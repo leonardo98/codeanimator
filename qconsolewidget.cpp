@@ -1,6 +1,7 @@
 #include "qconsolewidget.h"
 
 #include <QKeyEvent>
+#include "binding.h"
 
 QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 {
@@ -49,6 +50,7 @@ void QConsoleWidget::OnChildStdOutWrite(QString szOutput)
         insertPlainText(content);
     }
 #else
+    insertPlainText("\n");
     insertPlainText(szOutput);
 #endif
     fixedPosition = textCursor().position();
@@ -75,7 +77,10 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
         accept = false;
         int count = toPlainText().count() - fixedPosition;
         QString cmd = toPlainText().right(count);
-        redirect->WriteChildStdIn(cmd + "\n");
+        //redirect->WriteChildStdIn(cmd + "\n");
+        insertPlainText("\n");
+        PyRun_SimpleString(cmd.toStdString().c_str());
+        fixedPosition = textCursor().position();
     } else if (key == Qt::Key_Up) {
         accept = false;
     } else {
