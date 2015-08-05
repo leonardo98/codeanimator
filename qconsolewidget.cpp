@@ -27,6 +27,8 @@ QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 class CatchOutErr:\n\
   def __init__(self):\n\
     self.value = ''\n\
+  def reset(self):\n\
+    self.value = ''\n\
   def write(self, txt):\n\
     self.value += txt\n\
 catchOutErr = CatchOutErr()\n\
@@ -42,7 +44,7 @@ sys.stderr = catchOutErr\n\
 
         /* Execute some Python statements (in module __main__) */
         PyRun_SimpleString("import sys\n");
-        PyRun_SimpleString("print \"Hello!\"");
+//        PyRun_SimpleString("print \"Hello!\"");
 
         _catcher = PyObject_GetAttrString(_pModule,"catchOutErr"); //get our catchOutErr created above
 
@@ -112,9 +114,9 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
 
         PyErr_Print(); //make python print any errors
         PyObject *output = PyObject_GetAttrString(_catcher,"value"); //get the stdout and stderr from our catchOutErr object
+        PyRun_SimpleString("catchOutErr.reset()");
 
         insertPlainText(PyString_AsString(output));
-        insertPlainText("\n");
 
         fixedPosition = textCursor().position();
     } else if (key == Qt::Key_Up) {
