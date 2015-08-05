@@ -13,13 +13,6 @@ QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
     this->setPalette(p);*/
 
     fixedPosition = 0;
-    redirect = new CRedirect();
-    connect(redirect, SIGNAL(OnChildStdOutWrite(QString)), this, SLOT(OnChildStdOutWrite(QString)));
-    connect(redirect, SIGNAL(OnChildStarted()), this, SLOT(OnChildStarted()));
-    connect(redirect, SIGNAL(OnChildStdErrWrite(QString)), this, SLOT(OnChildStdErrWrite(QString)));
-    connect(redirect, SIGNAL(OnChildTerminate()), this, SLOT(OnChildTerminate()));
-
-    redirect->StartChildProcess(false);
 
     {
         std::string stdOutErr =
@@ -56,7 +49,6 @@ sys.stderr = catchOutErr\n\
 
 QConsoleWidget::~QConsoleWidget()
 {
-    delete redirect;
 }
 
 void QConsoleWidget::OnChildStarted()
