@@ -1,7 +1,6 @@
 #include "qconsolewidget.h"
 
 #include <QKeyEvent>
-#include "binding.h"
 
 QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 {
@@ -21,6 +20,36 @@ QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
     connect(redirect, SIGNAL(OnChildTerminate()), this, SLOT(OnChildTerminate()));
 
     redirect->StartChildProcess(false);
+
+    {
+        std::string stdOutErr =
+"import sys\n\
+class CatchOutErr:\n\
+  def __init__(self):\n\
+    self.value = ''\n\
+  def write(self, txt):\n\
+    self.value += txt\n\
+catchOutErr = CatchOutErr()\n\
+sys.stdout = catchOutErr\n\
+sys.stderr = catchOutErr\n\
+"; //this is python code to redirect stdouts/stderr
+
+                /* Initialize the Python interpreter.  Required. */
+        Py_Initialize();
+
+        _pModule = PyImport_AddModule("__main__"); //create main module
+        PyRun_SimpleString(stdOutErr.c_str()); //invoke code to redirect
+
+        /* Execute some Python statements (in module __main__) */
+        PyRun_SimpleString("import sys\n");
+        PyRun_SimpleString("print \"Hello!\"");
+
+        _catcher = PyObject_GetAttrString(_pModule,"catchOutErr"); //get our catchOutErr created above
+
+        /* Exit, cleaning up the interpreter */
+        //Py_Exit(0);
+    }
+
 }
 
 QConsoleWidget::~QConsoleWidget()
@@ -80,6 +109,13 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
         //redirect->WriteChildStdIn(cmd + "\n");
         insertPlainText("\n");
         PyRun_SimpleString(cmd.toStdString().c_str());
+
+        PyErr_Print(); //make python print any errors
+        PyObject *output = PyObject_GetAttrString(_catcher,"value"); //get the stdout and stderr from our catchOutErr object
+
+        insertPlainText(PyString_AsString(output));
+        insertPlainText("\n");
+
         fixedPosition = textCursor().position();
     } else if (key == Qt::Key_Up) {
         accept = false;

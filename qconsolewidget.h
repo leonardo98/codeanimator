@@ -5,6 +5,7 @@
 #include <QDir>
 
 #include "redirect.h"
+#include "binding.h"
 
 class QConsoleWidget : public QTextEdit
 {
@@ -15,6 +16,8 @@ public:
 private:
     int fixedPosition;
     CRedirect *redirect;
+    PyObject *_pModule;
+    PyObject *_catcher;
 
 protected:
     void keyPressEvent (QKeyEvent * event);

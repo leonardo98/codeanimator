@@ -41,7 +41,6 @@
 #include <QtWidgets>
 
 #include "animeditor.h"
-#include "binding.h"
 
 //![constructor]
 
@@ -60,16 +59,6 @@ CodeEditor::CodeEditor(QWidget *parent)
     setTabStopWidth(25);
 
     setFont (QFont ("Courier", 13));
-
-    {
-        /* Initialize the Python interpreter.  Required. */
-        Py_Initialize();
-        /* Execute some Python statements (in module __main__) */
-        PyRun_SimpleString("import sys\n");
-        PyRun_SimpleString("print \"Hello!\"");
-        /* Exit, cleaning up the interpreter */
-        //Py_Exit(0);
-    }
 }
 
 //![constructor]
