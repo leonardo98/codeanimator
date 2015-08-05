@@ -47,7 +47,6 @@
 
 CodeEditor::CodeEditor(QWidget *parent)
     : QPlainTextEdit(parent)
-//    , settings("PakholkovLeonid", "CodeAnimator")
 {
     lineNumberArea = new LineNumberArea(this);
 

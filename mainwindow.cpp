@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 MainWindow::MainWindow()
+    : settings("PakholkovLeonid", "CodeAnimator")
 {
     //createMenus();
 
@@ -15,5 +16,21 @@ MainWindow::MainWindow()
     _centralSplitter->setStretchFactor(1, 1);
 
     setCentralWidget(_centralSplitter);
+
+    restoreGeometry(settings.value("mainwindow_geometry").toByteArray());
+    restoreState(settings.value("mainwindow_state").toByteArray());
+
+    _centralSplitter->restoreState(settings.value("central_splitter").toByteArray());
+    _centralSplitter->restoreGeometry(settings.value("central_splitter_geometry").toByteArray());
 }
+
+MainWindow::~MainWindow()
+{
+    settings.setValue("central_splitter_geometry", _centralSplitter->saveGeometry());
+    settings.setValue("central_splitter", _centralSplitter->saveState());
+
+    settings.setValue("mainwindow_geometry", saveGeometry());
+    settings.setValue("mainwindow_state", saveState());
+}
+
 
