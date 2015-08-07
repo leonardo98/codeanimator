@@ -2,6 +2,7 @@
 #include "ogl/render.h"
 #include <QWheelEvent>
 #include <QTimer>
+#include <QStatusBar>
 
 Viewer::Viewer(QWidget *parent)
     : QGLWidget(parent)
@@ -18,6 +19,7 @@ Viewer::Viewer(QWidget *parent)
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(Update()));
     timer->start(20);
+    setMouseTracking(true);
 }
 
 void Viewer::initializeGL()
@@ -194,6 +196,11 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
     _lastMousePos = mousePos;
     _mouseWorld = newMmouseWorld;
+
+    char buff[100];
+    sprintf(buff, "x: %0.2f, y: %0.2f", _mouseWorld.x, _mouseWorld.y);
+
+    mainWindow->statusBar()->showMessage(tr(buff));
 }
 
 FPoint Viewer::ScreenToWorld(const FPoint &screenPos) {

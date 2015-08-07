@@ -1,6 +1,7 @@
 #include "mainwindow.h"
+#include <QStatusBar>
 
-QWidget *mainWindow = NULL;
+QMainWindow *mainWindow = NULL;
 
 MainWindow::MainWindow()
     : settings("PakholkovLeonid", "CodeAnimator")
@@ -34,6 +35,8 @@ MainWindow::MainWindow()
 
     _codeConsoleSplitter->restoreState(settings.value("code_console_splitter").toByteArray());
     _codeConsoleSplitter->restoreGeometry(settings.value("code_console_splitter_geometry").toByteArray());
+
+    statusBar()->showMessage(tr("Ready"));
 }
 
 MainWindow::~MainWindow()

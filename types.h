@@ -20,8 +20,9 @@ typedef unsigned int DWORD;
 
 #include "rapidxml/rapidxml.hpp"
 #include <QMessageBox>
+#include <QMainWindow>
 
-extern QWidget *mainWindow;
+extern QMainWindow *mainWindow;
 
 #define LOG(a) {     QMessageBox::about(mainWindow, mainWindow->tr("Warning : "), mainWindow->tr((std::string("message : ") + a + "\n").c_str())); }
 
