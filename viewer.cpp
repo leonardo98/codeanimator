@@ -243,8 +243,8 @@ void Viewer::paintGL()
             float startX = 0.f;
             float startY = 0.f;
             m.Mul(startX, startY);
-            float endX = 2000.f;
-            float endY = 1000.f;
+            float endX = Width();
+            float endY = Height();
             m.Mul(endX, endY);
             float STEP = 64.f;
             float x = static_cast<int>(startX / STEP) * STEP;
@@ -260,6 +260,12 @@ void Viewer::paintGL()
         }
        // Render::EndCachingLine();
         //if (TileEditorInterface::Instance()->ViewportVisible())
+        {
+            Render::Line( - 99999, 0 ,99999, 0, 0x4F000000);
+//            Render::Line(_viewportWidth, 0, _viewportWidth, _viewportHeight, 0x7F000000);
+//            Render::Line(_viewportWidth, _viewportHeight, 0, _viewportHeight, 0x7F000000);
+            Render::Line(0, - 99999, 0, 99999, 0x4F000000);
+        }
         Render::PopMatrix();
 
         {
