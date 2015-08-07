@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSplitter>
 #include "animeditor.h"
+#include "viewer.h"
 #include "qconsolewidget.h"
 #include <QSettings>
 
@@ -16,7 +17,9 @@ public:
     virtual ~MainWindow();
 private:
     QSplitter *_centralSplitter;
+    QSplitter *_codeConsoleSplitter;
     CodeEditor *_codeEditor;
+    Viewer *_viewer;
     QConsoleWidget *_console;
     QSettings settings;
 };

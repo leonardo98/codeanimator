@@ -29,7 +29,7 @@ sys.stdout = catchOutErr\n\
 sys.stderr = catchOutErr\n\
 "; //this is python code to redirect stdouts/stderr
 
-                /* Initialize the Python interpreter.  Required. */
+        /* Initialize the Python interpreter.  Required. */
         Py_Initialize();
 
         _pModule = PyImport_AddModule("__main__"); //create main module
@@ -49,6 +49,7 @@ sys.stderr = catchOutErr\n\
 
 QConsoleWidget::~QConsoleWidget()
 {
+    Py_Finalize();
 }
 
 void QConsoleWidget::OnChildStarted()
