@@ -260,14 +260,20 @@ void Viewer::paintGL()
         }
        // Render::EndCachingLine();
         //if (TileEditorInterface::Instance()->ViewportVisible())
+        Render::PopMatrix();
+
         {
+            Render::PushMatrix();
+            Render::MatrixMove(Width() / 2.f, Height() / 2.f);
+            Render::MatrixScale(_viewScale, _viewScale);
+            Render::MatrixMove(- _viewportWidth / 2.f, - _viewportHeight / 2.f);
             Render::Line(0, 0, _viewportWidth, 0, 0x7FFF0000);
             Render::Line(_viewportWidth, 0, _viewportWidth, _viewportHeight, 0x7FFF0000);
             Render::Line(_viewportWidth, _viewportHeight, 0, _viewportHeight, 0x7FFF0000);
             Render::Line(0, _viewportHeight, 0, 0, 0x7FFF0000);
+            Render::PopMatrix();
         }
         //Render::DrawCachingLine();
-        Render::PopMatrix();
     }
 
     //	char buff[10];
