@@ -8,9 +8,9 @@ typedef unsigned int uint;
 
 enum MoveType
 {
-    move_type_line,
+    move_type_linear,
+    move_type_square,
     move_type_cubic,
-    move_type_bicubic,
 };
 
 struct SplinePoint
@@ -52,20 +52,20 @@ typedef float ValueType;
 //    std::vector<ValueType> _data;
 //public:
 //    Interval()
-//        : type (move_type_line)
+//        : type (move_type_linear)
 //    {}
 //    MoveType GetType() { return _type; }
 //    void InitLine() {
-//        _type = move_type_line;
+//        _type = move_type_linear;
 //        _data.clear();
 //    }
 //    void InitCubic(ValueType a, b) {
-//        _type = move_type_cubic;
+//        _type = move_type_square;
 //        _data.resize(1);
 //        _data[0]= (a + b) / 2.f;
 //    }
 //    void InitBicubic(ValueType a, b) {
-//        _type = move_type_bicubic;
+//        _type = move_type_cubic;
 //        _data.resize(2);
 //        _data[0]= a;
 //        _data[1] = b;
@@ -79,7 +79,7 @@ typedef float ValueType;
 
 //    ValueType GetValue(float p)
 //    {
-//        if (GetType() == move_type_line)
+//        if (GetType() == move_type_linear)
 //        {
 //            return
 //        }
