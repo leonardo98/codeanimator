@@ -29,15 +29,18 @@ private:
     std::vector<float> _pool;
     std::vector<SplinePoint> _points;
 public:
-    void SetValue(uint index, float value);
-    float GetValue(uint index, float p = 0.f);
+    void SetValue(uint i, float value);
+    float GetValue(uint i, float p = 0.f);
 
-    void UnsetIndex(uint index);
+    float SetIndex(int &i, float value);
+    void UnsetIndex(int &i);
 
-    MoveType GetSegmentType(uint index);
-    void SetSegmentType(uint index, MoveType mt);
+    MoveType GetSegmentType(uint i);
+    void SetSegmentType(uint i, MoveType mt);
 
-    void DrawSegment(uint index);
+    void DrawSegment(uint i);
+
+    uint AddPoint(float value);
 };
 
 typedef float ValueType;
