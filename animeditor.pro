@@ -17,7 +17,10 @@ HEADERS     = animeditor.h \
     rapidxml/rapidxml.hpp \
     types.h \
     extmath.h \
-    SelectionTool.h
+    SelectionTool.h \
+    anim/boneanimated.h \
+    anim/boneposition.h \
+    splineeditor.h
 SOURCES     = main.cpp \
               animeditor.cpp \
     binding.cpp \
@@ -30,7 +33,10 @@ SOURCES     = main.cpp \
     ogl/textures.cpp \
     ogl/vertexbuffer.cpp \
     extmath.cpp \
-    SelectionTool.cpp
+    SelectionTool.cpp \
+    anim/boneanimated.cpp \
+    anim/boneposition.cpp \
+    splineeditor.cpp
 
 QT += opengl widgets
 
