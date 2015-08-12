@@ -30,18 +30,18 @@ float Spline::GetValue(uint i, float p)
     SplineType mt = GetSegmentType(i);
 
     if (mt == spline_type_linear)
-        return _pool[_points[i].index] * (p - 1)
+        return _pool[_points[i].index] * (1 - p)
                 + _pool[_points[i + 1].index] * p;
 
     if (mt == spline_type_square)
-        return _pool[_points[i].index] * (p - 1) * (p - 1)
-                + _pool[_points[i].indexOut] * (p - 1) * (p - 1)
+        return _pool[_points[i].index] * (1 - p) * (1 - p)
+                + _pool[_points[i].indexOut] * (1 - p) * p * 2
                 + _pool[_points[i + 1].index] * p * p;
 
     if (mt == spline_type_cubic)
-        return _pool[_points[i].index] * (p - 1) * (p - 1) * (p - 1)
-                + _pool[_points[i].indexOut] * (p - 1) * (p - 1) * p * 3
-                + _pool[_points[i + 1].indexIn] * (p - 1) * p * p * 3
+        return _pool[_points[i].index] * (1 - p) * (1 - p) * (1 - p)
+                + _pool[_points[i].indexOut] * (1 - p) * (1 - p) * p * 3
+                + _pool[_points[i + 1].indexIn] * (1 - p) * p * p * 3
                 + _pool[_points[i + 1].index] * p * p * p;
 
     return 0.f;
@@ -124,6 +124,7 @@ void Spline::SetSegmentType(uint i, SplineType mt)
         UnsetIndex(_points[i].indexOut);
         UnsetIndex(_points[i + 1].indexIn);
 
+        //SetIndex(_points[i].indexOut, 0.5f * (_pool[_points[i].index] + _pool[_points[i + 1].index]));
         SetIndex(_points[i].indexOut, _pool[_points[i].index]);
         _points[i + 1].indexIn = _points[i].indexOut;
     }
@@ -137,9 +138,26 @@ void Spline::SetSegmentType(uint i, SplineType mt)
     }
 }
 
-void Spline::DrawSegment(uint i)
+void Spline::DrawSegment(QPainter &painter, uint i, float start)
 {
+    const float step = 5.f;
+    float y1 = GetValue(i, 0.f);
+    for (float x = start; x < start + 99; x += step)
+    {
+        float y2 = GetValue(i, (x + step - start) / 100.f);
+        painter.drawLine(x, y1, x + step, y2);
+        y1 = y2;
+    }
+}
 
+void Spline::Draw(QPainter &painter)
+{
+    float x = 0;
+    for (uint i = 0; (i + 1) < _points.size(); ++i)
+    {
+        DrawSegment(painter, i, x);
+        x += 100;
+    }
 }
 
 uint Spline::AddPoint(float value)

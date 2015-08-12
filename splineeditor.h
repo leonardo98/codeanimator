@@ -2,6 +2,7 @@
 #define SPLINEEDITOR_H
 
 #include <QWidget>
+#include "anim/boneposition.h"
 
 class SplineEditor : public QWidget
 {
@@ -12,6 +13,13 @@ public:
 signals:
 
 public slots:
+
+private:
+    Spline _spline;
+
+protected:
+    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+
 };
 
 #endif // SPLINEEDITOR_H

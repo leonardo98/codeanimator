@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../ogl/fpoint.h"
+#include <QPainter>
 
 typedef unsigned int uint;
 
@@ -38,7 +39,8 @@ public:
     SplineType GetSegmentType(uint i);
     void SetSegmentType(uint i, SplineType mt);
 
-    void DrawSegment(uint i);
+    void DrawSegment(QPainter &painter, uint i, float start);
+    void Draw(QPainter &painter);
 
     uint AddPoint(float value);
 };
