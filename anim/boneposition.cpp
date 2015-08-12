@@ -27,18 +27,18 @@ void Spline::SetValue(uint i, float value)
 
 float Spline::GetValue(uint i, float p)
 {
-    MoveType mt = GetSegmentType(i);
+    SplineType mt = GetSegmentType(i);
 
-    if (mt == move_type_linear)
+    if (mt == spline_type_linear)
         return _pool[_points[i].index] * (p - 1)
                 + _pool[_points[i + 1].index] * p;
 
-    if (mt == move_type_square)
+    if (mt == spline_type_square)
         return _pool[_points[i].index] * (p - 1) * (p - 1)
                 + _pool[_points[i].indexOut] * (p - 1) * (p - 1)
                 + _pool[_points[i + 1].index] * p * p;
 
-    if (mt == move_type_cubic)
+    if (mt == spline_type_cubic)
         return _pool[_points[i].index] * (p - 1) * (p - 1) * (p - 1)
                 + _pool[_points[i].indexOut] * (p - 1) * (p - 1) * p * 3
                 + _pool[_points[i + 1].indexIn] * (p - 1) * p * p * 3
@@ -99,27 +99,27 @@ float Spline::SetIndex(int &i, float value)
     return delta;
 }
 
-MoveType Spline::GetSegmentType(uint i)
+SplineType Spline::GetSegmentType(uint i)
 {
     if (_points[i].indexOut == -1 && _points[i + 1].indexIn == -1)
     {
-        return move_type_linear;
+        return spline_type_linear;
     }
     if (_points[i].indexOut == _points[i + 1].indexIn)
     {
-        return move_type_square;
+        return spline_type_square;
     }
-    return move_type_cubic;
+    return spline_type_cubic;
 }
 
-void Spline::SetSegmentType(uint i, MoveType mt)
+void Spline::SetSegmentType(uint i, SplineType mt)
 {
-    if (mt == move_type_linear)
+    if (mt == spline_type_linear)
     {
         UnsetIndex(_points[i].indexOut);
         UnsetIndex(_points[i + 1].indexIn);
     }
-    else if (mt == move_type_square)
+    else if (mt == spline_type_square)
     {
         UnsetIndex(_points[i].indexOut);
         UnsetIndex(_points[i + 1].indexIn);
@@ -127,7 +127,7 @@ void Spline::SetSegmentType(uint i, MoveType mt)
         SetIndex(_points[i].indexOut, _pool[_points[i].index]);
         _points[i + 1].indexIn = _points[i].indexOut;
     }
-    else if (mt == move_type_cubic)
+    else if (mt == spline_type_cubic)
     {
         UnsetIndex(_points[i].indexOut);
         UnsetIndex(_points[i + 1].indexIn);

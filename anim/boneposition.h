@@ -6,11 +6,11 @@
 
 typedef unsigned int uint;
 
-enum MoveType
+enum SplineType
 {
-    move_type_linear,
-    move_type_square,
-    move_type_cubic,
+    spline_type_linear,
+    spline_type_square,
+    spline_type_cubic,
 };
 
 struct SplinePoint
@@ -35,8 +35,8 @@ public:
     float SetIndex(int &i, float value);
     void UnsetIndex(int &i);
 
-    MoveType GetSegmentType(uint i);
-    void SetSegmentType(uint i, MoveType mt);
+    SplineType GetSegmentType(uint i);
+    void SetSegmentType(uint i, SplineType mt);
 
     void DrawSegment(uint i);
 
@@ -48,24 +48,24 @@ typedef float ValueType;
 //struct Interval
 //{
 //private:
-//    MoveType _type;
+//    SplineType _type;
 //    std::vector<ValueType> _data;
 //public:
 //    Interval()
-//        : type (move_type_linear)
+//        : type (spline_type_linear)
 //    {}
-//    MoveType GetType() { return _type; }
+//    SplineType GetType() { return _type; }
 //    void InitLine() {
-//        _type = move_type_linear;
+//        _type = spline_type_linear;
 //        _data.clear();
 //    }
 //    void InitCubic(ValueType a, b) {
-//        _type = move_type_square;
+//        _type = spline_type_square;
 //        _data.resize(1);
 //        _data[0]= (a + b) / 2.f;
 //    }
 //    void InitBicubic(ValueType a, b) {
-//        _type = move_type_cubic;
+//        _type = spline_type_cubic;
 //        _data.resize(2);
 //        _data[0]= a;
 //        _data[1] = b;
@@ -79,7 +79,7 @@ typedef float ValueType;
 
 //    ValueType GetValue(float p)
 //    {
-//        if (GetType() == move_type_linear)
+//        if (GetType() == spline_type_linear)
 //        {
 //            return
 //        }
