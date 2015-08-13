@@ -167,25 +167,30 @@ void Spline::SetCornerType(uint i, CornerType mt)
     }
 }
 
-void Spline::DrawSegment(QPainter &painter, uint i, float start)
+void Spline::DrawSegment(QPainter &painter, uint i, const Matrix &m)
 {
-    const float step = 5.f;
-    float y1 = GetValue(i, 0.f);
-    for (float x = start; x < start + 99; x += step)
+    const float step = 1.f / _numDivide;
+    float ys = GetValue(i, 0.f);
+    for (float x = 0; x < 1.f; x += step)
     {
-        float y2 = GetValue(i, (x + step - start) / 100.f);
-        painter.drawLine(x, y1, x + step, y2);
-        y1 = y2;
+        float ye = GetValue(i, x + step);
+        {
+            float x1, y1, x2, y2;
+            m.Mul(x, ys, x1, y1);
+            m.Mul(x + step, ye, x2, y2);
+            painter.drawLine(x1, y1, x2, y2);
+        }
+        ys = ye;
     }
 }
 
-void Spline::Draw(QPainter &painter)
+void Spline::Draw(QPainter &painter, const Matrix &m)
 {
-    float x = 16;
+    Matrix lm(m);
     for (uint i = 0; (i + 1) < _points.size(); ++i)
     {
-        DrawSegment(painter, i, x);
-        x += 100;
+        DrawSegment(painter, i, lm);
+        lm.Move(1, 0);
     }
 }
 

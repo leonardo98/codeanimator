@@ -17,12 +17,15 @@ SplineEditor::SplineEditor(QWidget *parent) : QWidget(parent)
     setAutoFillBackground(true);
     setPalette(Pal);
     show();
+
+    _viewMatrix.Move(15.f, 15.f);
+    _viewMatrix.Scale(100.f, 1.f);
 }
 
 void SplineEditor::paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE
 {
     QPainter painter(this);
-    _spline.Draw(painter);
+    _spline.Draw(painter, _viewMatrix);
 
     painter.drawRect(QRectF(0.0, 0.0, width(), height()));
 }

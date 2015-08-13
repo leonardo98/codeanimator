@@ -4,6 +4,7 @@
 #include <vector>
 #include "../ogl/fpoint.h"
 #include <QPainter>
+#include "ogl/matrix.h"
 
 typedef unsigned int uint;
 
@@ -36,9 +37,15 @@ class Spline
 private:
     std::vector<float> _pool;
     std::vector<SplinePoint> _points;
+    uint _numDivide;
 public:
+    Spline() : _numDivide(10) {}
+
     void SetValue(uint i, float value);
     float GetValue(uint i, float p = 0.f);
+
+    void SetDivide(int div);
+    uint GetDivide() { return _numDivide; }
 
     float SetIndex(int &i, float value);
     void UnsetIndex(int &i);
@@ -49,8 +56,8 @@ public:
     CornerType GetCornerType(uint i);
     void SetCornerType(uint i, CornerType mt);
 
-    void DrawSegment(QPainter &painter, uint i, float start);
-    void Draw(QPainter &painter);
+    void DrawSegment(QPainter &painter, uint i, const Matrix &m);
+    void Draw(QPainter &painter, const Matrix &m);
 
     uint AddPoint(float value);
 };

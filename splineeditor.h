@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "anim/boneposition.h"
+#include "ogl/matrix.h"
 
 class SplineEditor : public QWidget
 {
@@ -19,6 +20,7 @@ private:
 
 protected:
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    Matrix _viewMatrix;
 
 };
 
