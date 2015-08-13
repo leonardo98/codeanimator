@@ -138,6 +138,35 @@ void Spline::SetSegmentType(uint i, SplineType mt)
     }
 }
 
+CornerType Spline::GetCornerType(uint i)
+{
+    return _points[i].corner;
+}
+
+void Spline::SetCornerType(uint i, CornerType mt)
+{
+    if (_points[i].corner == mt) return;
+
+    _points[i].corner = mt;
+    if (mt == corner_type_smooth)
+    {
+        if (i > 0 && GetSegmentType(i - 1) != spline_type_cubic)
+        {
+            SetSegmentType(i - 1, spline_type_cubic);
+        }
+        if ((i + 1) < _points.size() && GetSegmentType(i) != spline_type_cubic)
+        {
+            SetSegmentType(i, spline_type_cubic);
+        }
+
+        if (_points[i].indexIn != -1)
+            _pool[_points[i].indexIn] = _pool[_points[i].index];
+
+        if (_points[i].indexOut != -1)
+            _pool[_points[i].indexOut] = _pool[_points[i].index];
+    }
+}
+
 void Spline::DrawSegment(QPainter &painter, uint i, float start)
 {
     const float step = 5.f;

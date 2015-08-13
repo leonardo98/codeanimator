@@ -14,13 +14,20 @@ enum SplineType
     spline_type_cubic,
 };
 
+enum CornerType
+{
+    corner_type_sharp,
+    corner_type_smooth,
+};
+
 struct SplinePoint
 {
     int index;
     int indexIn;
     int indexOut;
+    CornerType corner;
     SplinePoint()
-        : index(-1), indexIn(-1), indexOut(-1)
+        : index(-1), indexIn(-1), indexOut(-1), corner(corner_type_sharp)
     {}
 };
 
@@ -38,6 +45,9 @@ public:
 
     SplineType GetSegmentType(uint i);
     void SetSegmentType(uint i, SplineType mt);
+
+    CornerType GetCornerType(uint i);
+    void SetCornerType(uint i, CornerType mt);
 
     void DrawSegment(QPainter &painter, uint i, float start);
     void Draw(QPainter &painter);

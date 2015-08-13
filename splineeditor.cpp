@@ -23,6 +23,8 @@ void SplineEditor::paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE
 {
     QPainter painter(this);
     _spline.Draw(painter);
+
+    painter.drawRect(QRectF(0.0, 0.0, width(), height()));
 }
 
 
