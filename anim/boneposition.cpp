@@ -152,7 +152,7 @@ void Spline::DrawSegment(QPainter &painter, uint i, float start)
 
 void Spline::Draw(QPainter &painter)
 {
-    float x = 0;
+    float x = 16;
     for (uint i = 0; (i + 1) < _points.size(); ++i)
     {
         DrawSegment(painter, i, x);
