@@ -34,7 +34,7 @@ struct SplinePoint
 
 class Spline
 {
-private:
+protected:
     std::vector<float> _pool;
     std::vector<SplinePoint> _points;
     uint _numDivide;
@@ -60,6 +60,20 @@ public:
     void Draw(QPainter &painter, const Matrix &m);
 
     uint AddPoint(float value);
+};
+
+class SplineMover : public Spline
+{
+private:
+    FPoint _mousePos;
+    int _activePoint;
+    int _subPoint;
+public:
+    SplineMover() : _activePoint(-1), _subPoint(0) {}
+
+    void OnMouseDown(FPoint mousePos, float wEps, float hEps);
+    bool OnMouseMove(FPoint mousePos);
+    void OnMouseUp();
 };
 
 typedef float ValueType;

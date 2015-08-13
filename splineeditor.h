@@ -16,11 +16,17 @@ signals:
 public slots:
 
 private:
-    Spline _spline;
+    SplineMover _spline;
 
 protected:
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
     Matrix _viewMatrix;
+
+public:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent* event) ;
 
 };
 
