@@ -100,7 +100,11 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
 {
     bool accept;
     int key = event->key();
-    if (key == Qt::Key_Backspace || event->key() == Qt::Key_Left) {
+    if (event->matches(QKeySequence::Copy))
+    {
+        accept = true;
+    }
+    else if (key == Qt::Key_Backspace || event->key() == Qt::Key_Left) {
         accept = textCursor().position() > fixedPosition;
     } else if (key == Qt::Key_Return) {
         accept = false;
