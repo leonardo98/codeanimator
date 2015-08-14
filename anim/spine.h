@@ -57,7 +57,7 @@ public:
     void SetCornerType(uint i, CornerType mt);
 
     void DrawSegment(QPainter &painter, uint i, const Matrix &m);
-    void Draw(QPainter &painter, const Matrix &m);
+    void Draw(QPainter &painter, const Matrix &m, float wRect, float hRect);
 
     uint AddPoint(float value);
 };

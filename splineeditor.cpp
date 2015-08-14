@@ -22,13 +22,22 @@ SplineEditor::SplineEditor(QWidget *parent) : QWidget(parent)
     _viewMatrix.Move(15.f, 15.f);
     _viewMatrix.Scale(100.f, 1.f);
 
-    setMouseTracking(true);
+    //setMouseTracking(true);
 }
 
 void SplineEditor::paintEvent(QPaintEvent *) Q_DECL_OVERRIDE
 {
     QPainter painter(this);
-    _spline.Draw(painter, _viewMatrix);
+
+    Matrix rev;
+    rev.MakeRevers(_viewMatrix);
+    float vEps;
+    float hEps;
+    rev.GetScale(vEps, hEps);
+    vEps *= 5;
+    hEps *= 5;
+
+    _spline.Draw(painter, _viewMatrix, vEps, hEps);
 
     painter.drawRect(QRectF(0.0, 0.0, width(), height()));
 }

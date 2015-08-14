@@ -1,4 +1,4 @@
-#include "boneposition.h"
+#include "spine.h"
 
 //BonePosition::BonePosition()
 //{
@@ -211,13 +211,23 @@ void Spline::DrawSegment(QPainter &painter, uint i, const Matrix &m)
     }
 }
 
-void Spline::Draw(QPainter &painter, const Matrix &m)
+void Spline::Draw(QPainter &painter, const Matrix &m, float wRect, float hRect)
 {
     Matrix lm(m);
     for (uint i = 0; (i + 1) < _points.size(); ++i)
     {
         DrawSegment(painter, i, lm);
         lm.Move(1, 0);
+    }
+    lm = m;
+    for (uint i = 0; i < _points.size(); ++i)
+    {
+        float x1, y1, x2, y2;
+
+        lm.Mul(i - wRect, _pool[_points[i].index] - hRect, x1, y1);
+        lm.Mul(i + wRect, _pool[_points[i].index] + hRect, x2, y2);
+
+        painter.drawRect(QRectF(x1, y1, x2 - x1, y2 - y1));
     }
 }
 

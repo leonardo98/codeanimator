@@ -2,7 +2,7 @@
 #define SPLINEEDITOR_H
 
 #include <QWidget>
-#include "anim/boneposition.h"
+#include "anim/spine.h"
 #include "ogl/matrix.h"
 
 class SplineEditor : public QWidget

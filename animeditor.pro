@@ -19,8 +19,8 @@ HEADERS     = animeditor.h \
     extmath.h \
     SelectionTool.h \
     anim/boneanimated.h \
-    anim/boneposition.h \
-    splineeditor.h
+    splineeditor.h \
+    anim/spine.h
 SOURCES     = main.cpp \
               animeditor.cpp \
     binding.cpp \
@@ -35,8 +35,8 @@ SOURCES     = main.cpp \
     extmath.cpp \
     SelectionTool.cpp \
     anim/boneanimated.cpp \
-    anim/boneposition.cpp \
-    splineeditor.cpp
+    splineeditor.cpp \
+    anim/spline.cpp
 
 QT += opengl widgets
 
