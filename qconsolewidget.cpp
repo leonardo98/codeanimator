@@ -120,13 +120,21 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
         //redirect->WriteChildStdIn(cmd + "\n");
         moveCursor(QTextCursor::End);
         insertPlainText("\n");
-        PyRun_SimpleString(cmd.toStdString().c_str());
 
-        PyErr_Print(); //make python print any errors
-        PyObject *output = PyObject_GetAttrString(_catcher,"value"); //get the stdout and stderr from our catchOutErr object
-        PyRun_SimpleString("catchOutErr.reset()");
+        if (cmd == "clr")
+        {
+            clear();
+        }
+        else
+        {
+            PyRun_SimpleString(cmd.toStdString().c_str());
 
-        insertPlainText(PyString_AsString(output));
+            PyErr_Print(); //make python print any errors
+            PyObject *output = PyObject_GetAttrString(_catcher,"value"); //get the stdout and stderr from our catchOutErr object
+            PyRun_SimpleString("catchOutErr.reset()");
+
+            insertPlainText(PyString_AsString(output));
+        }
 
         fixedPosition = textCursor().position();
     } else if (key == Qt::Key_Up) {
