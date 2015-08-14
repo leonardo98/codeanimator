@@ -29,15 +29,7 @@ void SplineEditor::paintEvent(QPaintEvent *) Q_DECL_OVERRIDE
 {
     QPainter painter(this);
 
-    Matrix rev;
-    rev.MakeRevers(_viewMatrix);
-    float vEps;
-    float hEps;
-    rev.GetScale(vEps, hEps);
-    vEps *= 5;
-    hEps *= 5;
-
-    _spline.Draw(painter, _viewMatrix, vEps, hEps);
+    _spline.Draw(painter, _viewMatrix);
 
     painter.drawRect(QRectF(0.0, 0.0, width(), height()));
 }
@@ -53,8 +45,8 @@ void SplineEditor::mousePressEvent(QMouseEvent *event)
         float vEps;
         float hEps;
         rev.GetScale(vEps, hEps);
-        vEps *= 5;
-        hEps *= 5;
+        vEps *= 10;
+        hEps *= 10;
         _spline.OnMouseDown(mousePos, vEps, hEps);
     }
 }

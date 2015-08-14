@@ -192,9 +192,9 @@ void Spline::DrawSegment(QPainter &painter, uint i, const Matrix &m)
         m.Mul(0.f, GetValue(i, 0.f), x1, y1);
         m.Mul(0.5f, _pool[_points[i].indexOut], x2, y2);
         painter.drawLine(x1, y1, x2, y2);
+        painter.drawEllipse(QPoint(x2, y2), 5, 5);
 
-        m.Mul(0.5f, _pool[_points[i].indexOut], x1, y1);
-        m.Mul(1.f, GetValue(i, 1.f), x2, y2);
+        m.Mul(1.f, GetValue(i, 1.f), x1, y1);
         painter.drawLine(x1, y1, x2, y2);
     }
     else if (sp == spline_type_cubic)
@@ -204,14 +204,16 @@ void Spline::DrawSegment(QPainter &painter, uint i, const Matrix &m)
         m.Mul(0.f, GetValue(i, 0.f), x1, y1);
         m.Mul(0.33333f, _pool[_points[i].indexOut], x2, y2);
         painter.drawLine(x1, y1, x2, y2);
+        painter.drawEllipse(QPoint(x2, y2), 5, 5);
 
         m.Mul(1.f - 0.33333f, _pool[_points[i + 1].indexIn], x1, y1);
         m.Mul(1.f, GetValue(i, 1.f), x2, y2);
         painter.drawLine(x1, y1, x2, y2);
+        painter.drawEllipse(QPoint(x1, y1), 5, 5);
     }
 }
 
-void Spline::Draw(QPainter &painter, const Matrix &m, float wRect, float hRect)
+void Spline::Draw(QPainter &painter, const Matrix &m)
 {
     Matrix lm(m);
     for (uint i = 0; (i + 1) < _points.size(); ++i)
@@ -222,12 +224,11 @@ void Spline::Draw(QPainter &painter, const Matrix &m, float wRect, float hRect)
     lm = m;
     for (uint i = 0; i < _points.size(); ++i)
     {
-        float x1, y1, x2, y2;
+        float x, y;
 
-        lm.Mul(i - wRect, _pool[_points[i].index] - hRect, x1, y1);
-        lm.Mul(i + wRect, _pool[_points[i].index] + hRect, x2, y2);
+        lm.Mul(i, _pool[_points[i].index], x, y);
 
-        painter.drawRect(QRectF(x1, y1, x2 - x1, y2 - y1));
+        painter.drawRect(QRectF(x - 5, y - 5, 10, 10));
     }
 }
 
