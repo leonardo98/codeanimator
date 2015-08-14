@@ -104,9 +104,16 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
     {
         accept = true;
     }
-    else if (key == Qt::Key_Backspace || event->key() == Qt::Key_Left) {
+    else if (key == Qt::Key_Backspace)
+    {
+        accept = textCursor().position() > fixedPosition
+                    || (textCursor().hasSelection() && textCursor().position() >= fixedPosition);
+    }
+    else if (key == Qt::Key_Left)
+    {
         accept = textCursor().position() > fixedPosition;
-    } else if (key == Qt::Key_Return) {
+    }
+    else if (key == Qt::Key_Return) {
         accept = false;
         int count = toPlainText().count() - fixedPosition;
         QString cmd = toPlainText().right(count);
