@@ -107,6 +107,7 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
         int count = toPlainText().count() - fixedPosition;
         QString cmd = toPlainText().right(count);
         //redirect->WriteChildStdIn(cmd + "\n");
+        moveCursor(QTextCursor::End);
         insertPlainText("\n");
         PyRun_SimpleString(cmd.toStdString().c_str());
 
