@@ -1,7 +1,6 @@
 QT += widgets
 
 HEADERS     = animeditor.h \
-    binding.h \
     qconsolewidget.h \
     mainwindow.h \
     viewer.h \
@@ -20,10 +19,10 @@ HEADERS     = animeditor.h \
     SelectionTool.h \
     anim/boneanimated.h \
     splineeditor.h \
-    anim/spine.h
+    anim/spine.h \
+    bindspline.h
 SOURCES     = main.cpp \
               animeditor.cpp \
-    binding.cpp \
     qconsolewidget.cpp \
     mainwindow.cpp \
     viewer.cpp \
@@ -36,7 +35,8 @@ SOURCES     = main.cpp \
     SelectionTool.cpp \
     anim/boneanimated.cpp \
     splineeditor.cpp \
-    anim/spline.cpp
+    anim/spline.cpp \
+    bindspline.cpp
 
 QT += opengl widgets
 

@@ -10,9 +10,9 @@ typedef unsigned int uint;
 
 enum SplineType
 {
-    spline_type_linear,
-    spline_type_square,
-    spline_type_cubic,
+    spline_type_linear = 1,
+    spline_type_square = 2,
+    spline_type_cubic  = 3,
 };
 
 enum CornerType

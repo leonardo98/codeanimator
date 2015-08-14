@@ -1,6 +1,9 @@
-#include "qconsolewidget.h"
+#include <python2.7/Python.h>
 
 #include <QKeyEvent>
+
+#include "qconsolewidget.h"
+#include "bindspline.h"
 
 QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 {
@@ -31,6 +34,8 @@ sys.stderr = catchOutErr\n\
 
         /* Initialize the Python interpreter.  Required. */
         Py_Initialize();
+
+        InitSplineModule();
 
         _pModule = PyImport_AddModule("__main__"); //create main module
         PyRun_SimpleString(stdOutErr.c_str()); //invoke code to redirect

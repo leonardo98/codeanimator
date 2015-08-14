@@ -10,6 +10,7 @@ class SplineEditor : public QWidget
     Q_OBJECT
 public:
     explicit SplineEditor(QWidget *parent = 0);
+    virtual ~SplineEditor();
 
 signals:
 
@@ -21,6 +22,7 @@ private:
 protected:
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
     Matrix _viewMatrix;
+    static SplineEditor * _instance;
 
 public:
     void mousePressEvent(QMouseEvent *event);
@@ -28,6 +30,9 @@ public:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent* event) ;
 
+    static SplineEditor * Instance() { return _instance; }
+
+    void SetSplineSegmentType(uint index, SplineType st);
 };
 
 #endif // SPLINEEDITOR_H

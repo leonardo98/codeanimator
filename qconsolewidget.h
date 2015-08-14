@@ -1,10 +1,11 @@
 #ifndef QCONSOLEWIDGET_H
 #define QCONSOLEWIDGET_H
 
+#include <python2.7/Python.h>
+
 #include <QTextEdit>
 #include <QDir>
 
-#include "binding.h"
 
 class QConsoleWidget : public QTextEdit
 {

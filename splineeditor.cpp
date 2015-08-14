@@ -1,8 +1,19 @@
 #include "splineeditor.h"
 #include <QMouseEvent>
 
+SplineEditor * SplineEditor::_instance = NULL;
+
+SplineEditor::~SplineEditor()
+{
+    assert(_instance != NULL);
+    _instance = NULL;
+}
+
 SplineEditor::SplineEditor(QWidget *parent) : QWidget(parent)
 {
+    assert(_instance == NULL);
+    _instance = this;
+
     _spline.AddPoint(100.f);
     _spline.AddPoint(0.f);
     _spline.AddPoint(150.f);
@@ -77,4 +88,10 @@ void SplineEditor::mouseMoveEvent(QMouseEvent *event)
 
 void SplineEditor::wheelEvent(QWheelEvent* event)
 {}
+
+void SplineEditor::SetSplineSegmentType(uint index, SplineType st)
+{
+    _spline.SetSegmentType(index, st);
+    repaint();
+}
 
