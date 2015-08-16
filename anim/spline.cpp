@@ -247,6 +247,34 @@ uint Spline::AddPoint(uint frame, float value)
     return r;
 }
 
+bool Spline::Active(uint frame)
+{
+    return (_points.front().frame <= frame && frame < _points.back().frame);
+}
+
+float Spline::GetGlobalValue(uint frame, float p)
+{
+    if (!Active(frame))
+        return 0.f;
+
+    uint start = 0;
+    uint end = _points.size() - 2;
+    uint middle = (start + end) / 2;
+
+    while (!(_points[middle].frame <= frame && frame < _points[middle + 1].frame))
+    {
+        if (_points[middle].frame > frame) {
+            end = middle;
+        } else if (_points[middle + 1].frame < frame) {
+            start = middle + 1;
+        }
+        middle = (start + end) / 2;
+    }
+
+    float segmentProgress = (frame - _points[middle].frame) / (_points[middle + 1].frame - _points[middle].frame) + p;
+
+    return GetValue(middle, segmentProgress);
+}
 
 void SplineMover::OnMouseDown(FPoint mousePos, float wEps, float hEps)
 {

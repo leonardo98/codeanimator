@@ -47,6 +47,9 @@ public:
     void SetValue(uint i, uint frame, float value);
     float GetValue(uint i, float p = 0.f);
 
+    bool Active(uint frame);
+    float GetGlobalValue(uint frame, float p = 0.f);
+
     void SetDivide(int div);
     uint GetDivide() { return _numDivide; }
 
