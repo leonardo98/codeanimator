@@ -11,8 +11,10 @@
 //    frame = 0;
 //}
 
-void Spline::SetValue(uint i, float value)
+void Spline::SetValue(uint i, uint frame, float value)
 {
+    _points[i].frame = frame;
+
     float delta = SetIndex(_points[i].index, value);
 
     if (_points[i].indexIn != -1)
@@ -215,28 +217,33 @@ void Spline::DrawSegment(QPainter &painter, uint i, const Matrix &m)
 
 void Spline::Draw(QPainter &painter, const Matrix &m)
 {
-    Matrix lm(m);
+    Matrix lm;
     for (uint i = 0; (i + 1) < _points.size(); ++i)
     {
+        lm = m;
+        lm.Move(_points[i].frame, 0.f);
+        lm.Scale((_points[i + 1].frame - _points[i].frame), 1.f);
+
         DrawSegment(painter, i, lm);
-        lm.Move(1, 0);
     }
-    lm = m;
+
     for (uint i = 0; i < _points.size(); ++i)
     {
+        lm = m;
+        lm.Move(_points[i].frame, 0.f);
+        lm.Scale((_points[i + 1].frame - _points[i].frame), 1.f);
+
         float x, y;
-
-        lm.Mul(i, _pool[_points[i].index], x, y);
-
+        lm.Mul(0, _pool[_points[i].index], x, y);
         painter.drawRect(QRectF(x - 5, y - 5, 10, 10));
     }
 }
 
-uint Spline::AddPoint(float value)
+uint Spline::AddPoint(uint frame, float value)
 {
     uint r = _points.size();
     _points.push_back(SplinePoint());
-    SetValue(r, value);
+    SetValue(r, frame, value);
     return r;
 }
 
@@ -248,7 +255,7 @@ void SplineMover::OnMouseDown(FPoint mousePos, float wEps, float hEps)
     _subPoint = 0;
     for (uint i = 0; i < _points.size(); ++i)
     {
-        if (fabs(mousePos.x - i) < wEps
+        if (fabs(mousePos.x - _points[i].frame) < wEps
                 && fabs(_pool[_points[i].index] - mousePos.y) < hEps)
         {
             _activePoint = i;
@@ -258,7 +265,7 @@ void SplineMover::OnMouseDown(FPoint mousePos, float wEps, float hEps)
         {
             SplineType sp = GetSegmentType(i);
             if (sp == spline_type_square
-                    && fabs(mousePos.x - (i + 0.5f)) < wEps
+                    && fabs(mousePos.x - 0.5f * (_points[i].frame + _points[i + 1].frame)) < wEps
                     && fabs(_pool[_points[i].indexOut] - mousePos.y) < hEps)
             {
                 _activePoint = i;
@@ -267,14 +274,14 @@ void SplineMover::OnMouseDown(FPoint mousePos, float wEps, float hEps)
             }
             if (sp == spline_type_cubic)
             {
-                if (fabs(mousePos.x - (i + 0.33333f)) < wEps
+                if (fabs(mousePos.x - (_points[i].frame + 0.33333f * (_points[i + 1].frame - _points[i].frame))) < wEps
                     && fabs(_pool[_points[i].indexOut] - mousePos.y) < hEps)
                 {
                     _activePoint = i;
                     _subPoint = 1;
                     break;
                 }
-                if (fabs(mousePos.x - (i + 1 - 0.33333f)) < wEps
+                if (fabs(mousePos.x - (_points[i + 1].frame - 0.33333f * (_points[i + 1].frame - _points[i].frame))) < wEps
                     && fabs(_pool[_points[i + 1].indexIn] - mousePos.y) < hEps)
                 {
                     _activePoint = i + 1;

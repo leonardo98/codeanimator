@@ -23,12 +23,15 @@ enum CornerType
 
 struct SplinePoint
 {
+    uint frame;
+
     int index;
     int indexIn;
     int indexOut;
     CornerType corner;
+
     SplinePoint()
-        : index(-1), indexIn(-1), indexOut(-1), corner(corner_type_sharp)
+        : index(-1), indexIn(-1), indexOut(-1), corner(corner_type_sharp), frame(0)
     {}
 };
 
@@ -41,7 +44,7 @@ protected:
 public:
     Spline() : _numDivide(10) {}
 
-    void SetValue(uint i, float value);
+    void SetValue(uint i, uint frame, float value);
     float GetValue(uint i, float p = 0.f);
 
     void SetDivide(int div);
@@ -59,7 +62,7 @@ public:
     void DrawSegment(QPainter &painter, uint i, const Matrix &m);
     void Draw(QPainter &painter, const Matrix &m);
 
-    uint AddPoint(float value);
+    uint AddPoint(uint frame, float value);
 };
 
 class SplineMover : public Spline

@@ -14,10 +14,10 @@ SplineEditor::SplineEditor(QWidget *parent) : QWidget(parent)
     assert(_instance == NULL);
     _instance = this;
 
-    _spline.AddPoint(100.f);
-    _spline.AddPoint(0.f);
-    _spline.AddPoint(150.f);
-    _spline.AddPoint(200.f);
+    _spline.AddPoint(0, 100.f);
+    _spline.AddPoint(40, 0.f);
+    _spline.AddPoint(80, 150.f);
+    _spline.AddPoint(100, 200.f);
 
     _spline.SetSegmentType(0, spline_type_cubic);
     _spline.SetSegmentType(1, spline_type_square);
@@ -31,7 +31,7 @@ SplineEditor::SplineEditor(QWidget *parent) : QWidget(parent)
     show();
 
     _viewMatrix.Move(15.f, 15.f);
-    _viewMatrix.Scale(100.f, 1.f);
+    _viewMatrix.Scale(4.f, 1.f);
 
     //setMouseTracking(true);
 }
