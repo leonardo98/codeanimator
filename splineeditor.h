@@ -38,6 +38,8 @@ public:
     void SetSplinePointValue(uint index, float value);
     void SetSplinePointFrameAndValue(uint index, uint frame, float value);
     void AddSplinePoint(uint frame, float value);
+    void RemoveSplinePoint(uint index);
+    void ClearSpline();
 };
 
 #endif // SPLINEEDITOR_H

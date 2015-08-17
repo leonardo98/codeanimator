@@ -119,3 +119,15 @@ void SplineEditor::AddSplinePoint(uint frame, float value)
     repaint();
 }
 
+void SplineEditor::RemoveSplinePoint(uint index)
+{
+    _spline.RemovePoint(index);
+    repaint();
+}
+
+void SplineEditor::ClearSpline()
+{
+    _spline.Clear();
+    repaint();
+}
+

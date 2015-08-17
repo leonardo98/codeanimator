@@ -104,6 +104,38 @@ static PyObject *spline_addPoint(PyObject *self, PyObject *args)
     return Py_BuildValue("s", "ok");
 }
 
+//
+// spline.removePoint(point index)
+//
+static PyObject *spline_removePoint(PyObject *self, PyObject *args)
+{
+    int index;
+
+    if (!PyArg_ParseTuple(args, "i", &index))
+        return NULL;
+
+    if (SplineEditor::Instance())
+    {
+        SplineEditor::Instance()->RemoveSplinePoint(index);
+    }
+
+    return Py_BuildValue("s", "ok");
+}
+
+//
+// spline.clear()
+//
+static PyObject *spline_clear(PyObject *self, PyObject *args)
+{
+
+    if (SplineEditor::Instance())
+    {
+        SplineEditor::Instance()->ClearSpline();
+    }
+
+    return Py_BuildValue("s", "ok");
+}
+
 static PyMethodDef SplineMethods[] = {
 //    ...
     {"setSegmentType",  spline_setSegmentType, METH_VARARGS, "Set segment type 1 - linear, 2 - square, 3 - cubic"},
@@ -111,6 +143,8 @@ static PyMethodDef SplineMethods[] = {
     {"setPointValue",  spline_setPointValue, METH_VARARGS, "Set spline point value"},
     {"setPointFrameAndValue",  spline_setPointFrameAndValue, METH_VARARGS, "Set spline point frame and value"},
     {"addPoint",  spline_addPoint, METH_VARARGS, "Add new point at spline by frame and value"},
+    {"removePoint",  spline_removePoint, METH_VARARGS, "Remove point from spline by index"},
+    {"clear",  spline_clear, METH_VARARGS, "Remove point from spline by index"},
 //    ...
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
