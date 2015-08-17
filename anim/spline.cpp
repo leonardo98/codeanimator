@@ -261,6 +261,20 @@ uint Spline::AddPoint(uint frame, float value)
     return r;
 }
 
+void Spline::RemovePoint(uint i)
+{
+    UnsetIndex(_points[i].indexIn);
+    UnsetIndex(_points[i].indexOut);
+    UnsetIndex(_points[i].index);
+    _points.erase(_points.begin() + i);
+}
+
+void Spline::Clear()
+{
+    _points.clear();
+    _pool.clear();
+}
+
 bool Spline::Active(uint frame)
 {
     return (_points.front().frame <= frame && frame < _points.back().frame);

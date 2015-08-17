@@ -70,6 +70,9 @@ public:
     void Draw(QPainter &painter, const Matrix &m);
 
     uint AddPoint(uint frame, float value);
+    void RemovePoint(uint i);
+
+    void Clear();
 };
 
 class SplineMover : public Spline
