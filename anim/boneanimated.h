@@ -3,11 +3,17 @@
 
 #include "spline.h"
 
+class BoneAnimated;
+
+typedef std::list<BoneAnimated *> BoneList;
+
 class BoneAnimated
 {
 private:
-    std::list<BoneAnimated *> children;
-    Matrix matrix;
+    BoneList _children;
+    Matrix _matrix;
+    bool _visible;
+    float _length;
 public:
     Spline x;
     Spline y;
@@ -15,12 +21,13 @@ public:
     Spline scaleX;
     Spline scaleY;
 public:
-    const Matrix &GetMatrix() { return matrix; }
+    const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
     void Draw();
     void AddChild(BoneAnimated *);
     void RemoveChild(BoneAnimated *);
-    void CalculatePosition(const Matrix &, int frame);
+    void CalculatePosition(const Matrix &, int frame, float p = 0.f);
+    void SetLength(float l) { _length = l; }
 };
 
 #endif // BONEANIMATED_H

@@ -125,6 +125,28 @@ void Render::DrawBar(float x, float y, float width, float height, DWORD color) {
 	Render::PopColor();
 }
 
+void Render::DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, DWORD color)
+{
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+    Render::PushColorAndMul(color);
+    tmp_quad_for_bar.Resize(3, 3);
+    tmp_quad_for_bar.VertXY(0).x = x1;
+    tmp_quad_for_bar.VertXY(0).y = y1;
+    tmp_quad_for_bar.VertXY(1).x = x2;
+    tmp_quad_for_bar.VertXY(1).y = y2;
+    tmp_quad_for_bar.VertXY(2).x = x3;
+    tmp_quad_for_bar.VertXY(2).y = y3;
+    for (int i = 0; i < 3; i++) {
+        tmp_quad_for_bar.VertUV(i).x = 0;
+        tmp_quad_for_bar.VertUV(i).y = 0;
+        tmp_quad_for_bar.Index(i) = i;
+    }
+    tmp_quad_for_bar.Draw();
+    glEnable(GL_TEXTURE_2D);
+    Render::PopColor();
+}
+
 void Render::DrawBarTextured(float x, float y, float width, float height, DWORD color) {
     Render::PushColorAndMul(color);
     tmp_quad_for_bar.Resize(4, 6);
