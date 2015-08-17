@@ -35,6 +35,8 @@ struct SplinePoint
     {}
 };
 
+bool CmpPoints(const SplinePoint &one, const SplinePoint &two);
+
 class Spline
 {
 protected:
@@ -46,9 +48,11 @@ public:
 
     void SetValue(uint i, uint frame, float value);
     float GetValue(uint i, float p = 0.f);
+    uint GetFrame(uint i);
 
     bool Active(uint frame);
-    float GetGlobalValue(uint frame, float p = 0.f);
+
+    float GetGlobalValue(uint frame, float timeSinceFrame = 0.f);
 
     void SetDivide(int div);
     uint GetDivide() { return _numDivide; }

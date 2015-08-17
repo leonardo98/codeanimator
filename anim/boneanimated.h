@@ -1,7 +1,7 @@
 #ifndef BONEANIMATED_H
 #define BONEANIMATED_H
 
-#include "spine.h"
+#include "spline.h"
 
 class BoneAnimated
 {

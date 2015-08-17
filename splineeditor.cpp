@@ -95,3 +95,23 @@ void SplineEditor::SetSplineSegmentType(uint index, SplineType st)
     repaint();
 }
 
+void SplineEditor::SetSplinePointFrame(uint index, uint frame)
+{
+    _spline.SetValue(index, frame, _spline.GetValue(index));
+}
+
+void SplineEditor::SetSplinePointValue(uint index, float value)
+{
+    _spline.SetValue(index, _spline.GetFrame(index), value);
+}
+
+void SplineEditor::SetSplinePointFrameAndValue(uint index, uint frame, float value)
+{
+    _spline.SetValue(index, frame, value);
+}
+
+void SplineEditor::AddSplinePoint(uint frame, float value)
+{
+    _spline.AddPoint(frame, value);
+}
+

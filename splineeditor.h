@@ -2,7 +2,7 @@
 #define SPLINEEDITOR_H
 
 #include <QWidget>
-#include "anim/spine.h"
+#include "anim/spline.h"
 #include "ogl/matrix.h"
 
 class SplineEditor : public QWidget
@@ -33,6 +33,11 @@ public:
     static SplineEditor * Instance() { return _instance; }
 
     void SetSplineSegmentType(uint index, SplineType st);
+
+    void SetSplinePointFrame(uint index, uint frame);
+    void SetSplinePointValue(uint index, float value);
+    void SetSplinePointFrameAndValue(uint index, uint frame, float value);
+    void AddSplinePoint(uint frame, float value);
 };
 
 #endif // SPLINEEDITOR_H

@@ -19,8 +19,8 @@ HEADERS     = animeditor.h \
     SelectionTool.h \
     anim/boneanimated.h \
     splineeditor.h \
-    anim/spine.h \
-    bindspline.h
+    bindspline.h \
+    anim/spline.h
 SOURCES     = main.cpp \
               animeditor.cpp \
     qconsolewidget.cpp \

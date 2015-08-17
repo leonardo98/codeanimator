@@ -1,4 +1,4 @@
-#include "spine.h"
+#include "spline.h"
 
 //BonePosition::BonePosition()
 //{
@@ -11,10 +11,13 @@
 //    frame = 0;
 //}
 
+bool CmpPoints(const SplinePoint &one, const SplinePoint &two)
+{
+    return one.frame < two.frame;
+}
+
 void Spline::SetValue(uint i, uint frame, float value)
 {
-    _points[i].frame = frame;
-
     float delta = SetIndex(_points[i].index, value);
 
     if (_points[i].indexIn != -1)
@@ -24,6 +27,12 @@ void Spline::SetValue(uint i, uint frame, float value)
     if (_points[i].indexOut != -1)
     {
         _pool[_points[i].indexOut] += delta;
+    }
+
+    if (_points[i].frame != frame)
+    {
+        _points[i].frame = frame;
+        std::sort(_points.begin(), _points.end(), CmpPoints);
     }
 }
 
@@ -47,6 +56,11 @@ float Spline::GetValue(uint i, float p)
                 + _pool[_points[i + 1].index] * p * p * p;
 
     return 0.f;
+}
+
+uint Spline::GetFrame(uint i)
+{
+    return _points[i].frame;
 }
 
 void Spline::UnsetIndex(int &i)
@@ -252,7 +266,7 @@ bool Spline::Active(uint frame)
     return (_points.front().frame <= frame && frame < _points.back().frame);
 }
 
-float Spline::GetGlobalValue(uint frame, float p)
+float Spline::GetGlobalValue(uint frame, float timeSinceFrame)
 {
     if (!Active(frame))
         return 0.f;
@@ -271,7 +285,7 @@ float Spline::GetGlobalValue(uint frame, float p)
         middle = (start + end) / 2;
     }
 
-    float segmentProgress = (frame - _points[middle].frame) / (_points[middle + 1].frame - _points[middle].frame) + p;
+    float segmentProgress = (frame - _points[middle].frame) / (_points[middle + 1].frame - _points[middle].frame) + timeSinceFrame;
 
     return GetValue(middle, segmentProgress);
 }
