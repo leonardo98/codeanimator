@@ -277,7 +277,7 @@ void Spline::Clear()
 
 bool Spline::Active(uint frame)
 {
-    return (_points.front().frame <= frame && frame < _points.back().frame);
+    return (_points.size() > 0 && _points.front().frame <= frame && frame < _points.back().frame);
 }
 
 float Spline::GetGlobalValue(uint frame, float timeSinceFrame)

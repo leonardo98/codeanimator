@@ -51,6 +51,8 @@ protected:
     bool _mouseDown;
     FPoint _mouseWorld;
 
+    bool _createBoneMode;
+
 public:
     Viewer(QWidget *parent);
 
@@ -62,7 +64,10 @@ public:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent* event) ;
 
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
+//    virtual bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // VIEWER_H

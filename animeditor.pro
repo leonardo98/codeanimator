@@ -20,7 +20,8 @@ HEADERS     = animeditor.h \
     anim/boneanimated.h \
     splineeditor.h \
     bindspline.h \
-    anim/spline.h
+    anim/spline.h \
+    animation.h
 SOURCES     = main.cpp \
               animeditor.cpp \
     qconsolewidget.cpp \
@@ -36,7 +37,8 @@ SOURCES     = main.cpp \
     anim/boneanimated.cpp \
     splineeditor.cpp \
     anim/spline.cpp \
-    bindspline.cpp
+    bindspline.cpp \
+    animation.cpp
 
 QT += opengl widgets
 

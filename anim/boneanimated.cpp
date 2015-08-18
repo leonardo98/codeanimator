@@ -5,6 +5,9 @@ BoneAnimated::BoneAnimated()
 {
     _visible = false;
     _length = 100.f;
+
+    angle.AddPoint(0, 0);
+    angle.AddPoint(10, 0);
 }
 
 void BoneAnimated::Draw()
@@ -12,10 +15,10 @@ void BoneAnimated::Draw()
     if (!_visible) return;
 
     float l = _length;
-    float wk = 0.05f;
+    float wk = 0.1f;
     Render::PushMatrix();
     Render::MatrixMul(_matrix);
-    Render::DrawTriangle(- wk * l / 2.f, 0.f, 0.f, l, wk * l / 2.f, 0.f, 0x7F7F7F7F);
+    Render::DrawTriangle(- wk * l / 2.f, 0.f, 0.f, l, wk * l / 2.f, 0.f, 0x7F4F4F4F);
     Render::Line(- wk * l / 2.f, 0.f, 0.f, l, 0x7F000000);
     Render::Line(0.f, l, wk * l / 2.f, 0.f, 0x7F000000);
     Render::Line(- wk * l / 2.f, 0.f, wk * l / 2.f, 0.f, 0x7F000000);

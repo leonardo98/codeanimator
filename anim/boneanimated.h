@@ -28,6 +28,7 @@ public:
     void RemoveChild(BoneAnimated *);
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = l; }
+    void SetVisible(bool v) { _visible = v; }
 };
 
 #endif // BONEANIMATED_H

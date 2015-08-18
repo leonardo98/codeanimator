@@ -3,6 +3,9 @@
 #include <QWheelEvent>
 #include <QTimer>
 #include <QStatusBar>
+#include <QApplication>
+#include <QKeyEvent>
+#include "animation.h"
 
 Viewer::Viewer(QWidget *parent)
     : QGLWidget(parent)
@@ -10,6 +13,7 @@ Viewer::Viewer(QWidget *parent)
     , _screenOffset((SCREEN_WIDTH = 1024) / 2
                     , (SCREEN_HEIGHT = 768) / 2  )
     , _worldOffset(0.f, 0.f)
+    , _createBoneMode(false)
 {
     Render::InitApplication();
 
@@ -20,6 +24,10 @@ Viewer::Viewer(QWidget *parent)
     connect(timer, SIGNAL(timeout()), this, SLOT(Update()));
     timer->start(20);
     setMouseTracking(true);
+    setFocusPolicy(Qt::StrongFocus);
+    //setE(true);
+
+    new Animation();//todo: make it beauty
 }
 
 void Viewer::initializeGL()
@@ -91,6 +99,15 @@ void Viewer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+//bool Viewer::eventFilter(QObject *obj, QEvent *event) {
+//    if (obj == this && event->type() == QEvent::KeyPress) {
+//        //qDebug(obj->objectName().toAscii());
+//        return true;
+//    } else {
+//        return QObject::eventFilter(obj, event);
+//    }
+// }
+
 void Viewer::mousePressEvent(QMouseEvent *event)
 {
     FPoint mousePos(event->pos().x(), event->pos().y());
@@ -104,6 +121,23 @@ void Viewer::mousePressEvent(QMouseEvent *event)
         _mouseMoveAction = mouse_dragging_world;
     }
 }
+
+void Viewer::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_B)
+    {
+        _createBoneMode = true;
+    }
+}
+
+void Viewer::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_B)
+    {
+        _createBoneMode = false;
+    }
+}
+
 
 void Viewer::mouseMoveEvent(QMouseEvent *event)
 {
@@ -132,7 +166,12 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
 
     FPoint fp(mousePos.x, mousePos.y);
 
-    _selectionTool.OnMouseDown(FPoint(fp.x, fp.y));
+    if (_createBoneMode)
+    {
+        Animation::Instance()->CreateBone(worldClickPos);
+    }
+    else
+        _selectionTool.OnMouseDown(FPoint(fp.x, fp.y));
 
 //    if ((QApplication::keyboardModifiers() & Qt::Key_Space) != 0)
 //    {
@@ -229,6 +268,8 @@ void Viewer::paintGL()
         Render::MatrixMove(_screenOffset.x, _screenOffset.y);
         Render::MatrixScale(_viewScale, _viewScale);
         Render::MatrixMove(-_worldOffset.x, -_worldOffset.y);
+
+        Animation::Instance()->Draw();
 
 //		if (_currents.beautyUnderCursor) {
 //			Render::SetAlpha(0x5F);
