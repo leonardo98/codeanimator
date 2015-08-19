@@ -5,15 +5,20 @@
 
 class BoneAnimated;
 
-typedef std::list<BoneAnimated *> BoneList;
+typedef std::vector<BoneAnimated *> BoneList;
 
 class BoneAnimated
 {
 private:
     BoneList _children;
-    Matrix _matrix;
     bool _visible;
+    Matrix _matrix;
+
+    // for editor
+    FPoint _pos;
+    float _angle;
     float _length;
+
 public:
     Spline x;
     Spline y;
@@ -29,6 +34,15 @@ public:
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = l; }
     void SetVisible(bool v) { _visible = v; }
+
+    bool CheckPoint(FPoint pos);
+    bool MoveOrRotate(FPoint pos);
+    bool MoveTo(const FPoint &mt);
+
+    void SetBonePos(const FPoint &pos) { _pos = pos; }
+    const FPoint &GetBonePos() { return _pos; }
+    void SetBoneAngle(float a) { _angle = a; }
+    float GetBoneAngle() { return _angle; }
 };
 
 #endif // BONEANIMATED_H

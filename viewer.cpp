@@ -166,12 +166,21 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
 
     FPoint fp(mousePos.x, mousePos.y);
 
+    int boneAtPoint = Animation::Instance()->GetBoneAtPoint(worldClickPos);
     if (_createBoneMode)
     {
         Animation::Instance()->CreateBone(worldClickPos);
     }
+    else if (boneAtPoint >= 0)
+    {
+        _mouseMoveAction = mouse_moving_bone;
+        _selected.push_back(boneAtPoint);
+        Animation::Instance()->StartBoneMoving(boneAtPoint, worldClickPos);
+    }
     else
-        _selectionTool.OnMouseDown(FPoint(fp.x, fp.y));
+    {
+        _cursorText = "";
+    }
 
 //    if ((QApplication::keyboardModifiers() & Qt::Key_Space) != 0)
 //    {
@@ -193,13 +202,35 @@ void Viewer::OnMouseUp()
 //		_pushCopyOnMouseUp = false;
 //	}
     _mouseMoveAction = mouse_none;
+
+    if ((QApplication::keyboardModifiers() & Qt::Key_Control) == 0)
+    {
+        _selected.clear();
+    }
 }
 
 void Viewer::OnMouseMove(const FPoint &mousePos)
 {
     FPoint newMmouseWorld = ScreenToWorld(mousePos);
 
-    if (_mouseMoveAction == mouse_dragging_world) {
+    if (Animation::Instance()->GetBoneAtPoint(newMmouseWorld) >= 0)
+    {
+        _cursorText = "bone";
+    }
+    else
+    {
+        _cursorText = "";
+    }
+
+    if (_mouseMoveAction == mouse_moving_bone)
+    {
+        for (uint i = 0; i < _selected.size(); ++i)
+        {
+            Animation::Instance()->BoneMoveTo(_selected[i], newMmouseWorld, _selected.size() > 1);
+        }
+    }
+    else if (_mouseMoveAction == mouse_dragging_world)
+    {
         _worldOffset -= (mousePos - _lastMousePos) / _viewScale;
 //	} else if (_mouseMoveAction == mouse_moving_beauty/* || _mouseMoveAction == mouse_moving_group*/) {
 //		if ((mousePos - _mouseDownPos).Length() > 10 || _mouseMovingMode >= 0.2f) {
@@ -237,7 +268,7 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
     _mouseWorld = newMmouseWorld;
 
     char buff[100];
-    sprintf(buff, "x: %0.2f, y: %0.2f", _mouseWorld.x, _mouseWorld.y);
+    sprintf(buff, "x: %0.2f, y: %0.2f; %s", _mouseWorld.x, _mouseWorld.y, _cursorText.c_str());
 
     mainWindow->statusBar()->showMessage(tr(buff));
 }

@@ -1,27 +1,35 @@
 #include "boneanimated.h"
 #include "ogl/render.h"
 
+const float WideCoef = 0.1f;
+
 BoneAnimated::BoneAnimated()
 {
     _visible = false;
     _length = 100.f;
 
-    angle.AddPoint(0, 0);
-    angle.AddPoint(10, 0);
+//    angle.AddPoint(0, 0);
+//    angle.AddPoint(10, 0);
+
+    //_pos.Rotate(M_PI);
+    _pos.x = _pos.y = 0.f;
+    _angle = M_PI;
 }
 
 void BoneAnimated::Draw()
 {
-    if (!_visible) return;
+    //if (!_visible) return;
 
     float l = _length;
-    float wk = 0.1f;
+    float w = WideCoef * _length / 2.f;
     Render::PushMatrix();
-    Render::MatrixMul(_matrix);
-    Render::DrawTriangle(- wk * l / 2.f, 0.f, 0.f, l, wk * l / 2.f, 0.f, 0x7F4F4F4F);
-    Render::Line(- wk * l / 2.f, 0.f, 0.f, l, 0x7F000000);
-    Render::Line(0.f, l, wk * l / 2.f, 0.f, 0x7F000000);
-    Render::Line(- wk * l / 2.f, 0.f, wk * l / 2.f, 0.f, 0x7F000000);
+    Render::MatrixMove(_pos.x, _pos.y);
+    Render::MatrixRotate(_angle);
+    //Render::MatrixMul(_matrix);
+    Render::DrawTriangle(- w, 0.f, 0.f, l, w, 0.f, 0x7F4F4F4F);
+    Render::Line(- w, 0.f, 0.f, l, 0x7F000000);
+    Render::Line(0.f, l, w, 0.f, 0x7F000000);
+    Render::Line(- w, 0.f, w, 0.f, 0x7F000000);
     Render::PopMatrix();
 }
 
@@ -72,4 +80,53 @@ void BoneAnimated::CalculatePosition(const Matrix &m, int frame, float p)
             (*i)->CalculatePosition(_matrix, frame, p);
         }
     }
+}
+
+bool BoneAnimated::CheckPoint(FPoint pos)
+{
+//    if (!_visible)
+//        return false;
+
+    Matrix m;
+    m.Move(_pos.x, _pos.y);
+    m.Rotate(_angle);
+
+    //m.Mul(_matrix);
+
+    Matrix rev;
+    rev.MakeRevers(m);
+
+    rev.Mul(pos);
+
+    float l = _length;
+    float w = WideCoef * _length;
+
+    return -w < pos.x && pos.x < w && 0.f < pos.y && pos.y < l;
+}
+
+bool BoneAnimated::MoveOrRotate(FPoint pos)
+{
+//    if (!_visible)
+//        return false;
+
+    Matrix m;
+    m.Move(_pos.x, _pos.y);
+    m.Rotate(_angle);
+
+    //m.Mul(_matrix);
+
+    Matrix rev;
+    rev.MakeRevers(m);
+
+    rev.Mul(pos);
+
+    float l = _length;
+    float w = WideCoef * _length;
+
+    return -w < pos.x && pos.x < w && 0.f < pos.y && pos.y < l / 2;
+}
+
+bool BoneAnimated::MoveTo(const FPoint &mt)
+{
+    _pos += mt;
 }

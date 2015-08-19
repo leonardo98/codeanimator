@@ -8,8 +8,9 @@
 enum MouseActionState
 {
     mouse_dragging_world,
-    mouse_moving_beauty,
-    mouse_moving_beauty_control,
+    mouse_moving_bone,
+    mouse_moving_mesh,
+    mouse_moving_mesh_point,
     mouse_select_region,
     mouse_drop_or_select_region,
     mouse_none
@@ -52,6 +53,9 @@ protected:
     FPoint _mouseWorld;
 
     bool _createBoneMode;
+    std::string _cursorText;
+
+    std::vector<uint> _selected;
 
 public:
     Viewer(QWidget *parent);

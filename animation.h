@@ -9,6 +9,9 @@ private:
     BoneList _bones;
     BoneList _root;
     static Animation *_instance;
+    bool _boneMoving; // move or rotate
+    FPoint _startMovingPos;
+    float _startRotateAngle;
 
 public:
     Animation();
@@ -19,6 +22,11 @@ public:
     static Animation *Instance() { return _instance; }
 
     void CreateBone(FPoint pos);
+
+    int GetBoneAtPoint(const FPoint &pos);
+
+    void StartBoneMoving(uint index, const FPoint &point);
+    void BoneMoveTo(uint index, const FPoint &mt, bool forceMoving);
 
 };
 
