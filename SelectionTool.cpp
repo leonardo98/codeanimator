@@ -21,7 +21,7 @@ bool SelectionTool::OnMouseDown(const FPoint &mousePos)
 	return false;
 }
 
-void SelectionTool::OnMouseUp(const FPoint &mousePos)
+void SelectionTool::OnMouseUp()
 {
 	if (!_mouseDown)
 	{
@@ -42,6 +42,7 @@ void SelectionTool::OnMouseMove(const FPoint &mousePos)
     _area.y1 = std::min(_startPoint.y, mousePos.y);
     _area.x2 = std::max(_startPoint.x, mousePos.x);
     _area.y2 = std::max(_startPoint.y, mousePos.y);
+    UpdateSelection(_area);
 }
 
 bool SelectionTool::IsMouseOver(const FPoint &mousePos)

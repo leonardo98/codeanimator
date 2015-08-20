@@ -4,7 +4,7 @@
 #include "ogl/render.h"
 #include "ogl/Rect.h"
 
-class SelectionTool 
+class SelectionTool
 {
 private:
 	bool _mouseDown;
@@ -14,10 +14,13 @@ private:
 public:
 	SelectionTool();
 	bool OnMouseDown(const FPoint &mousePos);
-	void OnMouseUp(const FPoint &mousePos);
+    void OnMouseUp();
 	void OnMouseMove(const FPoint &mousePos);
 	bool IsMouseOver(const FPoint &mousePos);
 	void Draw();
+
+    virtual void UpdateSelection(const Rect &area) = 0;
+//    void EndSelection();
 };
 
 #endif//SELECTION_TOOL_H

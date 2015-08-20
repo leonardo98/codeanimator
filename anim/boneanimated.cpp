@@ -11,7 +11,6 @@ BoneAnimated::BoneAnimated()
 //    angle.AddPoint(0, 0);
 //    angle.AddPoint(10, 0);
 
-    //_pos.Rotate(M_PI);
     _pos.x = _pos.y = 0.f;
     _angle = M_PI;
 }
@@ -30,6 +29,21 @@ void BoneAnimated::Draw()
     Render::Line(- w, 0.f, 0.f, l, 0x7F000000);
     Render::Line(0.f, l, w, 0.f, 0x7F000000);
     Render::Line(- w, 0.f, w, 0.f, 0x7F000000);
+    Render::PopMatrix();
+}
+
+void BoneAnimated::DrawSelection()
+{
+    float l = _length;
+    float w = WideCoef * _length;
+    Render::PushMatrix();
+    Render::MatrixMove(_pos.x, _pos.y);
+    Render::MatrixRotate(_angle);
+    //Render::MatrixMul(_matrix);
+    Render::Line(- w, - w, - w, l + w, 0x7F000000);
+    Render::Line( w, - w, w, l + w, 0x7F000000);
+    Render::Line(- w, - w, w, - w, 0x7F000000);
+    Render::Line(- w, l + w, w, l + w, 0x7F000000);
     Render::PopMatrix();
 }
 
@@ -101,7 +115,7 @@ bool BoneAnimated::CheckPoint(FPoint pos)
     float l = _length;
     float w = WideCoef * _length;
 
-    return -w < pos.x && pos.x < w && 0.f < pos.y && pos.y < l;
+    return -w < pos.x && pos.x < w && - w < pos.y && pos.y < l + w;
 }
 
 bool BoneAnimated::MoveOrRotate(FPoint pos)
@@ -123,10 +137,25 @@ bool BoneAnimated::MoveOrRotate(FPoint pos)
     float l = _length;
     float w = WideCoef * _length;
 
-    return -w < pos.x && pos.x < w && 0.f < pos.y && pos.y < l / 2;
+    return -w < pos.x && pos.x < w && - w < pos.y && pos.y < l / 2;
 }
 
 bool BoneAnimated::MoveTo(const FPoint &mt)
 {
     _pos += mt;
+}
+
+bool BoneAnimated::IfInside(const Rect &area)
+{
+    if (!(area.x1 <= _pos.x && _pos.x <= area.x2
+            &&  area.y1 <= _pos.y && _pos.y <= area.y2))
+    {
+        return false;
+    }
+
+    FPoint p(0, _length);
+    p.Rotate(_angle);
+    p += _pos;
+
+    return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
 }

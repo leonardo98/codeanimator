@@ -37,6 +37,12 @@ void Animation::Draw()
         (*i)->Draw();
     }
 
+    // draw selected bones
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        _bones[_selected[i]]->DrawSelection();
+    }
+
     // todo: draw mesh here
 }
 
@@ -65,15 +71,64 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _startRotateAngle = _bones[index]->GetBoneAngle();
 }
 
-void Animation::BoneMoveTo(uint index, const FPoint &point, bool forceMoving)
+void Animation::BoneMoveTo(const FPoint &point)
 {
-    if (_boneMoving || forceMoving)
+    if (_boneMoving || _selected.size() > 1)
     {
-        _bones[index]->MoveTo(point - _startMovingPos);
+        for (uint i = 0; i < _selected.size(); ++i)
+        {
+            _bones[_selected[i]]->MoveTo(point - _startMovingPos);
+        }
         _startMovingPos = point;
     }
-    else
-        _bones[index]->SetBoneAngle(_startRotateAngle
-                                    + (atan2(point.y - _bones[index]->GetBonePos().y, point.x - _bones[index]->GetBonePos().x)
-                                        - atan2(_startMovingPos.y - _bones[index]->GetBonePos().y, _startMovingPos.x - _bones[index]->GetBonePos().x)));
+    else if (_selected.size() == 1)
+        _bones[_selected[0]]->SetBoneAngle(_startRotateAngle
+                                    + (atan2(point.y - _bones[_selected[0]]->GetBonePos().y, point.x - _bones[_selected[0]]->GetBonePos().x)
+                                        - atan2(_startMovingPos.y - _bones[_selected[0]]->GetBonePos().y, _startMovingPos.x - _bones[_selected[0]]->GetBonePos().x)));
+}
+
+void Animation::Picking(int index, bool add)
+{
+    if (index == -1 && !add)
+    {
+        _selected.clear();
+        return;
+    }
+    if (index == -1)
+    {
+        return;
+    }
+    if (!add)
+    {
+        for (uint i = 0; i < _selected.size(); ++i)
+        {
+            if (_selected[i] == index)
+            {
+                return;
+            }
+        }
+        _selected.clear();
+        _selected.push_back(index);
+        return;
+    }
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        if (_selected[i] == index)
+        {
+            _selected[i] = _selected.back();
+            _selected.pop_back();
+            return;
+        }
+    }
+    _selected.push_back(index);
+}
+
+void Animation::SelectByArea(const Rect &area)
+{
+    _selected.clear();
+    for (uint i = 0; i < _bones.size(); ++i)
+    {
+        if (_bones[i]->IfInside(area))
+            _selected.push_back(i);
+    }
 }

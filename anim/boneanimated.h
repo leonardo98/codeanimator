@@ -2,6 +2,7 @@
 #define BONEANIMATED_H
 
 #include "spline.h"
+#include "ogl/rect.h"
 
 class BoneAnimated;
 
@@ -29,12 +30,14 @@ public:
     const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
     void Draw();
+    void DrawSelection();
     void AddChild(BoneAnimated *);
     void RemoveChild(BoneAnimated *);
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = l; }
     void SetVisible(bool v) { _visible = v; }
 
+    bool IfInside(const Rect &area);
     bool CheckPoint(FPoint pos);
     bool MoveOrRotate(FPoint pos);
     bool MoveTo(const FPoint &mt);
@@ -42,7 +45,7 @@ public:
     void SetBonePos(const FPoint &pos) { _pos = pos; }
     const FPoint &GetBonePos() { return _pos; }
     void SetBoneAngle(float a) { _angle = a; }
-    float GetBoneAngle() { return _angle; }
+    float GetBoneAngle() { return _angle; }    
 };
 
 #endif // BONEANIMATED_H

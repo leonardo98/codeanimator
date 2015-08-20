@@ -12,6 +12,7 @@ private:
     bool _boneMoving; // move or rotate
     FPoint _startMovingPos;
     float _startRotateAngle;
+    std::vector<uint> _selected;
 
 public:
     Animation();
@@ -25,8 +26,12 @@ public:
 
     int GetBoneAtPoint(const FPoint &pos);
 
+    void Picking(int index, bool add);
+
     void StartBoneMoving(uint index, const FPoint &point);
-    void BoneMoveTo(uint index, const FPoint &mt, bool forceMoving);
+    void BoneMoveTo(const FPoint &mt);
+
+    void SelectByArea(const Rect &area);
 
 };
 

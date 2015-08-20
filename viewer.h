@@ -16,7 +16,9 @@ enum MouseActionState
     mouse_none
 };
 
-class Viewer : public QGLWidget
+class Viewer
+        : public QGLWidget
+        , public SelectionTool
 {
     Q_OBJECT
 public slots:
@@ -44,7 +46,6 @@ protected:
     MouseActionState _mouseMoveAction;
     FPoint _mouseDownPos;
     float _mouseMovingMode;
-    SelectionTool _selectionTool;
 
     void OnMouseMove(const FPoint &mousePos);
     void OnMouseUp();
@@ -54,8 +55,6 @@ protected:
 
     bool _createBoneMode;
     std::string _cursorText;
-
-    std::vector<uint> _selected;
 
 public:
     Viewer(QWidget *parent);
@@ -70,6 +69,7 @@ public:
 
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    void UpdateSelection(const Rect &area);
 
 //    virtual bool eventFilter(QObject *obj, QEvent *event);
 };

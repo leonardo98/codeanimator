@@ -90,7 +90,7 @@ void Viewer::mouseReleaseEvent(QMouseEvent *event)
         {
             _mouseMoveAction = mouse_none;
         }
-        _selectionTool.OnMouseUp(mousePos);
+        SelectionTool::OnMouseUp();
         OnMouseUp();
     }
     else if (event->button() == Qt::RightButton)
@@ -128,6 +128,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         _createBoneMode = true;
     }
+//    if ((QApplication::keyboardModifiers() & Qt::Key_Control) == 0)
+//    {
+//        _selected.clear();
+//    }
 }
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)
@@ -153,7 +157,7 @@ void Viewer::mouseMoveEvent(QMouseEvent *event)
 //            mousePos.x = _mouseDownPos.x;
 //        }
 //    }
-    _selectionTool.OnMouseMove(mousePos);
+    SelectionTool::OnMouseMove(mousePos);
     OnMouseMove(mousePos);
 }
 
@@ -164,9 +168,8 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     _mouseMovingMode = 0.f;
     FPoint worldClickPos = ScreenToWorld(mousePos);
 
-    FPoint fp(mousePos.x, mousePos.y);
-
     int boneAtPoint = Animation::Instance()->GetBoneAtPoint(worldClickPos);
+    Animation::Instance()->Picking(boneAtPoint, (QApplication::keyboardModifiers() & Qt::ControlModifier) != 0);
     if (_createBoneMode)
     {
         Animation::Instance()->CreateBone(worldClickPos);
@@ -174,12 +177,13 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     else if (boneAtPoint >= 0)
     {
         _mouseMoveAction = mouse_moving_bone;
-        _selected.push_back(boneAtPoint);
+        //_selected.push_back(boneAtPoint);
         Animation::Instance()->StartBoneMoving(boneAtPoint, worldClickPos);
     }
     else
     {
         _cursorText = "";
+        SelectionTool::OnMouseDown(mousePos);
     }
 
 //    if ((QApplication::keyboardModifiers() & Qt::Key_Space) != 0)
@@ -202,11 +206,6 @@ void Viewer::OnMouseUp()
 //		_pushCopyOnMouseUp = false;
 //	}
     _mouseMoveAction = mouse_none;
-
-    if ((QApplication::keyboardModifiers() & Qt::Key_Control) == 0)
-    {
-        _selected.clear();
-    }
 }
 
 void Viewer::OnMouseMove(const FPoint &mousePos)
@@ -224,10 +223,11 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
     if (_mouseMoveAction == mouse_moving_bone)
     {
-        for (uint i = 0; i < _selected.size(); ++i)
-        {
-            Animation::Instance()->BoneMoveTo(_selected[i], newMmouseWorld, _selected.size() > 1);
-        }
+        Animation::Instance()->BoneMoveTo(newMmouseWorld);
+//        for (uint i = 0; i < _selected.size(); ++i)
+//        {
+//            Animation::Instance()->BoneMoveTo(_selected[i], newMmouseWorld, _selected.size() > 1);
+//        }
     }
     else if (_mouseMoveAction == mouse_dragging_world)
     {
@@ -364,7 +364,7 @@ void Viewer::paintGL()
     //	char buff[10];
 //	Math::FloatToChar(_viewScale, buff);
 //	Render::PrintString(940, 0, "", buff);
-    _selectionTool.Draw();
+    SelectionTool::Draw();
 //	Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
 //    {
 //        float x = _widgetWidth / 2 - (64 * _commandButtons.size()) / 2;
@@ -391,4 +391,11 @@ void Viewer::Update()
 //    Core::Update(dt);
     //Update(dt);
     updateGL();
+}
+
+void Viewer::UpdateSelection(const Rect &area)
+{
+    FPoint start = ScreenToWorld(FPoint(area.x1, area.y1));
+    FPoint end = ScreenToWorld(FPoint(area.x2, area.y2));
+    Animation::Instance()->SelectByArea(Rect(start.x, start.y, end.x, end.y));
 }
