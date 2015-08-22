@@ -84,8 +84,11 @@ void Animation::BoneMoveTo(const FPoint &point)
                 FPoint p(point);
                 FPoint s(_startMovingPos);
 
-                _bones[_selected[i]]->GetParent()->GetMatrix().Mul(p);
-                _bones[_selected[i]]->GetParent()->GetMatrix().Mul(s);
+                Matrix rev;
+                rev.MakeRevers(_bones[_selected[i]]->GetParent()->GetMatrix());
+
+                rev.Mul(p);
+                rev.Mul(s);
 
                 _bones[_selected[i]]->MoveTo(p - s);
             }
@@ -112,15 +115,10 @@ void Animation::BoneMoveTo(const FPoint &point)
                                             - atan2(_startMovingPos.y - _bones[_selected[0]]->GetBonePos().y, _startMovingPos.x - _bones[_selected[0]]->GetBonePos().x)));
         else
         {
-            FPoint p(point);
-            FPoint s(_startMovingPos);
             FPoint o(_bones[_selected[0]]->GetBonePos());
-
-//            _bones[_selected[0]]->GetParent()->GetMatrix().Mul(p);
-//            _bones[_selected[0]]->GetParent()->GetMatrix().Mul(s);
             _bones[_selected[0]]->GetParent()->GetMatrix().Mul(o);
-
-            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(p.y - o.y, p.x - o.x) - atan2(s.y - o.y, s.x - o.x)));
+            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(point.y - o.y, point.x - o.x)
+                                                                    - atan2(_startMovingPos.y - o.y, _startMovingPos.x - o.x)));
         }
     }
 }
