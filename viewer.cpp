@@ -224,10 +224,6 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
     if (_mouseMoveAction == mouse_moving_bone)
     {
         Animation::Instance()->BoneMoveTo(newMmouseWorld);
-//        for (uint i = 0; i < _selected.size(); ++i)
-//        {
-//            Animation::Instance()->BoneMoveTo(_selected[i], newMmouseWorld, _selected.size() > 1);
-//        }
     }
     else if (_mouseMoveAction == mouse_dragging_world)
     {

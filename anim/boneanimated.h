@@ -11,6 +11,7 @@ typedef std::vector<BoneAnimated *> BoneList;
 class BoneAnimated
 {
 private:
+    BoneAnimated *_parent;
     BoneList _children;
     bool _visible;
     Matrix _matrix;
@@ -33,6 +34,8 @@ public:
     void DrawSelection();
     void AddChild(BoneAnimated *);
     void RemoveChild(BoneAnimated *);
+    void SetParent(BoneAnimated *b);
+    BoneAnimated *GetParent() { return _parent; }
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = l; }
     void SetVisible(bool v) { _visible = v; }

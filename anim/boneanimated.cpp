@@ -13,6 +13,7 @@ BoneAnimated::BoneAnimated()
 
     _pos.x = _pos.y = 0.f;
     _angle = M_PI;
+    _parent = NULL;
 }
 
 void BoneAnimated::Draw()
@@ -22,9 +23,9 @@ void BoneAnimated::Draw()
     float l = _length;
     float w = WideCoef * _length / 2.f;
     Render::PushMatrix();
-    Render::MatrixMove(_pos.x, _pos.y);
-    Render::MatrixRotate(_angle);
-    //Render::MatrixMul(_matrix);
+//    Render::MatrixMove(_pos.x, _pos.y);
+//    Render::MatrixRotate(_angle);
+    Render::MatrixMul(_matrix);
     Render::DrawTriangle(- w, 0.f, 0.f, l, w, 0.f, 0x7F4F4F4F);
     Render::Line(- w, 0.f, 0.f, l, 0x7F000000);
     Render::Line(0.f, l, w, 0.f, 0x7F000000);
@@ -37,18 +38,32 @@ void BoneAnimated::DrawSelection()
     float l = _length;
     float w = WideCoef * _length;
     Render::PushMatrix();
-    Render::MatrixMove(_pos.x, _pos.y);
-    Render::MatrixRotate(_angle);
-    //Render::MatrixMul(_matrix);
+//    Render::MatrixMove(_pos.x, _pos.y);
+//    Render::MatrixRotate(_angle);
+    Render::MatrixMul(_matrix);
     Render::Line(- w, - w, - w, l + w, 0x7F000000);
     Render::Line( w, - w, w, l + w, 0x7F000000);
     Render::Line(- w, - w, w, - w, 0x7F000000);
     Render::Line(- w, l + w, w, l + w, 0x7F000000);
+
+    if (_parent)
+        Render::Circle(0, 0, w, 0x7F000000);
+
+    if (_children.size())
+        Render::Circle(0, l, w, 0x7F000000);
+
     Render::PopMatrix();
 }
 
 void BoneAnimated::AddChild(BoneAnimated *b)
 {
+    for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
+    {
+        if ((*i) == b)
+        {
+            return;
+        }
+    }
     _children.push_back(b);
 }
 
@@ -66,7 +81,10 @@ void BoneAnimated::RemoveChild(BoneAnimated *b)
 
 void BoneAnimated::CalculatePosition(const Matrix &m, int frame, float p)
 {
-    Matrix _matrix(m);
+    _matrix = m;
+    _matrix.Move(_pos.x, _pos.y);
+    _matrix.Rotate(_angle);
+
     _visible = false;
     if (x.Active(frame) || y.Active(frame))
     {
@@ -87,7 +105,7 @@ void BoneAnimated::CalculatePosition(const Matrix &m, int frame, float p)
         _visible = true;
     }
 
-    if (_visible)
+    //if (_visible)
     {
         for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
         {
@@ -102,10 +120,10 @@ bool BoneAnimated::CheckPoint(FPoint pos)
 //        return false;
 
     Matrix m;
-    m.Move(_pos.x, _pos.y);
-    m.Rotate(_angle);
+//    m.Move(_pos.x, _pos.y);
+//    m.Rotate(_angle);
 
-    //m.Mul(_matrix);
+    m.Mul(_matrix);
 
     Matrix rev;
     rev.MakeRevers(m);
@@ -124,10 +142,10 @@ bool BoneAnimated::MoveOrRotate(FPoint pos)
 //        return false;
 
     Matrix m;
-    m.Move(_pos.x, _pos.y);
-    m.Rotate(_angle);
+//    m.Move(_pos.x, _pos.y);
+//    m.Rotate(_angle);
 
-    //m.Mul(_matrix);
+    m.Mul(_matrix);
 
     Matrix rev;
     rev.MakeRevers(m);
@@ -159,3 +177,15 @@ bool BoneAnimated::IfInside(const Rect &area)
 
     return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
 }
+
+void BoneAnimated::SetParent(BoneAnimated *b)
+{
+    if (_parent)
+        _parent->RemoveChild(this);
+
+    _parent = b;
+
+    if (_parent)
+        _parent->AddChild(this);
+}
+

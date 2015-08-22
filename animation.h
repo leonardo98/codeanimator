@@ -7,7 +7,6 @@ class Animation
 {
 private:
     BoneList _bones;
-    BoneList _root;
     static Animation *_instance;
     bool _boneMoving; // move or rotate
     FPoint _startMovingPos;
@@ -32,6 +31,8 @@ public:
     void BoneMoveTo(const FPoint &mt);
 
     void SelectByArea(const Rect &area);
+
+    void LinkBones(int parent, int child);
 
 };
 

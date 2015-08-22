@@ -26,9 +26,10 @@ void Animation::Draw()
     // calculate new positions and visibility
     Matrix pos;
     pos.Unit();
-    for (BoneList::iterator i = _root.begin(), e = _root.end(); i != e; ++i)
+    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
     {
-        (*i)->CalculatePosition(pos, 0.f);
+        if ((*i)->GetParent() == NULL)
+            (*i)->CalculatePosition(pos, 0.f);
     }
 
     // draw bones
@@ -51,7 +52,6 @@ void Animation::CreateBone(FPoint pos)
     BoneAnimated *b = new BoneAnimated();
     b->MoveTo(pos);
     _bones.push_back(b);
-    _root.push_back(b);
 }
 
 int Animation::GetBoneAtPoint(const FPoint &pos)
@@ -80,6 +80,18 @@ void Animation::BoneMoveTo(const FPoint &point)
             _bones[_selected[i]]->MoveTo(point - _startMovingPos);
         }
         _startMovingPos = point;
+
+        if (_selected.size() == 1)
+        {
+            for (uint i = 0; i < _bones.size(); ++i)
+            {
+                if (i != _selected[0] && _bones[i]->CheckPoint(_startMovingPos))
+                {
+                    LinkBones(i, _selected[0]);
+                    return;
+                }
+            }
+        }
     }
     else if (_selected.size() == 1)
         _bones[_selected[0]]->SetBoneAngle(_startRotateAngle
@@ -131,4 +143,28 @@ void Animation::SelectByArea(const Rect &area)
         if (_bones[i]->IfInside(area))
             _selected.push_back(i);
     }
+}
+
+void Animation::LinkBones(int parent, int child)
+{
+    if (parent >= 0 && child >= 0)
+    {
+        _bones[child]->SetParent(_bones[parent]);
+        return;
+    }
+    if (child >= 0)
+    {
+        _bones[child]->SetParent(NULL);
+        return;
+    }
+    if (parent >= 0)
+    {
+        assert(false);
+        // todo: i do not know what to do)
+        //_bones[parent]->
+        return;
+    }
+
+//    BoneAnimated *parent, BoneAnimated *child;
+//    parent
 }
