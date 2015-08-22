@@ -77,7 +77,18 @@ void Animation::BoneMoveTo(const FPoint &point)
     {
         for (uint i = 0; i < _selected.size(); ++i)
         {
-            _bones[_selected[i]]->MoveTo(point - _startMovingPos);
+            if (_bones[_selected[i]]->GetParent() == NULL)
+                _bones[_selected[i]]->MoveTo(point - _startMovingPos);
+            else
+            {
+                FPoint p(point);
+                FPoint s(_startMovingPos);
+
+                _bones[_selected[i]]->GetParent()->GetMatrix().Mul(p);
+                _bones[_selected[i]]->GetParent()->GetMatrix().Mul(s);
+
+                _bones[_selected[i]]->MoveTo(p - s);
+            }
         }
         _startMovingPos = point;
 
@@ -94,9 +105,24 @@ void Animation::BoneMoveTo(const FPoint &point)
         }
     }
     else if (_selected.size() == 1)
-        _bones[_selected[0]]->SetBoneAngle(_startRotateAngle
-                                    + (atan2(point.y - _bones[_selected[0]]->GetBonePos().y, point.x - _bones[_selected[0]]->GetBonePos().x)
-                                        - atan2(_startMovingPos.y - _bones[_selected[0]]->GetBonePos().y, _startMovingPos.x - _bones[_selected[0]]->GetBonePos().x)));
+    {
+        if (_bones[_selected[0]]->GetParent() == NULL)
+            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle
+                                        + (atan2(point.y - _bones[_selected[0]]->GetBonePos().y, point.x - _bones[_selected[0]]->GetBonePos().x)
+                                            - atan2(_startMovingPos.y - _bones[_selected[0]]->GetBonePos().y, _startMovingPos.x - _bones[_selected[0]]->GetBonePos().x)));
+        else
+        {
+            FPoint p(point);
+            FPoint s(_startMovingPos);
+            FPoint o(_bones[_selected[0]]->GetBonePos());
+
+//            _bones[_selected[0]]->GetParent()->GetMatrix().Mul(p);
+//            _bones[_selected[0]]->GetParent()->GetMatrix().Mul(s);
+            _bones[_selected[0]]->GetParent()->GetMatrix().Mul(o);
+
+            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(p.y - o.y, p.x - o.x) - atan2(s.y - o.y, s.x - o.x)));
+        }
+    }
 }
 
 void Animation::Picking(int index, bool add)
