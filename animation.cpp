@@ -59,7 +59,20 @@ int Animation::GetBoneAtPoint(const FPoint &pos)
     for (uint i = 0; i < _bones.size(); ++i)
     {
         if (_bones[i]->CheckPoint(pos))
+        {
+            BoneAnimated *b = _bones[i]->GetBoneAtPoint(pos);
+            if (b)
+            {
+                for (uint j = 0; j < _bones.size(); ++j)
+                {
+                    if (_bones[j] == b)
+                    {
+                        return (int)j;
+                    }
+                }
+            }
             return (int)i;
+        }
     }
     return -1;
 }

@@ -36,6 +36,7 @@ public:
     void RemoveChild(BoneAnimated *);
     void SetParent(BoneAnimated *b);
     BoneAnimated *GetParent() { return _parent; }
+    BoneAnimated *GetBoneAtPoint(const FPoint &pos);
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = l; }
     void SetVisible(bool v) { _visible = v; }

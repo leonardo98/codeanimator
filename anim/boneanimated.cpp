@@ -208,3 +208,15 @@ void BoneAnimated::SetParent(BoneAnimated *b)
     }
 }
 
+BoneAnimated *BoneAnimated::GetBoneAtPoint(const FPoint &pos)
+{
+    for (uint i = 0; i < _children.size(); ++i)
+    {
+        if (_children[i]->CheckPoint(pos))
+        {
+            BoneAnimated *b = _children[i]->GetBoneAtPoint(pos);
+            return b ? b : _children[i];
+        }
+    }
+    return NULL;
+}
