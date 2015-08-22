@@ -173,7 +173,10 @@ void Animation::LinkBones(int parent, int child)
 {
     if (parent >= 0 && child >= 0)
     {
-        _bones[child]->SetParent(_bones[parent]);
+        if (_bones[child]->GetParent() != _bones[parent])
+        {
+            _bones[child]->SetParent(_bones[parent]);
+        }
         return;
     }
     if (child >= 0)

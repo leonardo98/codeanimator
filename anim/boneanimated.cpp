@@ -55,16 +55,31 @@ void BoneAnimated::DrawSelection()
     Render::PopMatrix();
 }
 
-void BoneAnimated::AddChild(BoneAnimated *b)
+bool BoneAnimated::AddChild(BoneAnimated *b)
 {
+    BoneAnimated *parent = b->GetParent();
+    while (parent)
+    {
+        if (parent == this) return false;
+        parent = parent->GetParent();
+    }
+    parent = GetParent();
+    while (parent)
+    {
+        if (parent == b) return false;
+        parent = parent->GetParent();
+    }
+
     for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
     {
         if ((*i) == b)
         {
-            return;
+            return true;
         }
     }
+
     _children.push_back(b);
+    return true;
 }
 
 void BoneAnimated::RemoveChild(BoneAnimated *b)
@@ -183,9 +198,13 @@ void BoneAnimated::SetParent(BoneAnimated *b)
     if (_parent)
         _parent->RemoveChild(this);
 
-    _parent = b;
-
-    if (_parent)
-        _parent->AddChild(this);
+    if (b && b->AddChild(this))
+    {
+        _parent = b;
+    }
+    else
+    {
+        _parent = NULL;
+    }
 }
 

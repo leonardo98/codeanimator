@@ -32,7 +32,7 @@ public:
     BoneAnimated();
     void Draw();
     void DrawSelection();
-    void AddChild(BoneAnimated *);
+    bool AddChild(BoneAnimated *);
     void RemoveChild(BoneAnimated *);
     void SetParent(BoneAnimated *b);
     BoneAnimated *GetParent() { return _parent; }
