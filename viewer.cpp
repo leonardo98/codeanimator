@@ -128,6 +128,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         _createBoneMode = true;
     }
+    else if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)
+    {
+        Animation::Instance()->Remove();
+    }
 //    if ((QApplication::keyboardModifiers() & Qt::Key_Control) == 0)
 //    {
 //        _selected.clear();

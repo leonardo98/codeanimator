@@ -228,3 +228,23 @@ void Animation::LinkBones(int parent, int child)
 //    BoneAnimated *parent, BoneAnimated *child;
 //    parent
 }
+
+void Animation::Remove()
+{
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        delete _bones[_selected[i]];
+        _bones[_selected[i]] = NULL;
+    }
+    for (uint i = 0; i < _bones.size(); )
+    {
+        if (_bones[i] == NULL)
+        {
+            _bones[i] = _bones.back();
+            _bones.pop_back();
+        }
+        else
+            ++i;
+    }
+    _selected.clear();
+}

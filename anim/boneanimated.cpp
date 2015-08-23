@@ -3,6 +3,16 @@
 
 const float WideCoef = 0.1f;
 
+BoneAnimated::~BoneAnimated()
+{
+    SetParent(NULL);
+    for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
+    {
+        (*i)->SetParent(NULL);
+    }
+    _children.clear();
+}
+
 BoneAnimated::BoneAnimated()
 {
     _visible = false;
@@ -216,12 +226,28 @@ bool BoneAnimated::IfInside(const Rect &area)
 
 void BoneAnimated::SetParent(BoneAnimated *b)
 {
+    FPoint s(0, 0);
+    GetMatrix().Mul(s);
+
+    FPoint e(0, _length);
+    //e.Rotate(_angle);
+    GetMatrix().Mul(e);
+
     if (_parent)
         _parent->RemoveChild(this);
 
     if (b && b->AddChild(this))
     {
         _parent = b;
+
+        Matrix rev;
+        rev.MakeRevers(_parent->GetMatrix());
+
+        rev.Mul(s);
+        rev.Mul(e);
+
+        SetBonePos(s);
+        SetBoneAngle(atan2(e.y - s.y, e.x - s.x) - M_PI / 2);
     }
     else
     {

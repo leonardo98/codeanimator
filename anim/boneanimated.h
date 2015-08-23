@@ -31,6 +31,7 @@ public:
 public:
     const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
+    virtual ~BoneAnimated();
     void Draw();
     void DrawSelection();
     bool AddChild(BoneAnimated *);

@@ -34,6 +34,8 @@ public:
 
     void LinkBones(int parent, int child);
 
+    void Remove();
+
 };
 
 #endif // ANIMATION_H
