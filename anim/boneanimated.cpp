@@ -180,17 +180,37 @@ bool BoneAnimated::MoveTo(const FPoint &mt)
 
 bool BoneAnimated::IfInside(const Rect &area)
 {
-    if (!(area.x1 <= _pos.x && _pos.x <= area.x2
-            &&  area.y1 <= _pos.y && _pos.y <= area.y2))
+    if (GetParent() == NULL)
     {
-        return false;
+        if (!(area.x1 <= _pos.x && _pos.x <= area.x2
+                && area.y1 <= _pos.y && _pos.y <= area.y2))
+        {
+            return false;
+        }
+
+        FPoint p(0, _length);
+        p.Rotate(_angle);
+        p += _pos;
+
+        return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
     }
+    else
+    {
+        FPoint s(_pos);
+        GetParent()->GetMatrix().Mul(s);
 
-    FPoint p(0, _length);
-    p.Rotate(_angle);
-    p += _pos;
+        if (!(area.x1 <= s.x && s.x <= area.x2 && area.y1 <= s.y && s.y <= area.y2))
+        {
+            return false;
+        }
 
-    return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
+        FPoint p(0, _length);
+        p.Rotate(_angle);
+        p += _pos;
+        GetParent()->GetMatrix().Mul(p);
+
+        return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
+    }
 }
 
 void BoneAnimated::SetParent(BoneAnimated *b)
