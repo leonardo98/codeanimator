@@ -14,6 +14,7 @@ BoneAnimated::BoneAnimated()
     _pos.x = _pos.y = 0.f;
     _angle = M_PI;
     _parent = NULL;
+    _moveByParent = false;
 }
 
 void BoneAnimated::Draw()

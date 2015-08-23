@@ -1,4 +1,5 @@
 #include "animation.h"
+#include <set>
 
 Animation *Animation::_instance = NULL;
 
@@ -90,6 +91,8 @@ void Animation::BoneMoveTo(const FPoint &point)
     {
         for (uint i = 0; i < _selected.size(); ++i)
         {
+            if (_bones[_selected[i]]->GetMoveByParent()) continue;
+
             if (_bones[_selected[i]]->GetParent() == NULL)
                 _bones[_selected[i]]->MoveTo(point - _startMovingPos);
             else
@@ -175,10 +178,27 @@ void Animation::Picking(int index, bool add)
 void Animation::SelectByArea(const Rect &area)
 {
     _selected.clear();
+    std::set<BoneAnimated*> sel;
     for (uint i = 0; i < _bones.size(); ++i)
     {
+        _bones[i]->SetMoveByParent(false);
         if (_bones[i]->IfInside(area))
+        {
             _selected.push_back(i);
+            sel.insert(_bones[i]);
+        }
+    }
+    for (uint i = 0; i < _bones.size(); ++i)
+    {
+        BoneAnimated *parent = _bones[i]->GetParent();
+        if (parent)
+        {
+            while (parent->GetParent())
+            {
+                parent = parent->GetParent();
+            }
+            _bones[i]->SetMoveByParent(sel.find(parent) != sel.end());
+        }
     }
 }
 
