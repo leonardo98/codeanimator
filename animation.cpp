@@ -115,7 +115,13 @@ void Animation::BoneMoveTo(const FPoint &point)
         {
             for (uint i = 0; i < _bones.size(); ++i)
             {
-                if (i != _selected[0] && _bones[i]->CheckPoint(_startMovingPos))
+                FPoint p(_bones[_selected[0]]->GetBonePos());
+                if (_bones[_selected[0]]->GetParent())
+                {
+                    _bones[_selected[0]]->GetParent()->GetMatrix().Mul(p);
+                }
+
+                if (i != _selected[0] && _bones[i]->CheckPoint(p))
                 {
                     LinkBones(i, _selected[0]);
                     return;
