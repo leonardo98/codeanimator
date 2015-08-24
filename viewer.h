@@ -53,7 +53,14 @@ protected:
     bool _mouseDown;
     FPoint _mouseWorld;
 
-    bool _createBoneMode;
+    enum HotKeysMode
+    {
+        none_key,
+        create_bone_key,
+        length_bone_key,
+    };
+    HotKeysMode _hotKeysMode;
+
     std::string _cursorText;
 
 public:

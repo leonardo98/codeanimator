@@ -13,7 +13,7 @@ Viewer::Viewer(QWidget *parent)
     , _screenOffset((SCREEN_WIDTH = 1024) / 2
                     , (SCREEN_HEIGHT = 768) / 2  )
     , _worldOffset(0.f, 0.f)
-    , _createBoneMode(false)
+    , _hotKeysMode(none_key)
 {
     Render::InitApplication();
 
@@ -126,7 +126,7 @@ void Viewer::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_B)
     {
-        _createBoneMode = true;
+        _hotKeysMode = create_bone_key;
     }
     else if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)
     {
@@ -142,7 +142,7 @@ void Viewer::keyReleaseEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_B)
     {
-        _createBoneMode = false;
+        _hotKeysMode = none_key;
     }
 }
 
@@ -174,7 +174,7 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
 
     int boneAtPoint = Animation::Instance()->GetBoneAtPoint(worldClickPos);
     Animation::Instance()->Picking(boneAtPoint, (QApplication::keyboardModifiers() & Qt::ControlModifier) != 0);
-    if (_createBoneMode)
+    if (_hotKeysMode == create_bone_key)
     {
         Animation::Instance()->CreateBone(worldClickPos);
     }
