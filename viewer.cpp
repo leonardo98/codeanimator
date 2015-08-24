@@ -128,6 +128,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         _hotKeysMode = create_bone_key;
     }
+    else if (event->key() == Qt::Key_L)
+    {
+        _hotKeysMode = length_bone_key;
+    }
     else if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)
     {
         Animation::Instance()->Remove();
@@ -140,7 +144,7 @@ void Viewer::keyPressEvent(QKeyEvent *event)
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_B)
+    if (event->key() == Qt::Key_B || event->key() == Qt::Key_L)
     {
         _hotKeysMode = none_key;
     }
@@ -227,7 +231,7 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
     if (_mouseMoveAction == mouse_moving_bone)
     {
-        Animation::Instance()->BoneMoveTo(newMmouseWorld);
+        Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key);
     }
     else if (_mouseMoveAction == mouse_dragging_world)
     {

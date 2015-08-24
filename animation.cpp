@@ -102,7 +102,7 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _startRotateAngle = _bones[index]->GetBoneAngle();
 }
 
-void Animation::BoneMoveTo(const FPoint &point)
+void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
 {
     if (_boneMoving || _selected.size() > 1)
     {
@@ -148,6 +148,9 @@ void Animation::BoneMoveTo(const FPoint &point)
     }
     else if (_selected.size() == 1)
     {
+        FPoint s(_bones[_selected[0]]->GetBonePos());
+        FPoint e(point);
+
         if (_bones[_selected[0]]->GetParent() == NULL)
             _bones[_selected[0]]->SetBoneAngle(_startRotateAngle
                                         + (atan2(point.y - _bones[_selected[0]]->GetBonePos().y, point.x - _bones[_selected[0]]->GetBonePos().x)
@@ -158,6 +161,14 @@ void Animation::BoneMoveTo(const FPoint &point)
             _bones[_selected[0]]->GetParent()->GetMatrix().Mul(o);
             _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(point.y - o.y, point.x - o.x)
                                                                     - atan2(_startMovingPos.y - o.y, _startMovingPos.x - o.x)));
+
+            Matrix rev;
+            rev.MakeRevers(_bones[_selected[0]]->GetParent()->GetMatrix());
+            rev.Mul(e);
+        }
+        if (changeLength)
+        {
+            _bones[_selected[0]]->SetLength((s - e).Length());
         }
     }
 }

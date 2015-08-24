@@ -28,7 +28,7 @@ public:
     void Picking(int index, bool add);
 
     void StartBoneMoving(uint index, const FPoint &point);
-    void BoneMoveTo(const FPoint &mt);
+    void BoneMoveTo(const FPoint &mt, bool changeLength);
 
     void SelectByArea(const Rect &area);
 
