@@ -132,10 +132,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         Animation::Instance()->Remove();
     }
-//    if ((QApplication::keyboardModifiers() & Qt::Key_Control) == 0)
-//    {
-//        _selected.clear();
-//    }
+    else if (event->key() == Qt::Key_U)
+    {
+        Animation::Instance()->Unlink();
+    }
 }
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)

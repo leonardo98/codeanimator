@@ -248,3 +248,11 @@ void Animation::Remove()
     }
     _selected.clear();
 }
+
+void Animation::Unlink()
+{
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        _bones[_selected[i]]->SetParent(NULL);
+    }
+}

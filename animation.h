@@ -35,6 +35,7 @@ public:
     void LinkBones(int parent, int child);
 
     void Remove();
+    void Unlink();
 
 };
 

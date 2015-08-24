@@ -252,6 +252,8 @@ void BoneAnimated::SetParent(BoneAnimated *b)
     else
     {
         _parent = NULL;
+        SetBonePos(s);
+        SetBoneAngle(atan2(e.y - s.y, e.x - s.x) - M_PI / 2);
     }
 }
 
