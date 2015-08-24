@@ -37,6 +37,8 @@ public:
     void Remove();
     void Unlink();
 
+    std::string GenerateUnicBoneName();
+
 };
 
 #endif // ANIMATION_H

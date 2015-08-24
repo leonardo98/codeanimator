@@ -48,10 +48,27 @@ void Animation::Draw()
     // todo: draw mesh here
 }
 
+std::string Animation::GenerateUnicBoneName()
+{
+    std::set<std::string> allNames;
+    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    {
+        allNames.insert((*i)->GetName());
+    }
+    int i = 1;
+    char name[100];
+    do
+    {
+        sprintf(name, "bone_%03i", i++);
+    } while (allNames.find(name) != allNames.end());
+    return name;
+}
+
 void Animation::CreateBone(FPoint pos)
 {
     BoneAnimated *b = new BoneAnimated();
     b->MoveTo(pos);
+    b->SetName(GenerateUnicBoneName());
     _bones.push_back(b);
 }
 
