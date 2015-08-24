@@ -22,6 +22,8 @@ private:
     float _angle;
     float _length;
 
+    std::string _name;
+
 public:
     Spline x;
     Spline y;
@@ -55,6 +57,9 @@ public:
 
     void SetMoveByParent(bool b) { _moveByParent = b;}
     bool GetMoveByParent() { return _moveByParent; }
+
+    void SetName(const std::string &name) { _name = name; }
+    const std::string &GetName() { return _name; }
 
 };
 
