@@ -18,7 +18,7 @@ private:
 
     void ExcludeChild();
 
-    PointList testPoints;
+//    PointList testPoints;
 
 public:
     Animation();
@@ -47,7 +47,7 @@ public:
 
     std::string GenerateUnicBoneName();
 
-    void Test(FPoint p);
+//    void Test(FPoint p);
 
 };
 

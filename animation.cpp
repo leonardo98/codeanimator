@@ -11,10 +11,10 @@ Animation::Animation()
     _boneMoving = false;
     _startMovingBone = -1;
 
-    testPoints.push_back(FPoint(0, 0));
-    testPoints.push_back(FPoint(0, 100));
-    testPoints.push_back(FPoint(100, 100));
-    testPoints.push_back(FPoint(100, 0));
+//    testPoints.push_back(FPoint(0, 0));
+//    testPoints.push_back(FPoint(0, 100));
+//    testPoints.push_back(FPoint(100, 100));
+//    testPoints.push_back(FPoint(100, 0));
 }
 
 Animation::~Animation()
@@ -55,9 +55,9 @@ void Animation::Draw()
     // todo: draw mesh here
 
 
-    for (int i = 0; i < testPoints.size() - 1; ++i)
-        Render::Line(testPoints[i].x, testPoints[i].y,
-                     testPoints[i + 1].x, testPoints[i + 1].y, 0xFFFFFFFF);
+//    for (int i = 0; i < testPoints.size() - 1; ++i)
+//        Render::Line(testPoints[i].x, testPoints[i].y,
+//                     testPoints[i + 1].x, testPoints[i + 1].y, 0xFFFFFFFF);
 }
 
 std::string Animation::GenerateUnicBoneName()
@@ -407,7 +407,7 @@ void UpdateChain(PointList &points, const FPoint &target)
     }
 }
 
-void Animation::Test(FPoint p)
-{
-    UpdateChain(testPoints, p);
-}
+//void Animation::Test(FPoint p)
+//{
+//    UpdateChain(testPoints, p);
+//}

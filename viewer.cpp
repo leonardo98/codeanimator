@@ -223,8 +223,8 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 {
     FPoint newMmouseWorld = ScreenToWorld(mousePos);
 
-    Animation::Instance()->Test(newMmouseWorld);
-    return;
+//    Animation::Instance()->Test(newMmouseWorld);
+//    return;
 
     if (Animation::Instance()->GetBoneAtPoint(newMmouseWorld) >= 0)
     {
