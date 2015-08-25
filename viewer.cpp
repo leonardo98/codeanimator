@@ -185,7 +185,6 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     else if (boneAtPoint >= 0)
     {
         _mouseMoveAction = mouse_moving_bone;
-        //_selected.push_back(boneAtPoint);
         Animation::Instance()->StartBoneMoving(boneAtPoint, worldClickPos);
     }
     else

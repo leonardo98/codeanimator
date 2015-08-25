@@ -13,6 +13,8 @@ private:
     float _startRotateAngle;
     std::vector<uint> _selected;
 
+    void ExcludeChild();
+
 public:
     Animation();
     virtual ~Animation();
@@ -35,7 +37,7 @@ public:
     void LinkBones(int parent, int child);
 
     void Remove();
-    void Unlink();
+    void Unlink();    
 
     std::string GenerateUnicBoneName();
 

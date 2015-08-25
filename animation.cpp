@@ -173,6 +173,31 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
     }
 }
 
+void Animation::ExcludeChild()
+{
+    std::set<BoneAnimated*> sel;
+    for (uint i = 0; i < _bones.size(); ++i)
+    {
+        _bones[i]->SetMoveByParent(false);
+    }
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        sel.insert(_bones[_selected[i]]);
+    }
+    for (uint i = 0; i < _bones.size(); ++i)
+    {
+        BoneAnimated *parent = _bones[i]->GetParent();
+        if (parent)
+        {
+            while (parent->GetParent())
+            {
+                parent = parent->GetParent();
+            }
+            _bones[i]->SetMoveByParent(sel.find(parent) != sel.end());
+        }
+    }
+}
+
 void Animation::Picking(int index, bool add)
 {
     if (index == -1 && !add)
@@ -195,6 +220,7 @@ void Animation::Picking(int index, bool add)
         }
         _selected.clear();
         _selected.push_back(index);
+        ExcludeChild();
         return;
     }
     for (uint i = 0; i < _selected.size(); ++i)
@@ -207,33 +233,20 @@ void Animation::Picking(int index, bool add)
         }
     }
     _selected.push_back(index);
+    ExcludeChild();
 }
 
 void Animation::SelectByArea(const Rect &area)
 {
     _selected.clear();
-    std::set<BoneAnimated*> sel;
     for (uint i = 0; i < _bones.size(); ++i)
     {
-        _bones[i]->SetMoveByParent(false);
         if (_bones[i]->IfInside(area))
         {
             _selected.push_back(i);
-            sel.insert(_bones[i]);
         }
     }
-    for (uint i = 0; i < _bones.size(); ++i)
-    {
-        BoneAnimated *parent = _bones[i]->GetParent();
-        if (parent)
-        {
-            while (parent->GetParent())
-            {
-                parent = parent->GetParent();
-            }
-            _bones[i]->SetMoveByParent(sel.find(parent) != sel.end());
-        }
-    }
+    ExcludeChild();
 }
 
 void Animation::LinkBones(int parent, int child)
