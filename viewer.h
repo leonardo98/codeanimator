@@ -58,6 +58,7 @@ protected:
         none_key,
         create_bone_key,
         length_bone_key,
+        ik_bone_key,
     };
     HotKeysMode _hotKeysMode;
 

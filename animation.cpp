@@ -1,5 +1,6 @@
 #include "animation.h"
 #include <set>
+#include "ogl/render.h"
 
 Animation *Animation::_instance = NULL;
 
@@ -8,6 +9,12 @@ Animation::Animation()
     assert(_instance == NULL);
     _instance = this;
     _boneMoving = false;
+    _startMovingBone = -1;
+
+    testPoints.push_back(FPoint(0, 0));
+    testPoints.push_back(FPoint(0, 100));
+    testPoints.push_back(FPoint(100, 100));
+    testPoints.push_back(FPoint(100, 0));
 }
 
 Animation::~Animation()
@@ -46,6 +53,11 @@ void Animation::Draw()
     }
 
     // todo: draw mesh here
+
+
+    for (int i = 0; i < testPoints.size() - 1; ++i)
+        Render::Line(testPoints[i].x, testPoints[i].y,
+                     testPoints[i + 1].x, testPoints[i + 1].y, 0xFFFFFFFF);
 }
 
 std::string Animation::GenerateUnicBoneName()
@@ -100,6 +112,7 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _boneMoving = _bones[index]->MoveOrRotate(point);
     _startMovingPos = point;
     _startRotateAngle = _bones[index]->GetBoneAngle();
+    _startMovingBone = index;
 }
 
 void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
@@ -170,6 +183,73 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
         {
             _bones[_selected[0]]->SetLength((s - e).Length());
         }
+    }
+}
+
+void Animation::IKBoneMove(const FPoint &point)
+{
+    //bone under cursor
+    BoneAnimated *mb = _bones[_startMovingBone];
+
+    //find all selected parents
+    std::vector<BoneAnimated *> boneChain;
+    boneChain.push_back(mb);
+
+    std::set<BoneAnimated*> sel;
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        sel.insert(_bones[_selected[i]]);
+    }
+
+    BoneAnimated *parent = mb->GetParent();
+    while (parent && sel.find(parent) != sel.end())
+    {
+        boneChain.push_back(parent);
+        parent = parent->GetParent();
+    }
+    for (uint i = 0; i < boneChain.size() / 2; ++i)
+    {
+        std::swap(boneChain[i], boneChain[boneChain.size() - 1 - i]);
+    }
+
+    if (boneChain.size() <= 1)
+    {
+        BoneMoveTo(point, false);
+    }
+
+    //form FPoint list
+    PointList points;
+    for (uint i = 0; i < boneChain.size(); ++i)
+    {
+        FPoint p(boneChain[i]->GetBonePos());
+        if (boneChain[i]->GetParent())
+        {
+            boneChain[i]->GetParent()->GetMatrix().Mul(p);
+        }
+        points.push_back(p);
+    }
+    points.push_back(_startMovingPos);
+
+    //ik - search positions
+    UpdateChain(points, point);
+
+    //update bone positiobns
+    for (uint i = 0; i < boneChain.size(); ++i)
+    {
+        FPoint a = points[i];
+        FPoint b = points[i + 1];
+
+        if (boneChain[i]->GetParent())
+        {
+            Matrix rev;
+            rev.MakeRevers(boneChain[i]->GetParent()->GetMatrix());
+
+            rev.Mul(a);
+            rev.Mul(b);
+        }
+
+        boneChain[i]->SetBonePos(a);
+        boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x));
     }
 }
 
@@ -271,9 +351,6 @@ void Animation::LinkBones(int parent, int child)
         //_bones[parent]->
         return;
     }
-
-//    BoneAnimated *parent, BoneAnimated *child;
-//    parent
 }
 
 void Animation::Remove()
@@ -302,4 +379,35 @@ void Animation::Unlink()
     {
         _bones[_selected[i]]->SetParent(NULL);
     }
+}
+
+void UpdateChain(PointList &points, const FPoint &target)
+{
+    FPoint &b = points.back();
+    int counter = 0;
+    while ((b - target).Length() > 1.f && counter < 10)
+    {
+        for (int i = points.size() - 2; i >= 0; --i)
+        {
+            FPoint &a = points[i];
+
+            FPoint d(b - a);
+            FPoint t(target - a);
+
+            float angle = atan2(t.y, t.x) - atan2(d.y, d.x);
+
+            for (int j = i + 1; j < points.size(); ++j)
+            {
+                FPoint p(points[j] - a);
+                p.Rotate(angle);
+                points[j] = p + a;
+            }
+        }
+        counter++;
+    }
+}
+
+void Animation::Test(FPoint p)
+{
+    UpdateChain(testPoints, p);
 }

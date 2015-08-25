@@ -132,6 +132,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         _hotKeysMode = length_bone_key;
     }
+    else if (event->key() == Qt::Key_I)
+    {
+        _hotKeysMode = ik_bone_key;
+    }
     else if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)
     {
         Animation::Instance()->Remove();
@@ -144,7 +148,7 @@ void Viewer::keyPressEvent(QKeyEvent *event)
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_B || event->key() == Qt::Key_L)
+    if (event->key() == Qt::Key_B || event->key() == Qt::Key_L || event->key() == Qt::Key_I)
     {
         _hotKeysMode = none_key;
     }
@@ -219,6 +223,9 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 {
     FPoint newMmouseWorld = ScreenToWorld(mousePos);
 
+    Animation::Instance()->Test(newMmouseWorld);
+    return;
+
     if (Animation::Instance()->GetBoneAtPoint(newMmouseWorld) >= 0)
     {
         _cursorText = "bone";
@@ -230,7 +237,10 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
     if (_mouseMoveAction == mouse_moving_bone)
     {
-        Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key);
+        if (_hotKeysMode == ik_bone_key)
+            Animation::Instance()->IKBoneMove(newMmouseWorld);
+        else
+            Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key);
     }
     else if (_mouseMoveAction == mouse_dragging_world)
     {
