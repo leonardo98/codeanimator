@@ -227,7 +227,7 @@ void Animation::IKBoneMove(const FPoint &point)
     }
 
     //form FPoint list
-    PointList points;
+    PointList points(boneChain.size());
     for (uint i = 0; i < boneChain.size(); ++i)
     {
         FPoint p(boneChain[i]->GetBonePos());
@@ -235,12 +235,26 @@ void Animation::IKBoneMove(const FPoint &point)
         {
             boneChain[i]->GetParent()->GetMatrix().Mul(p);
         }
-        points.push_back(p);
+        points[i]= p;
     }
     {
         FPoint p(_startMovingLocalPos);
         _bones[_startMovingBone]->GetMatrix().Mul(p);
         points.push_back(p);
+    }
+    std::vector<float> deltaAngle(boneChain.size());
+    for (uint i = 0; i < deltaAngle.size(); ++i)
+    {
+        FPoint a(points[i]);
+        FPoint b(points[i + 1]);
+
+        Matrix rev;
+        rev.MakeRevers(boneChain[i]->GetMatrix());
+
+        rev.Mul(a);
+        rev.Mul(b);
+
+        deltaAngle[i] = M_PI / 2 - atan2f(b.y - a.y, b.x - a.x);
     }
 
     //ik - search positions
@@ -262,7 +276,7 @@ void Animation::IKBoneMove(const FPoint &point)
             rev.Mul(b);
         }
 
-        boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) - M_PI / 2);
+        boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) - M_PI / 2 + deltaAngle[i]);
     }
 }
 
