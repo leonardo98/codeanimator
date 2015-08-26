@@ -13,6 +13,7 @@ private:
     bool _boneMoving; // move or rotate
     int _startMovingBone;
     FPoint _startMovingPos;
+    FPoint _startMovingLocalPos;
     float _startRotateAngle;
     std::vector<uint> _selected;
 

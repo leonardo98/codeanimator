@@ -55,7 +55,7 @@ void Animation::Draw()
     // todo: draw mesh here
 
 
-//    for (int i = 0; i < testPoints.size() - 1; ++i)
+//    for (int i = 0; i < (int)testPoints.size() - 1; ++i)
 //        Render::Line(testPoints[i].x, testPoints[i].y,
 //                     testPoints[i + 1].x, testPoints[i + 1].y, 0xFFFFFFFF);
 }
@@ -113,6 +113,11 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _startMovingPos = point;
     _startRotateAngle = _bones[index]->GetBoneAngle();
     _startMovingBone = index;
+
+    _startMovingLocalPos = _startMovingPos;
+    Matrix rev;
+    rev.MakeRevers(_bones[index]->GetMatrix());
+    rev.Mul(_startMovingLocalPos);
 }
 
 void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
@@ -207,14 +212,18 @@ void Animation::IKBoneMove(const FPoint &point)
         boneChain.push_back(parent);
         parent = parent->GetParent();
     }
-    for (uint i = 0; i < boneChain.size() / 2; ++i)
-    {
-        std::swap(boneChain[i], boneChain[boneChain.size() - 1 - i]);
-    }
 
     if (boneChain.size() <= 1)
     {
         BoneMoveTo(point, false);
+        return;
+    }
+
+    for (uint i = 0; i < boneChain.size() / 2; ++i)
+    {
+        BoneAnimated *tmp = boneChain[i];
+        boneChain[i] = boneChain[boneChain.size() - 1 - i];
+        boneChain[boneChain.size() - 1 - i] = tmp;
     }
 
     //form FPoint list
@@ -228,15 +237,20 @@ void Animation::IKBoneMove(const FPoint &point)
         }
         points.push_back(p);
     }
-    points.push_back(_startMovingPos);
+    {
+        FPoint p(_startMovingLocalPos);
+        _bones[_startMovingBone]->GetMatrix().Mul(p);
+        points.push_back(p);
+    }
 
     //ik - search positions
     UpdateChain(points, point);
+//    testPoints = points;
 
     //update bone positiobns
-    for (uint i = 0; i < boneChain.size(); ++i)
+    for (int i = 0; i < boneChain.size(); ++i)
     {
-        FPoint a = points[i];
+        FPoint a = boneChain[i]->GetBonePos();//points[i];
         FPoint b = points[i + 1];
 
         if (boneChain[i]->GetParent())
@@ -244,12 +258,11 @@ void Animation::IKBoneMove(const FPoint &point)
             Matrix rev;
             rev.MakeRevers(boneChain[i]->GetParent()->GetMatrix());
 
-            rev.Mul(a);
+            //rev.Mul(a);
             rev.Mul(b);
         }
 
-        boneChain[i]->SetBonePos(a);
-        boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x));
+        boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) - M_PI / 2);
     }
 }
 
@@ -394,7 +407,13 @@ void UpdateChain(PointList &points, const FPoint &target)
             FPoint d(b - a);
             FPoint t(target - a);
 
-            float angle = atan2(t.y, t.x) - atan2(d.y, d.x);
+            float sinAngle = (d.x * t.y - d.y * t.x) / (d.Length() * t.Length());
+            int n = sinAngle < 0 ? -1 : 1;
+            float angle = asin(sinAngle);
+//            if (n == -1)
+//            {
+//                angle = M_PI - angle;
+//            }
 
             for (int j = i + 1; j < points.size(); ++j)
             {
