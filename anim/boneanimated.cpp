@@ -107,6 +107,8 @@ void BoneAnimated::RemoveChild(BoneAnimated *b)
 
 void BoneAnimated::CalculatePosition(const Matrix &m, int frame, float p)
 {
+    _parentMatrix = m;
+
     _matrix = m;
     _matrix.Move(_pos.x, _pos.y);
     _matrix.Rotate(_angle);
@@ -268,4 +270,10 @@ BoneAnimated *BoneAnimated::GetBoneAtPoint(const FPoint &pos)
         }
     }
     return NULL;
+}
+
+void BoneAnimated::SetBoneAngle(float a)
+{
+    _angle = a;
+    CalculatePosition(_parentMatrix, 0.f);
 }

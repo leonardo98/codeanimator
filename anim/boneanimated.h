@@ -14,6 +14,7 @@ private:
     BoneAnimated *_parent;
     BoneList _children;
     bool _visible;
+    Matrix _parentMatrix;
     Matrix _matrix;
     bool _moveByParent;
 
@@ -52,7 +53,7 @@ public:
 
     void SetBonePos(const FPoint &pos) { _pos = pos; }
     const FPoint &GetBonePos() { return _pos; }
-    void SetBoneAngle(float a) { _angle = a; }
+    void SetBoneAngle(float a);
     float GetBoneAngle() { return _angle; }    
 
     void SetMoveByParent(bool b) { _moveByParent = b;}

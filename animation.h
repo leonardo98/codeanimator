@@ -13,13 +13,15 @@ private:
     bool _boneMoving; // move or rotate
     int _startMovingBone;
     FPoint _startMovingPos;
-    FPoint _startMovingLocalPos;
     float _startRotateAngle;
     std::vector<uint> _selected;
 
     void ExcludeChild();
 
 //    PointList testPoints;
+    std::vector<float> _deltaAngle;
+    std::vector<BoneAnimated *> _boneChain;
+    PointList _chainPoints;
 
 public:
     Animation();

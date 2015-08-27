@@ -58,6 +58,9 @@ void Animation::Draw()
 //    for (int i = 0; i < (int)testPoints.size() - 1; ++i)
 //        Render::Line(testPoints[i].x, testPoints[i].y,
 //                     testPoints[i + 1].x, testPoints[i + 1].y, 0xFFFFFFFF);
+//    for (int i = 0; i < (int)_chainPoints.size() - 1; ++i)
+//        Render::Line(_chainPoints[i].x, _chainPoints[i].y,
+//                     _chainPoints[i + 1].x, _chainPoints[i + 1].y, 0xFFFFFFFF);
 }
 
 std::string Animation::GenerateUnicBoneName()
@@ -114,10 +117,62 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _startRotateAngle = _bones[index]->GetBoneAngle();
     _startMovingBone = index;
 
-    _startMovingLocalPos = _startMovingPos;
-    Matrix rev;
-    rev.MakeRevers(_bones[index]->GetMatrix());
-    rev.Mul(_startMovingLocalPos);
+    // -=IK=-
+
+    //bone under cursor
+    BoneAnimated *mb = _bones[_startMovingBone];
+
+    //find all selected parents
+    _boneChain.clear();
+    _boneChain.push_back(mb);
+
+    std::set<BoneAnimated*> sel;
+    for (uint i = 0; i < _selected.size(); ++i)
+    {
+        sel.insert(_bones[_selected[i]]);
+    }
+
+    BoneAnimated *parent = mb->GetParent();
+    while (parent && sel.find(parent) != sel.end())
+    {
+        _boneChain.push_back(parent);
+        parent = parent->GetParent();
+    }
+
+    for (uint i = 0; i < _boneChain.size() / 2; ++i)
+    {
+        BoneAnimated *tmp = _boneChain[i];
+        _boneChain[i] = _boneChain[_boneChain.size() - 1 - i];
+        _boneChain[_boneChain.size() - 1 - i] = tmp;
+    }
+
+    //form FPoint list
+    _chainPoints.resize(_boneChain.size());
+    for (uint i = 0; i < _boneChain.size(); ++i)
+    {
+        FPoint p(_boneChain[i]->GetBonePos());
+        if (_boneChain[i]->GetParent())
+        {
+            _boneChain[i]->GetParent()->GetMatrix().Mul(p);
+        }
+        _chainPoints[i]= p;
+    }
+    _chainPoints.push_back(_startMovingPos);
+    _deltaAngle.resize(_boneChain.size());
+    for (uint i = 0; i < _deltaAngle.size(); ++i)
+    {
+        FPoint a(_chainPoints[i]);
+        FPoint b(_chainPoints[i + 1]);
+
+        Matrix rev;
+        rev.MakeRevers(_boneChain[i]->GetMatrix());
+
+        rev.Mul(a);
+        rev.Mul(b);
+
+        _deltaAngle[i] = M_PI / 2 - atan2f(b.y - a.y, b.x - a.x);
+    }
+
 }
 
 void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
@@ -193,90 +248,32 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
 
 void Animation::IKBoneMove(const FPoint &point)
 {
-    //bone under cursor
-    BoneAnimated *mb = _bones[_startMovingBone];
-
-    //find all selected parents
-    std::vector<BoneAnimated *> boneChain;
-    boneChain.push_back(mb);
-
-    std::set<BoneAnimated*> sel;
-    for (uint i = 0; i < _selected.size(); ++i)
-    {
-        sel.insert(_bones[_selected[i]]);
-    }
-
-    BoneAnimated *parent = mb->GetParent();
-    while (parent && sel.find(parent) != sel.end())
-    {
-        boneChain.push_back(parent);
-        parent = parent->GetParent();
-    }
-
-    if (boneChain.size() <= 1)
+    if (_boneChain.size() <= 1)
     {
         BoneMoveTo(point, false);
         return;
     }
 
-    for (uint i = 0; i < boneChain.size() / 2; ++i)
-    {
-        BoneAnimated *tmp = boneChain[i];
-        boneChain[i] = boneChain[boneChain.size() - 1 - i];
-        boneChain[boneChain.size() - 1 - i] = tmp;
-    }
-
-    //form FPoint list
-    PointList points(boneChain.size());
-    for (uint i = 0; i < boneChain.size(); ++i)
-    {
-        FPoint p(boneChain[i]->GetBonePos());
-        if (boneChain[i]->GetParent())
-        {
-            boneChain[i]->GetParent()->GetMatrix().Mul(p);
-        }
-        points[i]= p;
-    }
-    {
-        FPoint p(_startMovingLocalPos);
-        _bones[_startMovingBone]->GetMatrix().Mul(p);
-        points.push_back(p);
-    }
-    std::vector<float> deltaAngle(boneChain.size());
-    for (uint i = 0; i < deltaAngle.size(); ++i)
-    {
-        FPoint a(points[i]);
-        FPoint b(points[i + 1]);
-
-        Matrix rev;
-        rev.MakeRevers(boneChain[i]->GetMatrix());
-
-        rev.Mul(a);
-        rev.Mul(b);
-
-        deltaAngle[i] = M_PI / 2 - atan2f(b.y - a.y, b.x - a.x);
-    }
-
     //ik - search positions
-    UpdateChain(points, point);
+    UpdateChain(_chainPoints, point);
 //    testPoints = points;
 
     //update bone positiobns
-    for (int i = 0; i < boneChain.size(); ++i)
+    for (int i = 0; i < _boneChain.size(); ++i)
     {
-        FPoint a = boneChain[i]->GetBonePos();//points[i];
-        FPoint b = points[i + 1];
+        FPoint a = _boneChain[i]->GetBonePos();//points[i];
+        FPoint b = _chainPoints[i + 1];
 
-        if (boneChain[i]->GetParent())
+        if (_boneChain[i]->GetParent())
         {
             Matrix rev;
-            rev.MakeRevers(boneChain[i]->GetParent()->GetMatrix());
+            rev.MakeRevers(_boneChain[i]->GetParent()->GetMatrix());
 
             //rev.Mul(a);
             rev.Mul(b);
         }
 
-        boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) - M_PI / 2 + deltaAngle[i]);
+        _boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) - M_PI / 2 + _deltaAngle[i]);
     }
 }
 
@@ -412,7 +409,7 @@ void UpdateChain(PointList &points, const FPoint &target)
 {
     FPoint &b = points.back();
     int counter = 0;
-    while ((b - target).Length() > 1.f && counter < 10)
+    while ((b - target).Length() > 1 && counter < 10)
     {
         for (int i = points.size() - 2; i >= 0; --i)
         {
@@ -421,19 +418,25 @@ void UpdateChain(PointList &points, const FPoint &target)
             FPoint d(b - a);
             FPoint t(target - a);
 
-            float sinAngle = (d.x * t.y - d.y * t.x) / (d.Length() * t.Length());
-            int n = sinAngle < 0 ? -1 : 1;
-            float angle = asin(sinAngle);
+//            float sinAngle = (d.x * t.y - d.y * t.x) / (d.Length() * t.Length());
+//            int n = sinAngle < 0 ? -1 : 1;
+//            float angle = asin(sinAngle);
 //            if (n == -1)
 //            {
 //                angle = M_PI - angle;
 //            }
+            float angle = atan2(t.y, t.x) - atan2(d.y, d.x);
 
             for (int j = i + 1; j < points.size(); ++j)
             {
                 FPoint p(points[j] - a);
                 p.Rotate(angle);
                 points[j] = p + a;
+            }
+
+            if ((b - target).Length() < 1)
+            {
+                return;
             }
         }
         counter++;
