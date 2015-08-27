@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include <QStatusBar>
+#include <QMenu>
+#include <QMenuBar>
 
 QMainWindow *mainWindow = NULL;
 
@@ -7,7 +9,7 @@ MainWindow::MainWindow()
     : settings("PakholkovLeonid", "CodeAnimator")
 {
     mainWindow = this;
-    //createMenus();
+    createMenus();
 
     _centralSplitter = new QSplitter(Qt::Horizontal, this);
     _codeConsoleSplitter = new QSplitter(Qt::Vertical, this);
@@ -68,4 +70,36 @@ MainWindow::~MainWindow()
     settings.setValue("mainwindow_state", saveState());
 }
 
+void MainWindow::createMenus()
+{
+    {
+        QMenu *workMenu = menuBar()->addMenu(tr("&Work"));
 
+        QAction *aboutAct = new QAction(tr("&About"), this);
+        connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+        workMenu->addAction(aboutAct);
+
+        workMenu->addSeparator();
+
+//        QAction *createProj = new QAction(tr("&Create project..."), this);
+//        connect(createProj, SIGNAL(triggered()), this, SLOT(CreateProjectFn()));
+//        workMenu->addAction(createProj);
+
+//        QAction *openProj = new QAction(tr("&Open project..."), this);
+//        connect(openProj, SIGNAL(triggered()), this, SLOT(OpenProject()));
+//        workMenu->addAction(openProj);
+
+//        workMenu->addSeparator();
+
+        QAction *exitAct = new QAction(tr("E&xit"), this);
+        exitAct->setShortcuts(QKeySequence::Quit);
+        connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+        workMenu->addAction(exitAct);
+    }
+}
+
+void MainWindow::about()
+{
+    QMessageBox::about(this, tr("About 2D Game Animation Editor"),
+            tr("The <b>2D Game Animation Editor</b> version 2.0a<br>by Pakholkov Leonid<br>Feel free to contact: am98pln@gmail.com"));
+}

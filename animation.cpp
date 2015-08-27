@@ -409,7 +409,7 @@ void UpdateChain(PointList &points, const FPoint &target)
 {
     FPoint &b = points.back();
     int counter = 0;
-    while ((b - target).Length() > 1 && counter < 10)
+    while ((b - target).Length() > 1e-1f && counter < 10)
     {
         for (int i = points.size() - 2; i >= 0; --i)
         {
@@ -434,7 +434,7 @@ void UpdateChain(PointList &points, const FPoint &target)
                 points[j] = p + a;
             }
 
-            if ((b - target).Length() < 1)
+            if ((b - target).Length() < 1e-1f)
             {
                 return;
             }

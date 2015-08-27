@@ -13,10 +13,13 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+private slots:
+    void about();
 public:
     MainWindow();
     virtual ~MainWindow();
 private:
+    void createMenus();
     QSplitter *_centralSplitter;
     QSplitter *_codeConsoleSplitter;
     QSplitter *_viewerSplineSplitter;
