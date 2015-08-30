@@ -10,6 +10,7 @@ Animation::Animation()
     _instance = this;
     _boneMoving = false;
     _startMovingBone = -1;
+    _texture = NULL;
 
 //    testPoints.push_back(FPoint(0, 0));
 //    testPoints.push_back(FPoint(0, 100));
@@ -21,6 +22,9 @@ Animation::~Animation()
 {
     assert(_instance != NULL);
     _instance = NULL;
+
+    if (_texture)
+        delete _texture;
 }
 
 void Animation::Draw()
@@ -441,6 +445,13 @@ void UpdateChain(PointList &points, const FPoint &target)
         }
         counter++;
     }
+}
+
+void Animation::SetTexture(const char *fileName)
+{
+    if (_texture)
+        delete _texture;
+    _texture = new GLTexture2D(fileName);
 }
 
 //void Animation::Test(FPoint p)

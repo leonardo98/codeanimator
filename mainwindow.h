@@ -15,6 +15,7 @@ class MainWindow : public QMainWindow
 
 private slots:
     void about();
+    void chooseTexture();
 public:
     MainWindow();
     virtual ~MainWindow();

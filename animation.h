@@ -2,6 +2,7 @@
 #define ANIMATION_H
 
 #include "anim/boneanimated.h"
+#include "ogl/textures.h"
 
 typedef std::vector<FPoint> PointList;
 
@@ -22,6 +23,8 @@ private:
     std::vector<float> _deltaAngle;
     std::vector<BoneAnimated *> _boneChain;
     PointList _chainPoints;
+
+    GLTexture2D *_texture;
 
 public:
     Animation();
@@ -49,6 +52,7 @@ public:
     void Unlink();    
 
     std::string GenerateUnicBoneName();
+    void SetTexture(const char *fileName);
 
 //    void Test(FPoint p);
 

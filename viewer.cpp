@@ -14,6 +14,7 @@ Viewer::Viewer(QWidget *parent)
                     , (SCREEN_HEIGHT = 768) / 2  )
     , _worldOffset(0.f, 0.f)
     , _hotKeysMode(none_key)
+    , _mouseMoveAction(mouse_none)
 {
     Render::InitApplication();
 

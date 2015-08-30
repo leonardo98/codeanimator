@@ -2,6 +2,8 @@
 #include <QStatusBar>
 #include <QMenu>
 #include <QMenuBar>
+#include <QFileDialog>
+#include <animation.h>
 
 QMainWindow *mainWindow = NULL;
 
@@ -72,29 +74,44 @@ MainWindow::~MainWindow()
 
 void MainWindow::createMenus()
 {
+    QAction *action;
+    QMenu *menu;
     {
-        QMenu *workMenu = menuBar()->addMenu(tr("&Work"));
+        menu = menuBar()->addMenu(tr("&About"));
 
-        QAction *aboutAct = new QAction(tr("&About"), this);
-        connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-        workMenu->addAction(aboutAct);
+        action = new QAction(tr("&About"), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(about()));
+        menu->addAction(action);
 
-        workMenu->addSeparator();
+    }
+    {
+        menu = menuBar()->addMenu(tr("&File"));
 
-//        QAction *createProj = new QAction(tr("&Create project..."), this);
-//        connect(createProj, SIGNAL(triggered()), this, SLOT(CreateProjectFn()));
-//        workMenu->addAction(createProj);
+        action = new QAction(tr("&New..."), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(about()));
+        menu->addAction(action);
 
-//        QAction *openProj = new QAction(tr("&Open project..."), this);
-//        connect(openProj, SIGNAL(triggered()), this, SLOT(OpenProject()));
-//        workMenu->addAction(openProj);
+        action = new QAction(tr("&Save"), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(about()));
+        menu->addAction(action);
 
-//        workMenu->addSeparator();
+        action = new QAction(tr("&Save as..."), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(about()));
+        menu->addAction(action);
 
-        QAction *exitAct = new QAction(tr("E&xit"), this);
-        exitAct->setShortcuts(QKeySequence::Quit);
-        connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
-        workMenu->addAction(exitAct);
+        menu->addSeparator();
+
+        action = new QAction(tr("E&xit"), this);
+        action->setShortcuts(QKeySequence::Quit);
+        connect(action, SIGNAL(triggered()), this, SLOT(close()));
+        menu->addAction(action);
+    }
+    {
+        menu = menuBar()->addMenu(tr("&Animation"));
+
+        action = new QAction(tr("&Choose texture..."), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(chooseTexture()));
+        menu->addAction(action);
     }
 }
 
@@ -102,4 +119,10 @@ void MainWindow::about()
 {
     QMessageBox::about(this, tr("About 2D Game Animation Editor"),
             tr("The <b>2D Game Animation Editor</b> version 2.0a<br>by Pakholkov Leonid<br>Feel free to contact: am98pln@gmail.com"));
+}
+
+void MainWindow::chooseTexture()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("PNG (*.png)"));
+    Animation::Instance()->SetTexture(fileName.toStdString().c_str());
 }
