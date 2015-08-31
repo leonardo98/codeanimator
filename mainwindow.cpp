@@ -126,3 +126,9 @@ void MainWindow::chooseTexture()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("PNG (*.png)"));
     Animation::Instance()->SetTexture(fileName.toStdString().c_str());
 }
+
+bool MainWindow::CreateDotMode()
+{
+    return false;
+}
+

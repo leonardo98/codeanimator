@@ -1,24 +1,24 @@
 #ifndef COLRED_POLYGON_H
 #define COLRED_POLYGON_H
 
-#include "BeautyBase.h"
-#include "../Core/ogl/sprite.h"
+#include "ogl/sprite.h"
+#include "ogl/rect.h"
 
-//
-// 
-//  
-//
-
-class ColoredPolygon : public BeautyBase
+class ColoredPolygon
 {
 private:
 
-	int _width;
+    FPoint _mousePos;
+    DWORD _color;
+
+    Sprite *scaleSide;
+    Sprite *scale;
+
+    bool _debugDraw;
+    int _width;
 	int _height;
 
-	GLTexture2D * _texture;
-	std::string _texturePath;
-	void CalcWidthAndHeight();
+    void CalcWidthAndHeight();
 
 	QVector<FPoint> _dots; //   
 	QVector<FPoint> _screenDots;
@@ -37,13 +37,14 @@ private:
 	int CreateDot(float x, float y);
     void RemoveDot(QVector<int> index);
 
+    void InitCorners();
+    bool CanCut(const std::string &message, const std::string &substr, std::string &result);
+
 public:
 
 	virtual ~ColoredPolygon();
 	ColoredPolygon(rapidxml::xml_node<> *xe);
 	ColoredPolygon(const ColoredPolygon &c);
-    //ColoredPolygon(BinSaver &xe);
-    //void SaveToBin(BinSaver &xe);
 
 	virtual void Draw();
 	virtual void DebugDraw(bool onlyControl);
@@ -58,16 +59,11 @@ public:
 	virtual void GetAllLocalDotsRect(Rect &rect);
     virtual bool Selection(const Rect& rect, bool full);
 	virtual void SaveToXml(rapidxml::xml_node<> *xe);
-	virtual std::string Type();
 
 	virtual int Width();
 	virtual int Height();
 
 	virtual const char *GetIconTexture();
-private:
-	float _textureScale;
-	float _textureAngle;
-	Matrix _textureTransform;
 };
 
 

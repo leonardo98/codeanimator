@@ -21,7 +21,9 @@ HEADERS     = animeditor.h \
     splineeditor.h \
     bindspline.h \
     anim/spline.h \
-    animation.h
+    animation.h \
+    ColoredPolygon.h \
+    ogl/rect.h
 SOURCES     = main.cpp \
               animeditor.cpp \
     qconsolewidget.cpp \
@@ -38,9 +40,16 @@ SOURCES     = main.cpp \
     splineeditor.cpp \
     anim/spline.cpp \
     bindspline.cpp \
-    animation.cpp
+    animation.cpp \
+    ColoredPolygon.cpp \
+    ogl/rect.cpp
 
 QT += opengl widgets
 
 LIBS += -framework Python
+
+DISTFILES +=
+
+RESOURCES += \
+    resources.qrc
 

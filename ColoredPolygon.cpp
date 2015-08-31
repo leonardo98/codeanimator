@@ -1,80 +1,47 @@
 #include <QApplication>
 #include "ColoredPolygon.h"
-#include "../Core/Math.h"
-#include "../Core/Core.h"
-#include "../Core/Messager.h"
-#include "../Core/InputSystem.h"
-#include "../Core/ogl/vertexbuffer.h"
-#include "TileEditorInterface.h"
+#include "extmath.h"
+//#include "../Core/Core.h"
+//#include "../Core/Messager.h"
+//#include "../Core/InputSystem.h"
+#include "mainwindow.h"
+#include "animation.h"
 #include <math.h>
+#include "ogl/render.h"
+#include <set>
 
-ColoredPolygon::~ColoredPolygon() {
+GLTexture2D * h_base = NULL;// = Core::getTexture(":main/gfx/red.png");
+
+void ColoredPolygon::InitCorners()
+{
+    if (h_base == NULL)
+        h_base = new GLTexture2D(":main/gfx/red.png");
+    scale = new Sprite(h_base, 4, 13, 12, 12);
+    scaleSide = new Sprite(h_base, 4, 1, 10, 10);
 }
 
-//ColoredPolygon::ColoredPolygon(BinSaver &xe)
-//: BeautyBase(xe)
-//{
-//	_texture = 0;
-//	_textureScale = 1.f;
-//	_textureAngle = 0.f;
-
-//	unsigned char tmp = xe.ReadUnsignedChar();
-//	_dots.resize(tmp);
-//	for (unsigned char i = 0; i < tmp; ++i)
-//	{
-//		_dots[i].x = xe.ReadShortInt();
-//		_dots[i].y = xe.ReadShortInt();
-//	}
-//	CalcWidthAndHeight();
-//	GenerateTriangles();
-//	_mouseDown = false;
-//	_dotUnderCursor = _selectedDots = -1;
-//}
+ColoredPolygon::~ColoredPolygon()
+{
+    delete scale;
+    scale = NULL;
+    delete scaleSide;
+    scaleSide = NULL;
+}
 
 ColoredPolygon::ColoredPolygon(const ColoredPolygon &c) 
-: BeautyBase(c)
 {
 	_dots = c._dots;
-	_texture = c._texture;
-	_texturePath = c._texturePath;
-	_textureScale = c._textureScale;
-	_textureAngle = c._textureAngle;
-	_textureTransform.Unit();
-	if (_texture)
-	{
-		_textureTransform.Scale( _textureScale / _texture->Width()
-			, _textureScale / _texture->Height());
-		_textureTransform.Rotate(_textureAngle);
-	}
 	CalcWidthAndHeight();
 	GenerateTriangles();
 	_mouseDown = false;
     _dotUnderCursor.clear();
     _selectedDots.clear();
+    _debugDraw = false;
+    InitCorners();
 }
 
 ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
-: BeautyBase(xe)
 {
-    rapidxml::xml_attribute<> *tmp = xe->first_attribute("texture");
-	if (tmp)
-	{
-        _texturePath = tmp->value();
-        ReplaceSlash(_texturePath);
-        _texture = Core::getTexture(_texturePath);
-		_textureScale = Math::Read(xe, "textureScale", 1.f);
-		_textureAngle = Math::Read(xe, "textureAngle", 0.f);
-		_textureTransform.Unit();
-		_textureTransform.Scale( _textureScale / _texture->Width(), _textureScale / _texture->Height());
-		_textureTransform.Rotate(_textureAngle);
-
-	}
-	else
-	{
-		_texture = 0;
-		_textureScale = 1.f;
-		_textureAngle = 0.f;
-	}
     rapidxml::xml_node<> *dot = xe->first_node("dot");
 	while (dot != NULL) {
         _dots.push_back(FPoint(atof(dot->first_attribute("x")->value()), atof(dot->first_attribute("y")->value())));
@@ -85,13 +52,12 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
 	_mouseDown = false;
     _dotUnderCursor.clear();
     _selectedDots.clear();
+    _debugDraw = false;
+    InitCorners();
 }
 
-void ColoredPolygon::Draw() {
-
-	Render::PushMatrix();
-	Render::MatrixMove(_pos.x, _pos.y);
-
+void ColoredPolygon::Draw()
+{
 	DrawTriangles();
 
 	_screenDots = _dots;
@@ -104,9 +70,6 @@ void ColoredPolygon::Draw() {
 			Render::Line(_dots[i].x, _dots[i].y, _dots[(i + 1) % _dots.size()].x, _dots[(i + 1) % _dots.size()].y, 0xFFFFFFFF);
 		}
 	}
-
-	Render::PopMatrix();
-	BeautyBase::Draw();
 }
 
 void ColoredPolygon::DebugDraw(bool onlyControl) {
@@ -119,8 +82,7 @@ void ColoredPolygon::DebugDraw(bool onlyControl) {
 		Render::SetFiltering(false);
 		Render::PushMatrix();
 
-		Render::MatrixMove(_pos.x, _pos.y);
-        parent = Render::GetCurrentMatrix();
+        //parent = Render::GetCurrentMatrix();
 		for (unsigned int i = 0; i < _dots.size(); ++i) {
 			Render::Line(_dots[i].x, _dots[i].y, _dots[(i + 1) % _dots.size()].x, _dots[(i + 1) % _dots.size()].y, 0xFFFFFFFF);
 		}
@@ -149,43 +111,24 @@ void ColoredPolygon::DebugDraw(bool onlyControl) {
         Render::SetAlpha(Math::round(0xFF * alpha));
 
 		Render::PopMatrix();
-		Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
+//		Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
 	}
 }
 
 bool ColoredPolygon::PixelCheck(const FPoint &point) { 
-	if (Math::Inside(point - _pos, _dots)) {
+    if (Math::Inside(point, _dots)) {
 		return true;
 	}
     return SearchNearest(point.x, point.y) >= 0;
 }
 
-//void ColoredPolygon::SaveToBin(BinSaver &xe) {
-//	BeautyBase::SaveToBin(xe);
-//	xe.WriteValue((unsigned char)(_dots.size()));
-//	for (unsigned int j = 0; j < _dots.size(); ++j) {
-//		xe.WriteValue((short int)(_dots[j].x));
-//		xe.WriteValue((short int)(_dots[j].y));
-//	}
-//}
-
-void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe) {
-	BeautyBase::SaveToXml(xe);
+void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
+{
 	for (unsigned int j = 0; j < _dots.size(); ++j) {
         rapidxml::xml_node<> *dot = xe->document()->allocate_node(rapidxml::node_element, "dot");
         xe->append_node(dot);
         Math::Write(dot, "x", _dots[j].x);
         Math::Write(dot, "y", _dots[j].y);
-	}
-	if (_texture != 0)
-	{
-        char *copyName = xe->document()->allocate_string(_texturePath.c_str());
-        xe->append_attribute(xe->document()->allocate_attribute("texture", copyName));
-		Math::Write(xe, "textureScale", _textureScale);
-		Math::Write(xe, "textureAngle", _textureAngle);
-	}
-	if (_triangles.GetVB().Size() != 0) 
-	{
 	}
 	if (_triangles.GetVB().Size())
 	{
@@ -215,10 +158,6 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe) {
 	}
 }
 
-std::string ColoredPolygon::Type() { 
-	return "ColoredPolygon"; 
-}
-
 int ColoredPolygon::Width() {
 	return _width;
 }
@@ -239,16 +178,16 @@ void ColoredPolygon::CalcWidthAndHeight() {
 
 void ColoredPolygon::GenerateTriangles()
 {
-	Math::GenerateTriangles(_dots, _triangles, _color, _texture, &_textureTransform);
+    Math::GenerateTriangles(_dots, _triangles, _color, Animation::Instance()->GetTexture());
 }
 
 void ColoredPolygon::DrawTriangles() {
 	Render::PushColorAndMul(_color);
-	if (_texture)
-		_texture->bind();
+    if (Animation::Instance()->GetTexture())
+        Animation::Instance()->GetTexture()->bind();
 	_triangles.Render();
-	if (_texture)
-		_texture->unbind();
+    if (Animation::Instance()->GetTexture())
+        Animation::Instance()->GetTexture()->unbind();
 	Render::PopColor();
 }
 
@@ -269,13 +208,13 @@ int ColoredPolygon::SearchNearest(float x, float y)
 void ColoredPolygon::EncapsulateAllDots(Rect &rect) {
 	for (unsigned int i = 0; i < _screenDots.size(); ++i) {
 		//rect.Encapsulate(_screenDots[i].x, _screenDots[i].y);
-		rect.Encapsulate(_pos.x + _dots[i].x, _pos.y + _dots[i].y);
+        rect.Encapsulate(_dots[i].x, _dots[i].y);
 	}
 }
 
 void ColoredPolygon::GetAllLocalDotsRect(Rect &rect) {
 	for (unsigned int i = 0; i < _dots.size(); ++i) {
-		rect.Encapsulate(_pos.x + _dots[i].x, _pos.y + _dots[i].y);
+        rect.Encapsulate(_dots[i].x, _dots[i].y);
 	}
 }
 
@@ -328,27 +267,27 @@ void ColoredPolygon::MouseDown(const FPoint &mouse) {
 	if (!_debugDraw) {
 		return;
 	}
-	if (!TileEditorInterface::Instance()->CreateDotMode()) {
+    if (!MainWindow::Instance()->CreateDotMode()) {
         _selectedDots = _dotUnderCursor;
 	}
-		
+
 	_mouseDown = true;
 	_mousePos = mouse;
 }
 
 bool ColoredPolygon::MouseMove(const FPoint &mousePos) {
-	if (!TileEditorInterface::Instance()->CreateDotMode() && _mouseDown) {
-		Matrix reverse;
-		reverse.MakeRevers(parent);
+    if (!MainWindow::Instance()->CreateDotMode() && _mouseDown) {
+//		Matrix reverse;
+//		reverse.MakeRevers(parent);
 
-		FPoint start(_mousePos);
-		FPoint end(mousePos);
-		reverse.Mul(start);
-		reverse.Mul(end);
+//		FPoint start(_mousePos);
+//		FPoint end(mousePos);
+//		reverse.Mul(start);
+//		reverse.Mul(end);
 
-		_pos.x += (end.x - start.x);
-		_pos.y += (end.y - start.y);
-		_mousePos = mousePos;
+//		_pos.x += (end.x - start.x);
+//		_pos.y += (end.y - start.y);
+//		_mousePos = mousePos;
         return true;
 	}
 
@@ -365,17 +304,13 @@ bool ColoredPolygon::MouseMove(const FPoint &mousePos) {
 		_mousePos = mousePos;
         return false;
 	}
-	Matrix reverse;
-	reverse.MakeRevers(parent);
 
-	FPoint start(_mousePos);
+    FPoint start(_mousePos);
 	FPoint end(mousePos);
-	reverse.Mul(start);
-	reverse.Mul(end);
 
     if (_dotUnderCursor.size() == 0) {
-		_pos.x += (end.x - start.x);
-		_pos.y += (end.y - start.y);
+//		_pos.x += (end.x - start.x);
+//		_pos.y += (end.y - start.y);
 	} else {
         for (unsigned int i = 0; i < _dotUnderCursor.size(); ++i)
         {
@@ -398,57 +333,20 @@ const char *ColoredPolygon::GetIconTexture() {
 	return NULL;
 }
 
+bool ColoredPolygon::CanCut(const std::string &message, const std::string &substr, std::string &result)
+{
+    unsigned int rr = message.find(substr);
+    if (rr != 0) {
+        return false;
+    } else {
+        result = message.substr(substr.size());
+        return true;
+    }
+}
+
 bool ColoredPolygon::Command(const std::string &cmd) {
 	std::string position;
 
-	if (cmd == "Minus") 
-	{
-		_textureScale += 0.1f;
-		_textureTransform.Unit();
-		if (_texture)
-		{
-			_textureTransform.Scale( _textureScale / _texture->Width(), _textureScale / _texture->Height());
-			_textureTransform.Rotate(_textureAngle);
-		}
-		GenerateTriangles();
-		return true;
-	}
-	if (cmd == "Plus") 
-	{
-        _textureScale = std::max(0.1f, _textureScale - 0.1f);
-		_textureTransform.Unit();
-		if (_texture)
-		{
-			_textureTransform.Scale( _textureScale / _texture->Width(), _textureScale / _texture->Height());
-			_textureTransform.Rotate(_textureAngle);
-		}
-		GenerateTriangles();
-		return true;
-	}
-    if (cmd == "Rigth")
-	{
-        _textureAngle += M_PI / 6.f;
-		_textureTransform.Unit();
-		if (_texture)
-		{
-			_textureTransform.Scale( _textureScale / _texture->Width(), _textureScale / _texture->Height());
-			_textureTransform.Rotate(_textureAngle);
-		}
-		GenerateTriangles();
-		return true;
-	}
-    if (cmd == "Left")
-    {
-        _textureAngle -= M_PI / 6.f;
-        _textureTransform.Unit();
-        if (_texture)
-        {
-            _textureTransform.Scale( _textureScale / _texture->Width(), _textureScale / _texture->Height());
-            _textureTransform.Rotate(_textureAngle);
-        }
-        GenerateTriangles();
-        return true;
-    }
     if (cmd == "delete dot")
     {
         if (_selectedDots.size() > 0)
@@ -461,7 +359,7 @@ bool ColoredPolygon::Command(const std::string &cmd) {
 
 		return true;
 	} 
-	if (Messager::CanCut(cmd, "create dot at ", position)) {
+    if (CanCut(cmd, "create dot at ", position)) {
 
 		FPoint mouse;
         sscanf(position.c_str(), "%f %f", &(mouse.x), &(mouse.y));
@@ -481,10 +379,10 @@ bool ColoredPolygon::Command(const std::string &cmd) {
             }
 			_mouseDown = true;
 		} else {
-			Matrix reverse;
-			reverse.MakeRevers(parent);
-			FPoint fp(mouse);
-			reverse.Mul(fp);
+//			Matrix reverse;
+//			reverse.MakeRevers(parent);
+            FPoint fp(mouse);
+//			reverse.Mul(fp);
 
             int result = CreateDot(fp.x, fp.y);
             if (result >= 0)
@@ -501,11 +399,11 @@ bool ColoredPolygon::Command(const std::string &cmd) {
 		_mousePos = mouse;
 		return _mouseDown;
 	}
-	return (cmd == "" || BeautyBase::Command(cmd));
+    return (cmd == "");
 }
 
 bool ColoredPolygon::GeometryCheck(const FPoint &point) {
-	FPoint p(point - _pos);
+    FPoint p(point);
 	return Math::Inside(p, _dots); 
 }
 

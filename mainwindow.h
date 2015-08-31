@@ -19,6 +19,9 @@ private slots:
 public:
     MainWindow();
     virtual ~MainWindow();
+    bool CreateDotMode();
+    static MainWindow *Instance() { return (MainWindow *)mainWindow; }
+
 private:
     void createMenus();
     QSplitter *_centralSplitter;
