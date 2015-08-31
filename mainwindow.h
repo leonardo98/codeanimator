@@ -31,6 +31,8 @@ private:
     Viewer *_viewer;
     SplineEditor *_splineEditor;
 
+    QAction *_editPoints;
+
     QConsoleWidget *_console;
     QSettings settings;
 };

@@ -54,6 +54,16 @@ MainWindow::MainWindow()
     _viewerSplineSplitter->restoreState(settings.value("view_spline_splitter").toByteArray());
     _viewerSplineSplitter->restoreGeometry(settings.value("view_spline_splitter_geometry").toByteArray());
 
+
+    QString fileName = settings.value("last_texture").toString();
+    if (fileName.size())
+    {
+        if (Animation::Instance()->SetTexture(fileName.toStdString().c_str()))
+        {
+            _console->PrintToOutput("last used texture uploaded");
+        }
+    }
+
     statusBar()->showMessage(tr("Ready"));
 }
 
@@ -112,6 +122,14 @@ void MainWindow::createMenus()
         action = new QAction(tr("&Choose texture..."), this);
         connect(action, SIGNAL(triggered()), this, SLOT(chooseTexture()));
         menu->addAction(action);
+
+        menu->addSeparator();
+
+        _editPoints = action = new QAction(tr("&Link bone and texture"), this);
+        //connect(action, SIGNAL(triggered()), this, SLOT(chooseTexture()));
+        menu->addAction(action);
+        action->setCheckable(true);
+        action->setChecked(false);
     }
 }
 
@@ -124,11 +142,16 @@ void MainWindow::about()
 void MainWindow::chooseTexture()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("PNG (*.png)"));
-    Animation::Instance()->SetTexture(fileName.toStdString().c_str());
+
+    if (fileName.size())
+    {
+        Animation::Instance()->SetTexture(fileName.toStdString().c_str());
+        settings.setValue("last_texture", fileName.toStdString().c_str());
+    }
 }
 
 bool MainWindow::CreateDotMode()
 {
-    return false;
+    return _editPoints->isChecked();
 }
 

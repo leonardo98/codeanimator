@@ -55,6 +55,8 @@ GLTexture2D::GLTexture2D(const char *fileName)
     if (_width == 0 || _height == 0)
     {
         LOG(std::string("texture with zero size ") + fileName);
+        m_failed = true;
+        return;
     }
 
     glBindTexture(GL_TEXTURE_2D, m_texture);

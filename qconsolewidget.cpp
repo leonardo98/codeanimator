@@ -85,6 +85,13 @@ void QConsoleWidget::OnChildStdOutWrite(QString szOutput)
     fixedPosition = textCursor().position();
 }
 
+void QConsoleWidget::PrintToOutput(const char *s)
+{
+    insertPlainText(s);
+    insertPlainText("\n");
+    fixedPosition = textCursor().position();
+}
+
 void QConsoleWidget::OnChildStdErrWrite(QString szOutput)
 {
     append(szOutput);

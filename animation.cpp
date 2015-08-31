@@ -447,11 +447,12 @@ void UpdateChain(PointList &points, const FPoint &target)
     }
 }
 
-void Animation::SetTexture(const char *fileName)
+bool Animation::SetTexture(const char *fileName)
 {
     if (_texture)
         delete _texture;
     _texture = new GLTexture2D(fileName);
+    return !_texture->failed();
 }
 
 //void Animation::Test(FPoint p)

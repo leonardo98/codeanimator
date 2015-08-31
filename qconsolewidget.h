@@ -26,6 +26,8 @@ public slots:
     void OnChildStdErrWrite(QString szOutput);
     void OnChildTerminate();
 
+    void PrintToOutput(const char *s);
+
     void cursorPositionChanged();
 };
 

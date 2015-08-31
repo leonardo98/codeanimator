@@ -52,7 +52,7 @@ public:
     void Unlink();    
 
     std::string GenerateUnicBoneName();
-    void SetTexture(const char *fileName);
+    bool SetTexture(const char *fileName);
     GLTexture2D *GetTexture() { return _texture; }
 
 //    void Test(FPoint p);
