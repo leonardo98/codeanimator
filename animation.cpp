@@ -36,7 +36,9 @@ void Animation::Draw()
 {
     if (_baseSprite && MainWindow::Instance()->CreateDotMode())
     {
-        _baseSprite->Render();
+        Render::SetColor(0x7FFFFFFF);
+        _baseSprite->Render(- _baseSprite->Width() / 2, - _baseSprite->Height() / 2);
+        Render::SetColor(0xFFFFFFFF);
     }
 
     // hide all bones
@@ -93,12 +95,16 @@ std::string Animation::GenerateUnicBoneName()
     return name;
 }
 
-void Animation::CreateBone(FPoint pos)
+uint Animation::CreateBone(FPoint pos)
 {
+    uint r = _bones.size();
     BoneAnimated *b = new BoneAnimated();
     b->MoveTo(pos);
     b->SetName(GenerateUnicBoneName());
+    b->SetBoneAngle(-M_PI / 2);
+    b->SetLength(10.f);
     _bones.push_back(b);
+    return r;
 }
 
 int Animation::GetBoneAtPoint(const FPoint &pos)
@@ -470,6 +476,15 @@ bool Animation::SetTexture(const char *fileName)
     }
     return !_texture->failed();
 }
+
+void Animation::StartBoneCreating(uint index, const FPoint &point)
+{
+    _boneMoving = false;
+    _startMovingPos = point;
+    _startRotateAngle = _bones[index]->GetBoneAngle();
+    _startMovingBone = index;
+}
+
 
 //void Animation::Test(FPoint p)
 //{

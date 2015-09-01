@@ -36,7 +36,8 @@ public:
 
     static Animation *Instance() { return _instance; }
 
-    void CreateBone(FPoint pos);
+    uint CreateBone(FPoint pos);
+    void StartBoneCreating(uint index, const FPoint &point);
 
     int GetBoneAtPoint(const FPoint &pos);
 

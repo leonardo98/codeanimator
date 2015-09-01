@@ -22,7 +22,7 @@ BoneAnimated::BoneAnimated()
 //    angle.AddPoint(10, 0);
 
     _pos.x = _pos.y = 0.f;
-    _angle = M_PI;
+    _angle = 0.f;
     _parent = NULL;
     _moveByParent = false;
 }

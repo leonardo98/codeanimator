@@ -43,7 +43,7 @@ public:
     BoneAnimated *GetParent() { return _parent; }
     BoneAnimated *GetBoneAtPoint(const FPoint &pos);
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
-    void SetLength(float l) { _length = l; }
+    void SetLength(float l) { _length = std::max(10.f, l); }
     void SetVisible(bool v) { _visible = v; }
 
     bool IfInside(const Rect &area);
