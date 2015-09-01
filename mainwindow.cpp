@@ -56,13 +56,11 @@ MainWindow::MainWindow()
 
     statusBar()->showMessage(tr("Ready"));
 
-    _waitFirstUpdate = true;
+    connect(_viewer, SIGNAL(uploadTexture()), this, SLOT(uploadLastTexture()));
 }
 
 void MainWindow::uploadLastTexture()
 {
-    if (!_waitFirstUpdate) return;
-
     QString fileName = settings.value("last_texture").toString();
     if (fileName.size())
     {
@@ -73,7 +71,7 @@ void MainWindow::uploadLastTexture()
             _console->PrintToOutput(buff);
         }
     }
-    _waitFirstUpdate = false;
+    disconnect(_viewer, SIGNAL(uploadTexture()), this, SLOT(uploadLastTexture()));
 }
 
 MainWindow::~MainWindow()

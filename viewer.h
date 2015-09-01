@@ -23,6 +23,8 @@ class Viewer
     Q_OBJECT
 public slots:
     void Update();
+signals:
+    void uploadTexture();
 protected:
     float _viewScale; //
 

@@ -402,11 +402,8 @@ void Viewer::paintGL()
 
 void Viewer::Update()
 {
-//    float dt = 0.02f;
-//    Core::Update(dt);
-    //Update(dt);
     updateGL();
-    MainWindow::Instance()->uploadLastTexture();
+    emit uploadTexture();
 }
 
 void Viewer::UpdateSelection(const Rect &area)

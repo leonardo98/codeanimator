@@ -16,15 +16,14 @@ class MainWindow : public QMainWindow
 private slots:
     void about();
     void chooseTexture();
+    void uploadLastTexture();
 public:
     MainWindow();
     virtual ~MainWindow();
     bool CreateDotMode();
     static MainWindow *Instance() { return (MainWindow *)mainWindow; }
-    void uploadLastTexture();
 
 private:
-    bool _waitFirstUpdate;
     void createMenus();
     QSplitter *_centralSplitter;
     QSplitter *_codeConsoleSplitter;
