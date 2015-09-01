@@ -117,19 +117,34 @@ void MainWindow::createMenus()
         menu->addAction(action);
     }
     {
+        QActionGroup* group = new QActionGroup( this );
+
+        menu = menuBar()->addMenu(tr("&Mode"));
+
+        action = new QAction(tr("&Animation"), this);
+        action->setActionGroup(group);
+        action->setCheckable(true);
+        action->setChecked(false);
+        menu->addAction(action);
+
+        action = new QAction(tr("&Bone"), this);
+        action->setActionGroup(group);
+        action->setCheckable(true);
+        action->setChecked(false);
+        menu->addAction(action);
+
+        _editPoints = action = new QAction(tr("&Texture"), this);
+        action->setActionGroup(group);
+        action->setCheckable(true);
+        action->setChecked(true);
+        menu->addAction(action);
+    }
+    {
         menu = menuBar()->addMenu(tr("&Animation"));
 
         action = new QAction(tr("&Choose texture..."), this);
         connect(action, SIGNAL(triggered()), this, SLOT(chooseTexture()));
         menu->addAction(action);
-
-        menu->addSeparator();
-
-        _editPoints = action = new QAction(tr("&Link bone and texture"), this);
-        //connect(action, SIGNAL(triggered()), this, SLOT(chooseTexture()));
-        menu->addAction(action);
-        action->setCheckable(true);
-        action->setChecked(false);
     }
 }
 
