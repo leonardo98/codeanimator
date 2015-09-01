@@ -21,8 +21,10 @@ public:
     virtual ~MainWindow();
     bool CreateDotMode();
     static MainWindow *Instance() { return (MainWindow *)mainWindow; }
+    void uploadLastTexture();
 
 private:
+    bool _waitFirstUpdate;
     void createMenus();
     QSplitter *_centralSplitter;
     QSplitter *_codeConsoleSplitter;

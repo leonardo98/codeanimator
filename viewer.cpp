@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 #include "animation.h"
+#include "mainwindow.h"
 
 Viewer::Viewer(QWidget *parent)
     : QGLWidget(parent)
@@ -405,6 +406,7 @@ void Viewer::Update()
 //    Core::Update(dt);
     //Update(dt);
     updateGL();
+    MainWindow::Instance()->uploadLastTexture();
 }
 
 void Viewer::UpdateSelection(const Rect &area)

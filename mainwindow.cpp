@@ -54,17 +54,26 @@ MainWindow::MainWindow()
     _viewerSplineSplitter->restoreState(settings.value("view_spline_splitter").toByteArray());
     _viewerSplineSplitter->restoreGeometry(settings.value("view_spline_splitter_geometry").toByteArray());
 
+    statusBar()->showMessage(tr("Ready"));
+
+    _waitFirstUpdate = true;
+}
+
+void MainWindow::uploadLastTexture()
+{
+    if (!_waitFirstUpdate) return;
 
     QString fileName = settings.value("last_texture").toString();
     if (fileName.size())
     {
         if (Animation::Instance()->SetTexture(fileName.toStdString().c_str()))
         {
-            _console->PrintToOutput("last used texture uploaded");
+            char buff[1000];
+            sprintf(buff, "Texture: %s uploaded", fileName.toStdString().c_str());
+            _console->PrintToOutput(buff);
         }
     }
-
-    statusBar()->showMessage(tr("Ready"));
+    _waitFirstUpdate = false;
 }
 
 MainWindow::~MainWindow()

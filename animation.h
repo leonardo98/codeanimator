@@ -3,6 +3,7 @@
 
 #include "anim/boneanimated.h"
 #include "ogl/textures.h"
+#include "ogl/sprite.h"
 
 typedef std::vector<FPoint> PointList;
 
@@ -25,6 +26,7 @@ private:
     PointList _chainPoints;
 
     GLTexture2D *_texture;
+    Sprite *_baseSprite;
 
 public:
     Animation();

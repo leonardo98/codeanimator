@@ -1,6 +1,7 @@
 #include "animation.h"
 #include <set>
 #include "ogl/render.h"
+#include "mainwindow.h"
 
 Animation *Animation::_instance = NULL;
 
@@ -11,6 +12,7 @@ Animation::Animation()
     _boneMoving = false;
     _startMovingBone = -1;
     _texture = NULL;
+    _baseSprite = NULL;
 
 //    testPoints.push_back(FPoint(0, 0));
 //    testPoints.push_back(FPoint(0, 100));
@@ -25,10 +27,18 @@ Animation::~Animation()
 
     if (_texture)
         delete _texture;
+
+    if (_baseSprite)
+        delete _baseSprite;
 }
 
 void Animation::Draw()
 {
+    if (_baseSprite && MainWindow::Instance()->CreateDotMode())
+    {
+        _baseSprite->Render();
+    }
+
     // hide all bones
     for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
     {
@@ -451,7 +461,13 @@ bool Animation::SetTexture(const char *fileName)
 {
     if (_texture)
         delete _texture;
+    if (_baseSprite)
+        delete _baseSprite;
     _texture = new GLTexture2D(fileName);
+    if (!_texture->failed())
+    {
+        _baseSprite = new Sprite(_texture, 0, 0, _texture->Width(), _texture->Height());
+    }
     return !_texture->failed();
 }
 
