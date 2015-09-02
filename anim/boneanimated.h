@@ -46,6 +46,7 @@ public:
     BoneAnimated *GetBoneAtPoint(const FPoint &pos);
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = std::max(BONE_LENGTH_MIN, l); }
+    float GetLength() { return _length; }
     void SetVisible(bool v) { _visible = v; }
 
     bool IfInside(const Rect &area);

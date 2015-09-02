@@ -44,6 +44,7 @@ public:
     void Picking(int index, bool add);
 
     void StartBoneMoving(uint index, const FPoint &point);
+    void BoneCreateTo(const FPoint &point);
     void BoneMoveTo(const FPoint &mt, bool changeLength);
     void IKBoneMove(const FPoint &mt);
 
@@ -57,6 +58,7 @@ public:
     std::string GenerateUnicBoneName();
     bool SetTexture(const char *fileName);
     GLTexture2D *GetTexture() { return _texture; }
+    FPoint GetBoneEnd(uint index);
 
 //    void Test(FPoint p);
 

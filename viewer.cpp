@@ -204,7 +204,7 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
         FPoint startPos(worldClickPos);
         if (boneAtPoint >= 0)
         {
-
+            startPos = Animation::Instance()->GetBoneEnd(boneAtPoint);
         }
         uint index = Animation::Instance()->CreateBone(startPos);
         if (boneAtPoint >= 0)
@@ -268,10 +268,11 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
     {
         if (_hotKeysMode == ik_bone_key)
             Animation::Instance()->IKBoneMove(newMmouseWorld);
+        else if (_hotKeysMode == create_bone_key
+                 || _hotKeysMode == create_bone_chain_key)
+            Animation::Instance()->BoneCreateTo(newMmouseWorld);
         else
-            Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key
-                                                                || _hotKeysMode == create_bone_key
-                                                                || _hotKeysMode == create_bone_chain_key);
+            Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key);
     }
     else if (_mouseMoveAction == mouse_dragging_world)
     {
