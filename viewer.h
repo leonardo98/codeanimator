@@ -53,6 +53,13 @@ protected:
     void OnMouseUp();
     void OnMouseDown(const FPoint &mousePos);
     bool _mouseDown;
+    enum ChainState
+    {
+        chain_none,
+        chain_wait_first,
+        chain_work
+    };
+    ChainState _chainState;
     FPoint _mouseWorld;
 
     enum HotKeysMode

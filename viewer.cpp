@@ -16,6 +16,7 @@ Viewer::Viewer(QWidget *parent)
     , _worldOffset(0.f, 0.f)
     , _hotKeysMode(none_key)
     , _mouseMoveAction(mouse_none)
+    , _chainState(chain_none)
 {
     Render::InitApplication();
 
@@ -132,7 +133,11 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     }
     else if (event->key() == Qt::Key_C)
     {
-        _hotKeysMode = create_bone_chain_key;
+        if (_hotKeysMode != create_bone_chain_key)
+        {
+            _hotKeysMode = create_bone_chain_key;
+            _chainState = chain_wait_first;
+        }
     }
     else if (event->key() == Qt::Key_L)
     {
@@ -157,10 +162,18 @@ void Viewer::keyReleaseEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_B
             || event->key() == Qt::Key_L
             || event->key() == Qt::Key_I
-            || event->key() == Qt::Key_C
             )
     {
         _hotKeysMode = none_key;
+    }
+    else if (event->key() == Qt::Key_C)
+    {
+        if (_chainState == chain_work)
+        {
+            _chainState = chain_none;
+            _hotKeysMode = none_key;
+            Animation::Instance()->Remove();
+        }
     }
 }
 
@@ -214,6 +227,11 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
         Animation::Instance()->Picking(index, false);
         Animation::Instance()->StartBoneCreating(index, worldClickPos);
         _mouseMoveAction = mouse_moving_bone;
+
+        if (_hotKeysMode == create_bone_chain_key)
+        {
+            _chainState = chain_work;
+        }
     }
     else if (boneAtPoint >= 0)
     {
@@ -264,7 +282,14 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
         _cursorText = "";
     }
 
-    if (_mouseMoveAction == mouse_moving_bone)
+    if (!_mouseDown
+            && _hotKeysMode == create_bone_chain_key
+            && _mouseMoveAction == mouse_none
+            && _chainState == chain_work)
+    {
+        Animation::Instance()->BoneCreateTo(newMmouseWorld);
+    }
+    else if (_mouseMoveAction == mouse_moving_bone)
     {
         if (_hotKeysMode == ik_bone_key)
             Animation::Instance()->IKBoneMove(newMmouseWorld);
