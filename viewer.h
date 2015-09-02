@@ -59,6 +59,7 @@ protected:
     {
         none_key,
         create_bone_key,
+        create_bone_chain_key,
         length_bone_key,
         ik_bone_key,
     };

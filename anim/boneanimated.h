@@ -6,6 +6,8 @@
 
 class BoneAnimated;
 
+#define BONE_LENGTH_MIN 10.f
+
 typedef std::vector<BoneAnimated *> BoneList;
 
 class BoneAnimated
@@ -43,7 +45,7 @@ public:
     BoneAnimated *GetParent() { return _parent; }
     BoneAnimated *GetBoneAtPoint(const FPoint &pos);
     void CalculatePosition(const Matrix &, int frame, float p = 0.f);
-    void SetLength(float l) { _length = std::max(10.f, l); }
+    void SetLength(float l) { _length = std::max(BONE_LENGTH_MIN, l); }
     void SetVisible(bool v) { _visible = v; }
 
     bool IfInside(const Rect &area);
@@ -51,7 +53,7 @@ public:
     bool MoveOrRotate(FPoint pos);
     bool MoveTo(const FPoint &mt);
 
-    void SetBonePos(const FPoint &pos) { _pos = pos; }
+    void SetBonePos(const FPoint &pos);
     const FPoint &GetBonePos() { return _pos; }
     void SetBoneAngle(float a);
     float GetBoneAngle() { return _angle; }    

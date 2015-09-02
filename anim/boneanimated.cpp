@@ -16,7 +16,7 @@ BoneAnimated::~BoneAnimated()
 BoneAnimated::BoneAnimated()
 {
     _visible = false;
-    _length = 100.f;
+    _length = BONE_LENGTH_MIN;
 
 //    angle.AddPoint(0, 0);
 //    angle.AddPoint(10, 0);
@@ -37,10 +37,10 @@ void BoneAnimated::Draw()
 //    Render::MatrixMove(_pos.x, _pos.y);
 //    Render::MatrixRotate(_angle);
     Render::MatrixMul(_matrix);
-    Render::DrawTriangle(- w, 0.f, 0.f, l, w, 0.f, 0x7F4F4F4F);
-    Render::Line(- w, 0.f, 0.f, l, 0x7F000000);
-    Render::Line(0.f, l, w, 0.f, 0x7F000000);
-    Render::Line(- w, 0.f, w, 0.f, 0x7F000000);
+    Render::DrawTriangle(0.f, - w, l, 0.f, 0.f, w, 0x7F4F4F4F);
+    Render::Line(0.f, - w, l, 0.f, 0x7F000000);
+    Render::Line(l, 0.f, 0.f, w, 0x7F000000);
+    Render::Line(0.f, - w, 0.f, w, 0x7F000000);
     Render::PopMatrix();
 }
 
@@ -52,16 +52,16 @@ void BoneAnimated::DrawSelection()
 //    Render::MatrixMove(_pos.x, _pos.y);
 //    Render::MatrixRotate(_angle);
     Render::MatrixMul(_matrix);
-    Render::Line(- w, - w, - w, l + w, 0x7F000000);
-    Render::Line( w, - w, w, l + w, 0x7F000000);
-    Render::Line(- w, - w, w, - w, 0x7F000000);
-    Render::Line(- w, l + w, w, l + w, 0x7F000000);
+    Render::Line(- w, - w, l + w, - w, 0x7F000000);
+    Render::Line(- w, w, l + w, w, 0x7F000000);
+    Render::Line(- w, - w, - w, w, 0x7F000000);
+    Render::Line(l + w, - w, l + w, w, 0x7F000000);
 
     if (_parent)
         Render::Circle(0, 0, w, 0x7F000000);
 
     if (_children.size())
-        Render::Circle(0, l, w, 0x7F000000);
+        Render::Circle(l, 0, w, 0x7F000000);
 
     Render::PopMatrix();
 }
@@ -161,7 +161,7 @@ bool BoneAnimated::CheckPoint(FPoint pos)
     float l = _length;
     float w = WideCoef * _length;
 
-    return -w < pos.x && pos.x < w && - w < pos.y && pos.y < l + w;
+    return -w < pos.y && pos.y < w && - w < pos.x && pos.x < l + w;
 }
 
 bool BoneAnimated::MoveOrRotate(FPoint pos)
@@ -183,12 +183,13 @@ bool BoneAnimated::MoveOrRotate(FPoint pos)
     float l = _length;
     float w = WideCoef * _length;
 
-    return -w < pos.x && pos.x < w && - w < pos.y && pos.y < l / 2;
+    return -w < pos.y && pos.y < w && - w < pos.x && pos.x < l / 2;
 }
 
 bool BoneAnimated::MoveTo(const FPoint &mt)
 {
     _pos += mt;
+    CalculatePosition(_parentMatrix, 0.f);
 }
 
 bool BoneAnimated::IfInside(const Rect &area)
@@ -201,7 +202,7 @@ bool BoneAnimated::IfInside(const Rect &area)
             return false;
         }
 
-        FPoint p(0, _length);
+        FPoint p(_length, 0);
         p.Rotate(_angle);
         p += _pos;
 
@@ -217,7 +218,7 @@ bool BoneAnimated::IfInside(const Rect &area)
             return false;
         }
 
-        FPoint p(0, _length);
+        FPoint p(_length, 0);
         p.Rotate(_angle);
         p += _pos;
         GetParent()->GetMatrix().Mul(p);
@@ -231,7 +232,7 @@ void BoneAnimated::SetParent(BoneAnimated *b)
     FPoint s(0, 0);
     GetMatrix().Mul(s);
 
-    FPoint e(0, _length);
+    FPoint e(_length, 0);
     //e.Rotate(_angle);
     GetMatrix().Mul(e);
 
@@ -249,13 +250,13 @@ void BoneAnimated::SetParent(BoneAnimated *b)
         rev.Mul(e);
 
         SetBonePos(s);
-        SetBoneAngle(atan2(e.y - s.y, e.x - s.x) - M_PI / 2);
+        SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
     }
     else
     {
         _parent = NULL;
         SetBonePos(s);
-        SetBoneAngle(atan2(e.y - s.y, e.x - s.x) - M_PI / 2);
+        SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
     }
 }
 
@@ -275,5 +276,11 @@ BoneAnimated *BoneAnimated::GetBoneAtPoint(const FPoint &pos)
 void BoneAnimated::SetBoneAngle(float a)
 {
     _angle = a;
+    CalculatePosition(_parentMatrix, 0.f);
+}
+
+void BoneAnimated::SetBonePos(const FPoint &pos)
+{
+    _pos = pos;
     CalculatePosition(_parentMatrix, 0.f);
 }

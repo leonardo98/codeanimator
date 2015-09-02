@@ -99,10 +99,8 @@ uint Animation::CreateBone(FPoint pos)
 {
     uint r = _bones.size();
     BoneAnimated *b = new BoneAnimated();
-    b->MoveTo(pos);
+    b->SetBonePos(pos);
     b->SetName(GenerateUnicBoneName());
-    b->SetBoneAngle(-M_PI / 2);
-    b->SetLength(10.f);
     _bones.push_back(b);
     return r;
 }
@@ -190,7 +188,7 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
         rev.Mul(a);
         rev.Mul(b);
 
-        _deltaAngle[i] = M_PI / 2 - atan2f(b.y - a.y, b.x - a.x);
+        _deltaAngle[i] = - atan2f(b.y - a.y, b.x - a.x);
     }
 
 }
@@ -251,13 +249,15 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
         else
         {
             FPoint o(_bones[_selected[0]]->GetBonePos());
-            _bones[_selected[0]]->GetParent()->GetMatrix().Mul(o);
-            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(point.y - o.y, point.x - o.x)
-                                                                    - atan2(_startMovingPos.y - o.y, _startMovingPos.x - o.x)));
-
+            FPoint sm(_startMovingPos);
             Matrix rev;
             rev.MakeRevers(_bones[_selected[0]]->GetParent()->GetMatrix());
             rev.Mul(e);
+            rev.Mul(sm);
+
+            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(e.y - o.y, e.x - o.x)
+                                                                    - atan2(sm.y - o.y, sm.x - o.x)));
+
         }
         if (changeLength)
         {
@@ -293,7 +293,7 @@ void Animation::IKBoneMove(const FPoint &point)
             rev.Mul(b);
         }
 
-        _boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) - M_PI / 2 + _deltaAngle[i]);
+        _boneChain[i]->SetBoneAngle(atan2(b.y - a.y, b.x - a.x) + _deltaAngle[i]);
     }
 }
 
@@ -481,7 +481,7 @@ void Animation::StartBoneCreating(uint index, const FPoint &point)
 {
     _boneMoving = false;
     _startMovingPos = point;
-    _startRotateAngle = _bones[index]->GetBoneAngle();
+    _startRotateAngle = 0.f;
     _startMovingBone = index;
 }
 

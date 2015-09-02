@@ -130,6 +130,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         _hotKeysMode = create_bone_key;
     }
+    else if (event->key() == Qt::Key_C)
+    {
+        _hotKeysMode = create_bone_chain_key;
+    }
     else if (event->key() == Qt::Key_L)
     {
         _hotKeysMode = length_bone_key;
@@ -150,7 +154,11 @@ void Viewer::keyPressEvent(QKeyEvent *event)
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_B || event->key() == Qt::Key_L || event->key() == Qt::Key_I)
+    if (event->key() == Qt::Key_B
+            || event->key() == Qt::Key_L
+            || event->key() == Qt::Key_I
+            || event->key() == Qt::Key_C
+            )
     {
         _hotKeysMode = none_key;
     }
@@ -187,6 +195,22 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     if (_hotKeysMode == create_bone_key)
     {
         uint index = Animation::Instance()->CreateBone(worldClickPos);
+        Animation::Instance()->Picking(index, false);
+        Animation::Instance()->StartBoneCreating(index, worldClickPos);
+        _mouseMoveAction = mouse_moving_bone;
+    }
+    else if (_hotKeysMode == create_bone_chain_key)
+    {
+        FPoint startPos(worldClickPos);
+        if (boneAtPoint >= 0)
+        {
+
+        }
+        uint index = Animation::Instance()->CreateBone(startPos);
+        if (boneAtPoint >= 0)
+        {
+            Animation::Instance()->LinkBones(boneAtPoint, index);
+        }
         Animation::Instance()->Picking(index, false);
         Animation::Instance()->StartBoneCreating(index, worldClickPos);
         _mouseMoveAction = mouse_moving_bone;
@@ -245,7 +269,9 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
         if (_hotKeysMode == ik_bone_key)
             Animation::Instance()->IKBoneMove(newMmouseWorld);
         else
-            Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key || _hotKeysMode == create_bone_key);
+            Animation::Instance()->BoneMoveTo(newMmouseWorld, _hotKeysMode == length_bone_key
+                                                                || _hotKeysMode == create_bone_key
+                                                                || _hotKeysMode == create_bone_chain_key);
     }
     else if (_mouseMoveAction == mouse_dragging_world)
     {
