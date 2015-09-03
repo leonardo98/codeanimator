@@ -37,7 +37,7 @@ void BoneAnimated::Draw()
 //    Render::MatrixMove(_pos.x, _pos.y);
 //    Render::MatrixRotate(_angle);
     Render::MatrixMul(_matrix);
-    Render::DrawTriangle(0.f, - w, l, 0.f, 0.f, w, 0x7F4F4F4F);
+    Render::DrawTriangle(0.f, - w, l, 0.f, 0.f, w, 0x7FFFFFFF);
     Render::Line(0.f, - w, l, 0.f, 0x7F000000);
     Render::Line(l, 0.f, 0.f, w, 0x7F000000);
     Render::Line(0.f, - w, 0.f, w, 0x7F000000);

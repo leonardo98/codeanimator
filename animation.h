@@ -4,12 +4,13 @@
 #include "anim/boneanimated.h"
 #include "ogl/textures.h"
 #include "ogl/sprite.h"
-
-typedef std::vector<FPoint> PointList;
+#include "ColoredPolygon.h"
 
 class Animation
 {
 private:
+    std::vector<ColoredPolygon *> _meshes;
+    int _meshGenerateBone;
     BoneList _bones;
     static Animation *_instance;
     bool _boneMoving; // move or rotate
@@ -36,7 +37,7 @@ public:
 
     static Animation *Instance() { return _instance; }
 
-    uint CreateBone(FPoint pos);
+    uint CreateBone(FPoint pos, bool generateMesh);
     void StartBoneCreating(uint index, const FPoint &point);
 
     int GetBoneAtPoint(const FPoint &pos);
@@ -59,6 +60,8 @@ public:
     bool SetTexture(const char *fileName);
     GLTexture2D *GetTexture() { return _texture; }
     FPoint GetBoneEnd(uint index);
+
+    void Finish();
 
 //    void Test(FPoint p);
 

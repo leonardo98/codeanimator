@@ -15,7 +15,7 @@ GLTexture2D * h_base = NULL;// = Core::getTexture(":main/gfx/red.png");
 void ColoredPolygon::InitCorners()
 {
     if (h_base == NULL)
-        h_base = new GLTexture2D(":main/gfx/red.png");
+        h_base = new GLTexture2D(":main/red.png");
     scale = new Sprite(h_base, 4, 13, 12, 12);
     scaleSide = new Sprite(h_base, 4, 1, 10, 10);
 }
@@ -38,6 +38,7 @@ ColoredPolygon::ColoredPolygon(const ColoredPolygon &c)
     _selectedDots.clear();
     _debugDraw = false;
     InitCorners();
+    _color = 0xFFFFFFFF;
 }
 
 ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
@@ -54,6 +55,38 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
     _selectedDots.clear();
     _debugDraw = false;
     InitCorners();
+    _color = 0xFFFFFFFF;
+}
+
+void ColoredPolygon::UpdatePoints(const PointList &points)
+{
+    _dots.resize(points.size());
+    for (uint i = 0; i < points.size(); ++i)
+    {
+        _dots[i] = points[i];
+    }
+    CalcWidthAndHeight();
+    GenerateTriangles();
+    _dotUnderCursor.clear();
+    _selectedDots.clear();
+    InitCorners();
+}
+
+ColoredPolygon::ColoredPolygon(const PointList &points)
+{
+    _dots.resize(points.size());
+    for (uint i = 0; i < points.size(); ++i)
+    {
+        _dots[i] = points[i];
+    }
+    CalcWidthAndHeight();
+    GenerateTriangles();
+    _mouseDown = false;
+    _dotUnderCursor.clear();
+    _selectedDots.clear();
+    _debugDraw = false;
+    InitCorners();
+    _color = 0xFFFFFFFF;
 }
 
 void ColoredPolygon::Draw()
@@ -178,16 +211,16 @@ void ColoredPolygon::CalcWidthAndHeight() {
 
 void ColoredPolygon::GenerateTriangles()
 {
-    Math::GenerateTriangles(_dots, _triangles, _color, Animation::Instance()->GetTexture());
+    Matrix m;
+    m.Unit();
+    m.Move(-0.5f, -0.5f);
+    m.Scale(1.f / Animation::Instance()->GetTexture()->Width(), 1.f / Animation::Instance()->GetTexture()->Height());
+    Math::GenerateTriangles(_dots, _triangles, _color, Animation::Instance()->GetTexture(), &m);
 }
 
 void ColoredPolygon::DrawTriangles() {
 	Render::PushColorAndMul(_color);
-    if (Animation::Instance()->GetTexture())
-        Animation::Instance()->GetTexture()->bind();
 	_triangles.Render();
-    if (Animation::Instance()->GetTexture())
-        Animation::Instance()->GetTexture()->unbind();
 	Render::PopColor();
 }
 

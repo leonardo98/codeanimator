@@ -13,6 +13,7 @@ Animation::Animation()
     _startMovingBone = -1;
     _texture = NULL;
     _baseSprite = NULL;
+    _meshGenerateBone = -1;
 
 //    testPoints.push_back(FPoint(0, 0));
 //    testPoints.push_back(FPoint(0, 100));
@@ -56,6 +57,12 @@ void Animation::Draw()
             (*i)->CalculatePosition(pos, 0.f);
     }
 
+    // draw meshes
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        _meshes[i]->DebugDraw(false);
+    }
+
     // draw bones
     for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
     {
@@ -95,13 +102,33 @@ std::string Animation::GenerateUnicBoneName()
     return name;
 }
 
-uint Animation::CreateBone(FPoint pos)
+uint Animation::CreateBone(FPoint pos, bool generateMesh)
 {
     uint r = _bones.size();
     BoneAnimated *b = new BoneAnimated();
     b->SetBonePos(pos);
     b->SetName(GenerateUnicBoneName());
     _bones.push_back(b);
+
+    if (generateMesh)
+    {
+        PointList points;
+
+        FPoint p1(pos);
+        FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + pos;
+        FPoint o = *FPoint(0.f, b->GetLength() * 0.314f).Rotate(b->GetBoneAngle());
+
+        points.push_back(p1 + o);
+        points.push_back(p1 - o);
+        points.push_back(p2 - o);
+        points.push_back(p2 + o);
+
+        ColoredPolygon *c = new ColoredPolygon(points);
+        _meshes.push_back(c);
+//        b->SetMesh(c);
+        _meshGenerateBone = r;
+    }
+
     return r;
 }
 
@@ -263,6 +290,22 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
         {
             _bones[_selected[0]]->SetLength((s - e).Length());
         }
+        if (_meshGenerateBone >= 0)
+        {
+            PointList points;
+            BoneAnimated *b = _bones[_selected[0]];
+
+            FPoint p1(b->GetBonePos());
+            FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
+            FPoint o = *FPoint(0.f, b->GetLength() * 0.314f).Rotate(b->GetBoneAngle());
+
+            points.push_back(p1 + o);
+            points.push_back(p1 - o);
+            points.push_back(p2 - o);
+            points.push_back(p2 + o);
+
+            _meshes[_meshGenerateBone]->UpdatePoints(points);
+        }
     }
 }
 
@@ -279,6 +322,23 @@ void Animation::BoneCreateTo(const FPoint &point)
     }
     _bones[_selected[0]]->SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
     _bones[_selected[0]]->SetLength((s - e).Length());
+
+    if (_meshGenerateBone >= 0)
+    {
+        PointList points;
+        BoneAnimated *b = _bones[_selected[0]];
+
+        FPoint p1(b->GetBonePos());
+        FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
+        FPoint o = *FPoint(0.f, b->GetLength() * 0.314f).Rotate(b->GetBoneAngle());
+
+        points.push_back(p1 + o);
+        points.push_back(p1 - o);
+        points.push_back(p2 - o);
+        points.push_back(p2 + o);
+
+        _meshes[_meshGenerateBone]->UpdatePoints(points);
+    }
 }
 
 void Animation::IKBoneMove(const FPoint &point)
@@ -505,6 +565,11 @@ FPoint Animation::GetBoneEnd(uint index)
     FPoint r(_bones[index]->GetLength(), 0.f);
     _bones[index]->GetMatrix().Mul(r);
     return r;
+}
+
+void Animation::Finish()
+{
+    _meshGenerateBone = -1;
 }
 
 

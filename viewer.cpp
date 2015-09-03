@@ -207,7 +207,7 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     Animation::Instance()->Picking(boneAtPoint, (QApplication::keyboardModifiers() & Qt::ControlModifier) != 0);
     if (_hotKeysMode == create_bone_key)
     {
-        uint index = Animation::Instance()->CreateBone(worldClickPos);
+        uint index = Animation::Instance()->CreateBone(worldClickPos, MainWindow::Instance()->CreateDotMode());
         Animation::Instance()->Picking(index, false);
         Animation::Instance()->StartBoneCreating(index, worldClickPos);
         _mouseMoveAction = mouse_moving_bone;
@@ -219,7 +219,7 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
         {
             startPos = Animation::Instance()->GetBoneEnd(boneAtPoint);
         }
-        uint index = Animation::Instance()->CreateBone(startPos);
+        uint index = Animation::Instance()->CreateBone(startPos, boneAtPoint == -1 && MainWindow::Instance()->CreateDotMode());
         if (boneAtPoint >= 0)
         {
             Animation::Instance()->LinkBones(boneAtPoint, index);
@@ -264,6 +264,8 @@ void Viewer::OnMouseUp()
 //		_pushCopyOnMouseUp = false;
 //	}
     _mouseMoveAction = mouse_none;
+
+    Animation::Instance()->Finish();
 }
 
 void Viewer::OnMouseMove(const FPoint &mousePos)

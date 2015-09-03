@@ -4,6 +4,8 @@
 #include "ogl/sprite.h"
 #include "ogl/rect.h"
 
+typedef std::vector<FPoint> PointList;
+
 class ColoredPolygon
 {
 private:
@@ -20,7 +22,7 @@ private:
 
     void CalcWidthAndHeight();
 
-	QVector<FPoint> _dots; //   
+    QVector<FPoint> _dots; //
 	QVector<FPoint> _screenDots;
 	Sprite _triangles;
 	bool _mouseDown;
@@ -44,7 +46,10 @@ public:
 
 	virtual ~ColoredPolygon();
 	ColoredPolygon(rapidxml::xml_node<> *xe);
-	ColoredPolygon(const ColoredPolygon &c);
+    ColoredPolygon(const ColoredPolygon &c);
+    ColoredPolygon(const PointList &points);
+
+    void UpdatePoints(const PointList &points);
 
 	virtual void Draw();
 	virtual void DebugDraw(bool onlyControl);
