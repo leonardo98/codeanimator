@@ -14,6 +14,7 @@ BoneAnimated::~BoneAnimated()
 }
 
 BoneAnimated::BoneAnimated()
+    : _mesh(-1)
 {
     _visible = false;
     _length = BONE_LENGTH_MIN;
