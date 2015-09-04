@@ -5,11 +5,11 @@ const float WideCoef = 0.1f;
 
 BoneAnimated::~BoneAnimated()
 {
-    SetParent(NULL);
     for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
     {
         (*i)->SetParent(NULL);
     }
+    SetParent(NULL);
     _children.clear();
 }
 
