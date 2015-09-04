@@ -174,6 +174,10 @@ void Viewer::keyPressEvent(QKeyEvent *event)
             MainWindow::Instance()->PrintToOutput("Esc pressed. -> Navigate and edit bone.");
         }
     }
+    else if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete)
+    {
+        Animation::Instance()->Remove();
+    }
 }
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)

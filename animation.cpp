@@ -498,11 +498,12 @@ void Animation::Remove()
     {
         if (_meshes[i] == NULL)
         {
-            for (uint j = 0; j < _bones.size(); )
+            for (uint j = 0; j < _bones.size(); ++j)
             {
                 if (_bones[j]->GetMesh() == _meshes.size())
                 {
                     _bones[j]->SetMesh(i);
+                    break;
                 }
             }
             _meshes[i] = _meshes.back();

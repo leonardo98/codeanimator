@@ -134,10 +134,10 @@ void MainWindow::createMenus()
 
         action = new QAction(tr("&Delete"), this);
         connect(action, SIGNAL(triggered()), Animation::Instance(), SLOT(Remove()));
-        QList<QKeySequence> keys;
-        keys.push_back(QKeySequence::Delete);
-        keys.push_back(QKeySequence::Backspace);
-        action->setShortcuts(keys);
+//        QList<QKeySequence> keys;
+//        keys.push_back(QKeySequence::Backspace);
+//        keys.push_back(QKeySequence::Delete);
+        action->setShortcuts(QKeySequence::Delete);
         menu->addAction(action);
     }
     {
