@@ -22,6 +22,7 @@ public:
     virtual ~MainWindow();
     bool CreateDotMode();
     static MainWindow *Instance() { return (MainWindow *)mainWindow; }
+    void PrintToOutput(const char *s);
 
 private:
     void createMenus();

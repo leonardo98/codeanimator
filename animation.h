@@ -1,13 +1,20 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
+#include <QObject>
+
 #include "anim/boneanimated.h"
 #include "ogl/textures.h"
 #include "ogl/sprite.h"
 #include "ColoredPolygon.h"
 
-class Animation
+class Animation : public QObject
 {
+    Q_OBJECT
+public slots:
+    void Remove();
+    void Unlink();
+
 private:
     std::vector<ColoredPolygon *> _meshes;
     int _meshGenerateBone;
@@ -52,9 +59,6 @@ public:
     void SelectByArea(const Rect &area);
 
     void LinkBones(int parent, int child);
-
-    void Remove();
-    void Unlink();    
 
     std::string GenerateUnicBoneName();
     bool SetTexture(const char *fileName);

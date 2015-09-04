@@ -124,8 +124,8 @@ uint Animation::CreateBone(FPoint pos, bool generateMesh)
         points.push_back(p2 + o);
 
         ColoredPolygon *c = new ColoredPolygon(points);
+        b->SetMesh(_meshes.size());
         _meshes.push_back(c);
-//        b->SetMesh(c);
         _meshGenerateBone = r;
     }
 
@@ -476,6 +476,11 @@ void Animation::Remove()
 {
     for (uint i = 0; i < _selected.size(); ++i)
     {
+        if (_bones[_selected[i]]->GetMesh() != -1)
+        {
+            delete _meshes[_bones[_selected[i]]->GetMesh()];
+            _meshes[_bones[_selected[i]]->GetMesh()] = NULL;
+        }
         delete _bones[_selected[i]];
         _bones[_selected[i]] = NULL;
     }
@@ -485,6 +490,23 @@ void Animation::Remove()
         {
             _bones[i] = _bones.back();
             _bones.pop_back();
+        }
+        else
+            ++i;
+    }
+    for (uint i = 0; i < _meshes.size(); )
+    {
+        if (_meshes[i] == NULL)
+        {
+            for (uint j = 0; j < _bones.size(); )
+            {
+                if (_bones[j]->GetMesh() == _meshes.size())
+                {
+                    _bones[j]->SetMesh(i);
+                }
+            }
+            _meshes[i] = _meshes.back();
+            _meshes.pop_back();
         }
         else
             ++i;

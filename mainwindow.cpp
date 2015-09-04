@@ -11,7 +11,6 @@ MainWindow::MainWindow()
     : settings("PakholkovLeonid", "CodeAnimator")
 {
     mainWindow = this;
-    createMenus();
 
     _centralSplitter = new QSplitter(Qt::Horizontal, this);
     _codeConsoleSplitter = new QSplitter(Qt::Vertical, this);
@@ -21,6 +20,8 @@ MainWindow::MainWindow()
     _console = new QConsoleWidget( this );
     _viewer = new Viewer( this );
     _splineEditor = new SplineEditor( this );
+
+    createMenus();
 
     _codeConsoleSplitter->addWidget(_codeEditor);
     _codeConsoleSplitter->addWidget(_console);
@@ -57,6 +58,11 @@ MainWindow::MainWindow()
     statusBar()->showMessage(tr("Ready"));
 
     connect(_viewer, SIGNAL(uploadTexture()), this, SLOT(uploadLastTexture()));
+}
+
+void MainWindow::PrintToOutput(const char *s)
+{
+    _console->PrintToOutput(s);
 }
 
 void MainWindow::uploadLastTexture()
@@ -124,6 +130,17 @@ void MainWindow::createMenus()
         menu->addAction(action);
     }
     {
+        menu = menuBar()->addMenu(tr("&Edit"));
+
+        action = new QAction(tr("&Delete"), this);
+        connect(action, SIGNAL(triggered()), Animation::Instance(), SLOT(Remove()));
+        QList<QKeySequence> keys;
+        keys.push_back(QKeySequence::Delete);
+        keys.push_back(QKeySequence::Backspace);
+        action->setShortcuts(keys);
+        menu->addAction(action);
+    }
+    {
         QActionGroup* group = new QActionGroup( this );
 
         menu = menuBar()->addMenu(tr("&Mode"));
@@ -151,6 +168,13 @@ void MainWindow::createMenus()
 
         action = new QAction(tr("&Choose texture..."), this);
         connect(action, SIGNAL(triggered()), this, SLOT(chooseTexture()));
+        menu->addAction(action);
+
+        menu->addSeparator();
+
+        action = new QAction(tr("&Unlink bone from parent"), this);
+        connect(action, SIGNAL(triggered()), Animation::Instance(), SLOT(Unlink()));
+        action->setShortcut(Qt::Key_P);
         menu->addAction(action);
     }
 }

@@ -129,7 +129,11 @@ void Viewer::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_B)
     {
-        _hotKeysMode = create_bone_key;
+        if (_hotKeysMode != create_bone_key)
+        {
+            MainWindow::Instance()->PrintToOutput("Key B pressed. -> Create bone.");
+            _hotKeysMode = create_bone_key;
+        }
     }
     else if (event->key() == Qt::Key_C)
     {
@@ -137,44 +141,56 @@ void Viewer::keyPressEvent(QKeyEvent *event)
         {
             _hotKeysMode = create_bone_chain_key;
             _chainState = chain_wait_first;
+            MainWindow::Instance()->PrintToOutput("Key C pressed. -> Create chain of bone.");
         }
     }
     else if (event->key() == Qt::Key_L)
     {
-        _hotKeysMode = length_bone_key;
+        if (_hotKeysMode != length_bone_key)
+        {
+            _hotKeysMode = length_bone_key;
+            MainWindow::Instance()->PrintToOutput("Key L pressed. -> Change length of bone.");
+        }
     }
     else if (event->key() == Qt::Key_I)
     {
-        _hotKeysMode = ik_bone_key;
+        if (_hotKeysMode != ik_bone_key)
+        {
+            _hotKeysMode = ik_bone_key;
+            MainWindow::Instance()->PrintToOutput("Key L pressed. -> Inverse kinematic of bone.");
+        }
     }
-    else if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)
+    else if (event->key() == Qt::Key_Escape)
     {
-        Animation::Instance()->Remove();
-    }
-    else if (event->key() == Qt::Key_U)
-    {
-        Animation::Instance()->Unlink();
+        if (_hotKeysMode != none_key)
+        {
+            if (_hotKeysMode == create_bone_chain_key)
+            {
+                _chainState = chain_none;
+                 Animation::Instance()->Remove();
+            }
+
+            _hotKeysMode = none_key;
+            MainWindow::Instance()->PrintToOutput("Esc pressed. -> Navigate and edit bone.");
+        }
     }
 }
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_B
-            || event->key() == Qt::Key_L
-            || event->key() == Qt::Key_I
-            )
-    {
-        _hotKeysMode = none_key;
-    }
-    else if (event->key() == Qt::Key_C)
-    {
-        if (_chainState == chain_work)
-        {
-            _chainState = chain_none;
-            _hotKeysMode = none_key;
-            Animation::Instance()->Remove();
-        }
-    }
+//    if (event->key() == Qt::Key_C)
+//    {
+//        if (_chainState == chain_work)
+//        {
+//            _hotKeysMode = none_key;
+
+//            if (!_mouseDown)
+//            {
+//                Animation::Instance()->Remove();
+//                _chainState = chain_none;
+//            }
+//        }
+//    }
 }
 
 
@@ -264,7 +280,6 @@ void Viewer::OnMouseUp()
 //		_pushCopyOnMouseUp = false;
 //	}
     _mouseMoveAction = mouse_none;
-
     Animation::Instance()->Finish();
 }
 
@@ -284,10 +299,7 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
         _cursorText = "";
     }
 
-    if (!_mouseDown
-            && _hotKeysMode == create_bone_chain_key
-            && _mouseMoveAction == mouse_none
-            && _chainState == chain_work)
+    if (_chainState == chain_work)
     {
         Animation::Instance()->BoneCreateTo(newMmouseWorld);
     }
