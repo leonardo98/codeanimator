@@ -37,6 +37,7 @@ private:
     int SearchNearest(float x, float y);
 
 	int CreateDot(float x, float y);
+    bool CheckLines(const FPoint &p);
     void RemoveDot(QVector<int> index);
 
     void InitCorners();

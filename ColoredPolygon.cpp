@@ -228,9 +228,9 @@ int ColoredPolygon::SearchNearest(float x, float y)
 {
     static const float SIZEX = 20;
     FPoint p(x, y);
-    for (unsigned int i = 0; i < _screenDots.size(); ++i)
+    for (unsigned int i = 0; i < _dots.size(); ++i)
     {
-        if ((_screenDots[i] - p).Length() < SIZEX)
+        if ((_dots[i] - p).Length() < SIZEX)
         {
             return i;
         }
@@ -251,13 +251,23 @@ void ColoredPolygon::GetAllLocalDotsRect(Rect &rect) {
 	}
 }
 
+bool ColoredPolygon::CheckLines(const FPoint &p)
+{
+    for (unsigned int i = 0; i < _dots.size() && result < 0; ++i)
+    {
+        if (Math::DotNearLine(_dots[i], _dots[(i + 1) % _dots.size()], p))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 int ColoredPolygon::CreateDot(float x, float y) {
 	if (_dots.size() >= 50) {
 		return false;
 	}
 	int result = -1;
-	static const float SIZEX = 6;
 	FPoint p(x, y);
 	for (unsigned int i = 0; i < _dots.size() && result < 0; ++i) {
 		if (Math::DotNearLine(_dots[i], _dots[(i + 1) % _dots.size()], p)) {
