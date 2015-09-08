@@ -149,7 +149,7 @@ void ColoredPolygon::DebugDraw(bool onlyControl) {
 }
 
 bool ColoredPolygon::PixelCheck(const FPoint &point) { 
-    if (Math::Inside(point, _dots)) {
+    if (Math::Inside(point, _dots) || CheckLines(point)) {
 		return true;
 	}
     return SearchNearest(point.x, point.y) >= 0;
@@ -253,7 +253,7 @@ void ColoredPolygon::GetAllLocalDotsRect(Rect &rect) {
 
 bool ColoredPolygon::CheckLines(const FPoint &p)
 {
-    for (unsigned int i = 0; i < _dots.size() && result < 0; ++i)
+    for (unsigned int i = 0; i < _dots.size(); ++i)
     {
         if (Math::DotNearLine(_dots[i], _dots[(i + 1) % _dots.size()], p))
         {
@@ -313,6 +313,8 @@ void ColoredPolygon::MouseDown(const FPoint &mouse) {
     if (!MainWindow::Instance()->CreateDotMode()) {
         _selectedDots = _dotUnderCursor;
 	}
+
+    TryCreateDot(mouse);
 
 	_mouseDown = true;
 	_mousePos = mouse;
@@ -387,6 +389,31 @@ bool ColoredPolygon::CanCut(const std::string &message, const std::string &subst
     }
 }
 
+void ColoredPolygon::TryCreateDot(const FPoint &mouse)
+{
+    int index = SearchNearest(mouse.x, mouse.y);
+    if (index == -1) {
+//			Matrix reverse;
+//			reverse.MakeRevers(parent);
+        FPoint fp(mouse);
+//			reverse.Mul(fp);
+
+        int result = CreateDot(fp.x, fp.y);
+        if (result >= 0)
+        {
+            _dotUnderCursor = _selectedDots = QVector<int>(1, result);
+        }
+        else
+        {
+            _dotUnderCursor.clear();
+            _selectedDots.clear();
+        }
+        _mouseDown = _selectedDots.size() > 0;
+    }
+    _mousePos = mouse;
+    //return _mouseDown;
+}
+
 bool ColoredPolygon::Command(const std::string &cmd) {
 	std::string position;
 
@@ -402,46 +429,6 @@ bool ColoredPolygon::Command(const std::string &cmd) {
 
 		return true;
 	} 
-    if (CanCut(cmd, "create dot at ", position)) {
-
-		FPoint mouse;
-        sscanf(position.c_str(), "%f %f", &(mouse.x), &(mouse.y));
-
-        int index = SearchNearest(mouse.x, mouse.y);
-        if (index >= 0) {
-            int i = 0;
-            for (; i < _selectedDots.size() && _selectedDots[i] != index; ++i)
-            {}
-            if (i >= _selectedDots.size())
-            {
-                _dotUnderCursor = _selectedDots = QVector<int>(1, index);
-            }
-            else
-            {
-                _dotUnderCursor = _selectedDots;
-            }
-			_mouseDown = true;
-		} else {
-//			Matrix reverse;
-//			reverse.MakeRevers(parent);
-            FPoint fp(mouse);
-//			reverse.Mul(fp);
-
-            int result = CreateDot(fp.x, fp.y);
-            if (result >= 0)
-            {
-                _dotUnderCursor = _selectedDots = QVector<int>(1, result);
-            }
-            else
-            {
-                _dotUnderCursor.clear();
-                _selectedDots.clear();
-            }
-            _mouseDown = _selectedDots.size() > 0;
-		}
-		_mousePos = mouse;
-		return _mouseDown;
-	}
     return (cmd == "");
 }
 

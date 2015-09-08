@@ -67,6 +67,11 @@ public:
 
     void Finish();
 
+    void PolygonMouseDown(const FPoint &pos);
+    void PolygonMouseMove(const FPoint &pos);
+    void PolygonMouseUp(const FPoint &pos);
+    bool PolygonActive(const FPoint &pos);
+
 //    void Test(FPoint p);
 
 };

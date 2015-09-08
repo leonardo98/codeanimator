@@ -157,7 +157,7 @@ void Viewer::keyPressEvent(QKeyEvent *event)
         if (_hotKeysMode != ik_bone_key)
         {
             _hotKeysMode = ik_bone_key;
-            MainWindow::Instance()->PrintToOutput("Key L pressed. -> Inverse kinematic of bone.");
+            MainWindow::Instance()->PrintToOutput("Key I pressed. -> Inverse kinematic of bone.");
         }
     }
     else if (event->key() == Qt::Key_Escape)
@@ -258,6 +258,10 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
         Animation::Instance()->StartBoneMoving(boneAtPoint, worldClickPos);
         _mouseMoveAction = mouse_moving_bone;
     }
+    else if (Animation::Instance()->PolygonActive(worldClickPos))
+    {
+        Animation::Instance()->PolygonMouseDown(worldClickPos);
+    }
     else
     {
         _cursorText = "";
@@ -285,6 +289,9 @@ void Viewer::OnMouseUp()
 //	}
     _mouseMoveAction = mouse_none;
     Animation::Instance()->Finish();
+
+    FPoint mouseWorld = ScreenToWorld(_lastMousePos);
+    Animation::Instance()->PolygonMouseUp(mouseWorld);
 }
 
 void Viewer::OnMouseMove(const FPoint &mousePos)
@@ -293,6 +300,8 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
 //    Animation::Instance()->Test(newMmouseWorld);
 //    return;
+
+    Animation::Instance()->PolygonMouseMove(newMmouseWorld);
 
     if (Animation::Instance()->GetBoneAtPoint(newMmouseWorld) >= 0)
     {

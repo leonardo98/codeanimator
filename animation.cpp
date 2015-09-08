@@ -124,7 +124,7 @@ uint Animation::CreateBone(FPoint pos, bool generateMesh)
         points.push_back(p2 + o);
 
         ColoredPolygon *c = new ColoredPolygon(points);
-        b->SetMesh(_meshes.size());
+//        b->SetMesh(_meshes.size());
         _meshes.push_back(c);
         _meshGenerateBone = r;
     }
@@ -476,11 +476,11 @@ void Animation::Remove()
 {
     for (uint i = 0; i < _selected.size(); ++i)
     {
-        if (_bones[_selected[i]]->GetMesh() != -1)
-        {
-            delete _meshes[_bones[_selected[i]]->GetMesh()];
-            _meshes[_bones[_selected[i]]->GetMesh()] = NULL;
-        }
+//        if (_bones[_selected[i]]->GetMesh() != -1)
+//        {
+//            delete _meshes[_bones[_selected[i]]->GetMesh()];
+//            _meshes[_bones[_selected[i]]->GetMesh()] = NULL;
+//        }
         delete _bones[_selected[i]];
         _bones[_selected[i]] = NULL;
     }
@@ -494,24 +494,24 @@ void Animation::Remove()
         else
             ++i;
     }
-    for (uint i = 0; i < _meshes.size(); )
-    {
-        if (_meshes[i] == NULL)
-        {
-            for (uint j = 0; j < _bones.size(); ++j)
-            {
-                if (_bones[j]->GetMesh() == _meshes.size())
-                {
-                    _bones[j]->SetMesh(i);
-                    break;
-                }
-            }
-            _meshes[i] = _meshes.back();
-            _meshes.pop_back();
-        }
-        else
-            ++i;
-    }
+//    for (uint i = 0; i < _meshes.size(); )
+//    {
+//        if (_meshes[i] == NULL)
+//        {
+//            for (uint j = 0; j < _bones.size(); ++j)
+//            {
+//                if (_bones[j]->GetMesh() == _meshes.size())
+//                {
+//                    _bones[j]->SetMesh(i);
+//                    break;
+//                }
+//            }
+//            _meshes[i] = _meshes.back();
+//            _meshes.pop_back();
+//        }
+//        else
+//            ++i;
+//    }
     _selected.clear();
 }
 
@@ -593,6 +593,40 @@ FPoint Animation::GetBoneEnd(uint index)
 void Animation::Finish()
 {
     _meshGenerateBone = -1;
+}
+
+bool Animation::PolygonActive(const FPoint &pos)
+{
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        if (_meshes[i]->PixelCheck(pos))
+            return true;
+    }
+    return false;
+}
+
+void Animation::PolygonMouseDown(const FPoint &pos)
+{
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        _meshes[i]->MouseDown(pos);
+    }
+}
+
+void Animation::PolygonMouseMove(const FPoint &pos)
+{
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        _meshes[i]->MouseMove(pos);
+    }
+}
+
+void Animation::PolygonMouseUp(const FPoint &pos)
+{
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        _meshes[i]->MouseUp(pos);
+    }
 }
 
 

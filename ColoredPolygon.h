@@ -38,6 +38,7 @@ private:
 
 	int CreateDot(float x, float y);
     bool CheckLines(const FPoint &p);
+    void TryCreateDot(const FPoint &mouse);
     void RemoveDot(QVector<int> index);
 
     void InitCorners();
