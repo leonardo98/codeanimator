@@ -389,16 +389,12 @@ bool ColoredPolygon::CanCut(const std::string &message, const std::string &subst
     }
 }
 
-void ColoredPolygon::TryCreateDot(const FPoint &mouse)
+bool ColoredPolygon::TryCreateDot(const FPoint &mouse)
 {
     int index = SearchNearest(mouse.x, mouse.y);
     if (index == -1) {
-//			Matrix reverse;
-//			reverse.MakeRevers(parent);
-        FPoint fp(mouse);
-//			reverse.Mul(fp);
 
-        int result = CreateDot(fp.x, fp.y);
+        int result = CreateDot(mouse.x, mouse.y);
         if (result >= 0)
         {
             _dotUnderCursor = _selectedDots = QVector<int>(1, result);
@@ -408,10 +404,11 @@ void ColoredPolygon::TryCreateDot(const FPoint &mouse)
             _dotUnderCursor.clear();
             _selectedDots.clear();
         }
-        _mouseDown = _selectedDots.size() > 0;
+        //_mouseDown = _selectedDots.size() > 0;
     }
-    _mousePos = mouse;
+    //_mousePos = mouse;
     //return _mouseDown;
+    return index >= 0 || _selectedDots.size() > 0;
 }
 
 bool ColoredPolygon::Command(const std::string &cmd) {

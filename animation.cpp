@@ -60,7 +60,7 @@ void Animation::Draw()
     // draw meshes
     for (uint i = 0; i < _meshes.size(); ++i)
     {
-        _meshes[i]->DebugDraw(false);
+        _meshes[i]->Draw();
     }
 
     // draw bones
@@ -75,7 +75,11 @@ void Animation::Draw()
         _bones[_selected[i]]->DrawSelection();
     }
 
-    // todo: draw mesh here
+    // draw meshes
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        _meshes[i]->DebugDraw(true);
+    }
 
 
 //    for (int i = 0; i < (int)testPoints.size() - 1; ++i)
