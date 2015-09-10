@@ -26,7 +26,6 @@ private:
     float _length;
 
     std::string _name;
-    int _mesh;
 
 public:
     Spline x;
@@ -65,9 +64,6 @@ public:
 
     void SetName(const std::string &name) { _name = name; }
     const std::string &GetName() { return _name; }
-
-//    void SetMesh(int index) { _mesh = index; }
-//    int GetMesh() { return _mesh; }
 
 };
 

@@ -44,7 +44,12 @@ private:
     void InitCorners();
     bool CanCut(const std::string &message, const std::string &substr, std::string &result);
 
+    std::string _boneName;
+
 public:
+
+    const std::string &GetBone() { return _boneName; }
+    void SetBone(const std::string &name) { _boneName = name; }
 
 	virtual ~ColoredPolygon();
 	ColoredPolygon(rapidxml::xml_node<> *xe);
