@@ -72,6 +72,8 @@ public:
     void PolygonMouseUp(const FPoint &pos);
     bool PolygonActive(const FPoint &pos);
 
+    void RemoveBones();
+
 //    void Test(FPoint p);
 
 };

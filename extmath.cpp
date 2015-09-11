@@ -528,11 +528,14 @@ bool Math::GenerateTriangles(QVector<FPoint> inputDots, Sprite &sprite, DWORD co
 				}
 			}
 
-            FillTriangle(triCounter++, dots[opt], dots[(opt + 1) % dots.size()], dots[(opt + 2) % dots.size()], vb);
-            if (opt < dots.size() - 1) {
-                dots.erase(dots.begin() + opt + 1);
-            } else {
-                dots.erase(dots.begin());
+            if (opt >= 0)
+            {
+                FillTriangle(triCounter++, dots[opt], dots[(opt + 1) % dots.size()], dots[(opt + 2) % dots.size()], vb);
+                if (opt < dots.size() - 1) {
+                    dots.erase(dots.begin() + opt + 1);
+                } else {
+                    dots.erase(dots.begin());
+                }
             }
 
         }

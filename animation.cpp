@@ -477,18 +477,8 @@ void Animation::LinkBones(int parent, int child)
     }
 }
 
-void Animation::Remove()
+void Animation::RemoveBones()
 {
-    if (MainWindow::Instance()->CreateDotMode())
-    {
-        for (uint i = 0; i < _meshes.size(); ++i)
-        {
-            if (_meshes[i]->RemoveDots())
-            {
-                return;
-            }
-        }
-    }
     for (uint i = 0; i < _selected.size(); ++i)
     {
         delete _bones[_selected[i]];
@@ -520,6 +510,21 @@ void Animation::Remove()
             ++i;
     }
     _selected.clear();
+}
+
+void Animation::Remove()
+{
+    if (MainWindow::Instance()->CreateDotMode())
+    {
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            if (_meshes[i]->RemoveDots())
+            {
+                return;
+            }
+        }
+    }
+    RemoveBones();
 }
 
 void Animation::Unlink()

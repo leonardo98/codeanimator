@@ -167,7 +167,7 @@ void Viewer::keyPressEvent(QKeyEvent *event)
             if (_hotKeysMode == create_bone_chain_key)
             {
                 _chainState = chain_none;
-                 Animation::Instance()->Remove();
+                 Animation::Instance()->RemoveBones();
             }
 
             _hotKeysMode = none_key;
