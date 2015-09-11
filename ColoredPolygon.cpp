@@ -326,7 +326,25 @@ void ColoredPolygon::MouseDown(const FPoint &mouse) {
         _selectedDots = _dotUnderCursor;
 	}
 
-    TryCreateDot(mouse);
+    int index = SearchNearest(mouse.x, mouse.y);
+    if (index == -1)
+    {
+        int result = CreateDot(mouse.x, mouse.y);
+        if (result >= 0)
+        {
+            _dotUnderCursor = _selectedDots = QVector<int>(1, result);
+        }
+        else
+        {
+            _dotUnderCursor.clear();
+            _selectedDots.clear();
+        }
+    }
+    else
+    {
+        _selectedDots.push_back(index);
+        _dotUnderCursor = _selectedDots;
+    }
 
 	_mouseDown = true;
 	_mousePos = mouse;
@@ -401,41 +419,17 @@ bool ColoredPolygon::CanCut(const std::string &message, const std::string &subst
     }
 }
 
-bool ColoredPolygon::TryCreateDot(const FPoint &mouse)
+bool ColoredPolygon::RemoveDots()
 {
-    int index = SearchNearest(mouse.x, mouse.y);
-    if (index == -1) {
-
-        int result = CreateDot(mouse.x, mouse.y);
-        if (result >= 0)
-        {
-            _dotUnderCursor = _selectedDots = QVector<int>(1, result);
-        }
-        else
-        {
-            _dotUnderCursor.clear();
-            _selectedDots.clear();
-        }
-    }
-    return index >= 0 || _selectedDots.size() > 0;
-}
-
-bool ColoredPolygon::Command(const std::string &cmd) {
-	std::string position;
-
-    if (cmd == "delete dot")
+    if (_selectedDots.size() > 0)
     {
-        if (_selectedDots.size() > 0)
-        {
-            RemoveDot(_selectedDots);
-            _selectedDots.clear();
-            _dotUnderCursor.clear();
-			GenerateTriangles();
-		}
-
-		return true;
-	} 
-    return (cmd == "");
+        RemoveDot(_selectedDots);
+        _selectedDots.clear();
+        _dotUnderCursor.clear();
+        GenerateTriangles();
+        return true;
+    }
+    return false;
 }
 
 bool ColoredPolygon::GeometryCheck(const FPoint &point) {

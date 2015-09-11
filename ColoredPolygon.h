@@ -38,7 +38,6 @@ private:
 
 	int CreateDot(float x, float y);
     bool CheckLines(const FPoint &p);
-    bool TryCreateDot(const FPoint &mouse);
     void RemoveDot(QVector<int> index);
 
     void InitCorners();
@@ -66,7 +65,7 @@ public:
 	virtual void MouseUp(const FPoint &mouse);
 	virtual bool PixelCheck(const FPoint &point);
 	virtual bool GeometryCheck(const FPoint &point);
-	virtual bool Command(const std::string &cmd);
+    bool RemoveDots();
 	virtual void EncapsulateAllDots(Rect &rect);
 	virtual void GetAllLocalDotsRect(Rect &rect);
     virtual bool Selection(const Rect& rect, bool full);
