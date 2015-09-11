@@ -105,47 +105,59 @@ void ColoredPolygon::Draw()
 	}
 }
 
-void ColoredPolygon::DebugDraw(bool onlyControl) {
-	if (!onlyControl) {
+void ColoredPolygon::DebugDraw(bool onlyControl)
+{
+    if (!onlyControl)
+    {
 		Draw();
 	}
-	{
-		_debugDraw = true;
-	
-		Render::SetFiltering(false);
-		Render::PushMatrix();
 
-        //parent = Render::GetCurrentMatrix();
-		for (unsigned int i = 0; i < _dots.size(); ++i) {
-			Render::Line(_dots[i].x, _dots[i].y, _dots[(i + 1) % _dots.size()].x, _dots[(i + 1) % _dots.size()].y, 0xFFFFFFFF);
-		}
+    _debugDraw = true;
 
-		Render::SetMatrixUnit();
+    Render::SetFiltering(false);
+    Render::PushMatrix();
 
-		float alpha = (Render::GetColor() >> 24) / 255.f;
-		Render::SetAlpha(Math::round(0xAF * alpha));
-        std::set<int> drawBig;
-        for (unsigned int i = 0; i < _dotUnderCursor.size(); ++i)
-        {
-            drawBig.insert(_dotUnderCursor[i]);
+    for (unsigned int i = 0; i < _triangles.GetVB().SizeIndex(); i += 3)
+    {
+        Render::Line(_triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 0)).x, _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 0)).y
+                     , _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 1)).x, _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 1)).y, 0x4FFFFFFF);
+        Render::Line(_triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 2)).x, _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 2)).y
+                     , _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 1)).x, _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 1)).y, 0x4FFFFFFF);
+        Render::Line(_triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 0)).x, _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 0)).y
+                     , _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 2)).x, _triangles.GetVB().VertXY(_triangles.GetVB().Index(i + 2)).y, 0x4FFFFFFF);
+    }
+
+    //parent = Render::GetCurrentMatrix();
+    for (unsigned int i = 0; i < _dots.size(); ++i)
+    {
+        Render::Line(_dots[i].x, _dots[i].y, _dots[(i + 1) % _dots.size()].x, _dots[(i + 1) % _dots.size()].y, 0xFFFFFFFF);
+    }
+
+    Render::SetMatrixUnit();
+
+    float alpha = (Render::GetColor() >> 24) / 255.f;
+    Render::SetAlpha(Math::round(0xAF * alpha));
+    std::set<int> drawBig;
+    for (unsigned int i = 0; i < _dotUnderCursor.size(); ++i)
+    {
+        drawBig.insert(_dotUnderCursor[i]);
+    }
+    for (unsigned int i = 0; i < _selectedDots.size(); ++i)
+    {
+        drawBig.insert(_selectedDots[i]);
+    }
+
+    for (unsigned int i = 0; i < _screenDots.size(); ++i) {
+        if (drawBig.end() != drawBig.find(i)) {
+            scale->Render(_screenDots[i].x - scale->Width() / 2.f, _screenDots[i].y - scale->Height() / 2.f);
+        } else {
+            scaleSide->Render(_screenDots[i].x - scaleSide->Width() / 2.f, _screenDots[i].y - scaleSide->Height() / 2.f);
         }
-        for (unsigned int i = 0; i < _selectedDots.size(); ++i)
-        {
-            drawBig.insert(_selectedDots[i]);
-        }
+    }
+    Render::SetAlpha(Math::round(0xFF * alpha));
 
-        for (unsigned int i = 0; i < _screenDots.size(); ++i) {
-            if (drawBig.end() != drawBig.find(i)) {
-                scale->Render(_screenDots[i].x - scale->Width() / 2.f, _screenDots[i].y - scale->Height() / 2.f);
-            } else {
-                scaleSide->Render(_screenDots[i].x - scaleSide->Width() / 2.f, _screenDots[i].y - scaleSide->Height() / 2.f);
-            }
-        }
-        Render::SetAlpha(Math::round(0xFF * alpha));
-
-		Render::PopMatrix();
+    Render::PopMatrix();
 //		Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
-	}
 }
 
 bool ColoredPolygon::PixelCheck(const FPoint &point) { 
@@ -404,10 +416,7 @@ bool ColoredPolygon::TryCreateDot(const FPoint &mouse)
             _dotUnderCursor.clear();
             _selectedDots.clear();
         }
-        //_mouseDown = _selectedDots.size() > 0;
     }
-    //_mousePos = mouse;
-    //return _mouseDown;
     return index >= 0 || _selectedDots.size() > 0;
 }
 
