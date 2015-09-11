@@ -471,12 +471,14 @@ bool Math::GenerateTriangles(QVector<FPoint> inputDots, Sprite &sprite, DWORD co
 		}
 		if (dots.size() == 3) {
 			FillTriangle(triCounter++, dots[0], dots[1], dots[2], vb);
-			dots.clear();
+            return true;
 		} else {
 			const FPoint *a;
 			const FPoint *b;
 			const FPoint *c;
-			for (unsigned int i = 0; i < dots.size(); ++i) {
+            int opt = -1;
+            for (unsigned int i = 0; i < dots.size(); ++i)
+            {
 				a = &inputDots[dots[i]];
 				b = &inputDots[dots[(i + 1) % dots.size()]];
 				c = &inputDots[dots[(i + 2) % dots.size()]];
@@ -495,17 +497,45 @@ bool Math::GenerateTriangles(QVector<FPoint> inputDots, Sprite &sprite, DWORD co
 					intersection = (a2 != a && a2 != b && a2 != c && Math::Inside(*a2, *a, *b, *c));
 				}
 
-				if (!intersection && Math::VMul(*b - *a, *c - *b) * sign > 0.f) {//       
-					FillTriangle(triCounter++, dots[i], dots[(i + 1) % dots.size()], dots[(i + 2) % dots.size()], vb);
-					if (i < dots.size() - 1) {
-						dots.erase(dots.begin() + i + 1);
-					} else {
-						dots.erase(dots.begin());
-					}
-					break;
+                if (!intersection && Math::VMul(*b - *a, *c - *b) * sign > 0.f)
+                {
+                    if (opt >= 0)
+                    {
+                        const FPoint *oa = &inputDots[dots[opt]];
+                        const FPoint *ob = &inputDots[dots[(opt + 1) % dots.size()]];
+                        const FPoint *oc = &inputDots[dots[(opt + 2) % dots.size()]];
+
+                        float al = (*b - *c).Length();
+                        float bl = (*a - *c).Length();
+                        float cl = (*b - *a).Length();
+
+                        float oal = (*ob - *oc).Length();
+                        float obl = (*oa - *oc).Length();
+                        float ocl = (*ob - *oa).Length();
+
+                        float cosb = (bl * bl - al * al - cl * cl) / ( - 2 * al * cl);
+                        float cosob = (obl * obl - oal * oal - ocl * ocl) / ( - 2 * oal * ocl);
+
+                        if (cosb > cosob)
+                        {
+                            opt = i;
+                        }
+                    }
+                    else
+                    {
+                        opt = i;
+                    }
 				}
 			}
-		}		
+
+            FillTriangle(triCounter++, dots[opt], dots[(opt + 1) % dots.size()], dots[(opt + 2) % dots.size()], vb);
+            if (opt < dots.size() - 1) {
+                dots.erase(dots.begin() + opt + 1);
+            } else {
+                dots.erase(dots.begin());
+            }
+
+        }
 	}
 	return true;
 }
