@@ -55,6 +55,13 @@ MainWindow::MainWindow()
     _viewerSplineSplitter->restoreState(settings.value("view_spline_splitter").toByteArray());
     _viewerSplineSplitter->restoreGeometry(settings.value("view_spline_splitter_geometry").toByteArray());
 
+    // load previos animation
+    _storeFileName = settings.value("store_file_name").toString();
+    if (!_storeFileName.empty())
+    {
+        Animation::Instance()->LoadFromFile(_storeFileName);
+    }
+
     statusBar()->showMessage(tr("Ready"));
 
     connect(_viewer, SIGNAL(uploadTexture()), this, SLOT(uploadLastTexture()));
@@ -93,6 +100,8 @@ MainWindow::~MainWindow()
 
     settings.setValue("mainwindow_geometry", saveGeometry());
     settings.setValue("mainwindow_state", saveState());
+
+    settings.setValue("store_file_name", _storeFileName);
 }
 
 void MainWindow::createMenus()
@@ -114,12 +123,17 @@ void MainWindow::createMenus()
         connect(action, SIGNAL(triggered()), this, SLOT(about()));
         menu->addAction(action);
 
-        action = new QAction(tr("&Save"), this);
-        connect(action, SIGNAL(triggered()), this, SLOT(about()));
+        action = new QAction(tr("&Open..."), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(open()));
         menu->addAction(action);
 
-        action = new QAction(tr("&Save as..."), this);
-        connect(action, SIGNAL(triggered()), this, SLOT(about()));
+        action = new QAction(tr("&Save"), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(save()));
+        action->setShortcuts(QKeySequence::Save);
+        menu->addAction(action);
+
+        action = new QAction(tr("Save &as..."), this);
+        connect(action, SIGNAL(triggered()), this, SLOT(saveAs()));
         menu->addAction(action);
 
         menu->addSeparator();
@@ -200,4 +214,39 @@ bool MainWindow::CreateDotMode()
 {
     return _editPoints->isChecked();
 }
+
+void MainWindow::open()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Animation (*.aml)"));
+
+    if (fileName.size())
+    {
+        _storeFileName = fileName;
+
+        Animation::Instance()->LoadFromFile(_storeFileName);
+    }
+}
+
+void MainWindow::save()
+{
+    if (_storeFileName.empty())
+    {
+        saveAs();
+        return;
+    }
+
+    Animation::Instance()->SaveToFile(_storeFileName);
+}
+
+void MainWindow::saveAs()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Save File"), "", tr("Animation (*.aml)"));
+
+    if (fileName.size())
+    {
+        _storeFileName = fileName;
+        save();
+    }
+}
+
 

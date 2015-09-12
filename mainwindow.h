@@ -17,6 +17,9 @@ private slots:
     void about();
     void chooseTexture();
     void uploadLastTexture();
+    void saveAs();
+    void save();
+    void open();
 public:
     MainWindow();
     virtual ~MainWindow();
@@ -25,6 +28,7 @@ public:
     void PrintToOutput(const char *s);
 
 private:
+    std::string _storeFileName;
     void createMenus();
     QSplitter *_centralSplitter;
     QSplitter *_codeConsoleSplitter;

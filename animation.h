@@ -74,7 +74,8 @@ public:
 
     void RemoveBones();
 
-//    void Test(FPoint p);
+    void LoadFromFile(const std::string &fileName);
+    void SaveToFile(const std::string &fileName);
 
 };
 
