@@ -584,7 +584,16 @@ bool Animation::SetTexture(const char *fileName)
     {
         _baseSprite = new Sprite(_texture, 0, 0, _texture->Width(), _texture->Height());
     }
-    return !_texture->failed();
+    if (!_texture->failed())
+    {
+        _fileName = fileName;
+        return true;
+    }
+    else
+    {
+        _fileName = "";
+        return false;
+    }
 }
 
 void Animation::StartBoneCreating(uint index, const FPoint &point)
@@ -641,8 +650,12 @@ void Animation::PolygonMouseUp(const FPoint &pos)
     }
 }
 
+void Animation::LoadFromFile(const std::string &fileName)
+{
 
-//void Animation::Test(FPoint p)
-//{
-//    UpdateChain(testPoints, p);
-//}
+}
+
+void Animation::SaveToFile(const std::string &fileName)
+{
+
+}

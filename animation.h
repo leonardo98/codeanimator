@@ -35,6 +35,7 @@ private:
 
     GLTexture2D *_texture;
     Sprite *_baseSprite;
+    std::string _fileName;
 
 public:
     Animation();
