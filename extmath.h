@@ -20,6 +20,7 @@ public:
     static void Write(rapidxml::xml_node<> *xe, const char *name, const float value);
     static void Write(rapidxml::xml_node<> *xe, const char *name, const int value);
     static void Write(rapidxml::xml_node<> *xe, const char *name, const unsigned int value);
+    static void Write(rapidxml::xml_node<> *xe, const char *name, const char *value);
     static const char * FloatToChar(float f, char *s = NULL);
 	static bool GetCirclesIntersect(float X1, float Y1, float R1, float X2, float Y2, float R2, FPoint &P1, FPoint &P2);
 	static bool GetCirclesIntersect2(float x1, float y1, float r1, float x2, float y2, float r2, FPoint &q1, FPoint &q2);

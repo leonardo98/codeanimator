@@ -23,21 +23,23 @@ float Math::Read(rapidxml::xml_node<> *xe, const char *name, const float default
 void Math::Write(rapidxml::xml_node<> *xe, const char *name, const float value) {
 	char buff[20];
     sprintf(buff, "%g", value);
-    char *copyBuff = xe->document()->allocate_string(buff);
-    xe->append_attribute(xe->document()->allocate_attribute(name, copyBuff));
+    Math::Write(xe, name, buff);
 }
 
 void Math::Write(rapidxml::xml_node<> *xe, const char *name, const int value) {
     char buff[20];
     sprintf(buff, "%i", value);
-    char *copyBuff = xe->document()->allocate_string(buff);
-    xe->append_attribute(xe->document()->allocate_attribute(name, copyBuff));
+    Math::Write(xe, name, buff);
 }
 
 void Math::Write(rapidxml::xml_node<> *xe, const char *name, const unsigned int value) {
     char buff[20];
     sprintf(buff, "%i", value);
-    char *copyBuff = xe->document()->allocate_string(buff);
+    Math::Write(xe, name, buff);
+}
+
+void Math::Write(rapidxml::xml_node<> *xe, const char *name, const char *value) {
+    char *copyBuff = xe->document()->allocate_string(value);
     xe->append_attribute(xe->document()->allocate_attribute(name, copyBuff));
 }
 
