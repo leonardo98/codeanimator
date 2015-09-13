@@ -43,13 +43,15 @@ ColoredPolygon::ColoredPolygon(const ColoredPolygon &c)
 
 ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
 {
+    _boneName = xe->first_attribute("bone")->value();
+
     rapidxml::xml_node<> *dot = xe->first_node("dot");
 	while (dot != NULL) {
         _dots.push_back(FPoint(atof(dot->first_attribute("x")->value()), atof(dot->first_attribute("y")->value())));
         dot = dot->next_sibling("dot");
 	}
-	CalcWidthAndHeight();
-	GenerateTriangles();
+    CalcWidthAndHeight();
+    GenerateTriangles();
 	_mouseDown = false;
     _dotUnderCursor.clear();
     _selectedDots.clear();
@@ -169,6 +171,7 @@ bool ColoredPolygon::PixelCheck(const FPoint &point) {
 
 void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 {
+    Math::Write(xe, "bone", _boneName.c_str());
 	for (unsigned int j = 0; j < _dots.size(); ++j) {
         rapidxml::xml_node<> *dot = xe->document()->allocate_node(rapidxml::node_element, "dot");
         xe->append_node(dot);
@@ -225,13 +228,16 @@ void ColoredPolygon::GenerateTriangles()
 {
     Matrix m;
     m.Unit();
-    m.Move(-0.5f, -0.5f);
-    m.Scale(1.f / Animation::Instance()->GetTexture()->Width(), 1.f / Animation::Instance()->GetTexture()->Height());
+    if (Animation::Instance()->GetTexture())
+    {
+        m.Move(-0.5f, -0.5f);
+        m.Scale(1.f / Animation::Instance()->GetTexture()->Width(), 1.f / Animation::Instance()->GetTexture()->Height());
+    }
     Math::GenerateTriangles(_dots, _triangles, _color, Animation::Instance()->GetTexture(), &m);
 }
 
 void ColoredPolygon::DrawTriangles() {
-	Render::PushColorAndMul(_color);
+    Render::PushColorAndMul(_color);
 	_triangles.Render();
 	Render::PopColor();
 }

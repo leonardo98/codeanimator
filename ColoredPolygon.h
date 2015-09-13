@@ -29,7 +29,6 @@ private:
     QVector<int> _dotUnderCursor;
     QVector<int> _selectedDots;
 
-	void GenerateTriangles();
 	VertexBuffer tri;
 	void FillTriangle(const FPoint &a, const FPoint &b, const FPoint &c, VertexBuffer &tri);
 	void DrawTriangles();
@@ -47,6 +46,7 @@ private:
 
 public:
 
+    void GenerateTriangles();
     const std::string &GetBone() { return _boneName; }
     void SetBone(const std::string &name) { _boneName = name; }
 
