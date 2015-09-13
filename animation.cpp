@@ -2,6 +2,8 @@
 #include <set>
 #include "ogl/render.h"
 #include "mainwindow.h"
+#include "extmath.h"
+#include "rapidxml/rapidxml_print.hpp"
 
 Animation *Animation::_instance = NULL;
 
@@ -587,6 +589,10 @@ bool Animation::SetTexture(const char *fileName)
     if (!_texture->failed())
     {
         _fileName = fileName;
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            _meshes[i]->GenerateTriangles();
+        }
         return true;
     }
     else
@@ -652,10 +658,109 @@ void Animation::PolygonMouseUp(const FPoint &pos)
 
 void Animation::LoadFromFile(const std::string &fileName)
 {
+    _boneMoving = false;
+    _startMovingBone = -1;
+    _texture = NULL;
+    _baseSprite = NULL;
+    _meshGenerateBone = -1;
+    _selected.clear();
 
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        delete _meshes[i];
+    }
+    _meshes.clear();
+
+    for (uint i = 0; i < _bones.size(); ++i)
+    {
+        delete _bones[i];
+    }
+    _bones.clear();
+
+    _deltaAngle.clear();
+    _boneChain.clear();
+    _chainPoints.clear();
+
+//    GLTexture2D *_texture;
+//    Sprite *_baseSprite;
+//    std::string _fileName;
+
+    std::ifstream myfile(fileName.c_str());
+    std::vector<char> buffer((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>( ));
+
+    if (buffer.size())
+    { //    -  XML
+        buffer.push_back('\0');
+        rapidxml::xml_document<> doc;
+        doc.parse<0>(&buffer[0]);
+        rapidxml::xml_node<> *animation = doc.first_node();
+
+        rapidxml::xml_node<> *bones = animation->first_node("bones");
+        rapidxml::xml_node<> *bone = bones->first_node("bone");
+        int n = atoi(bones->first_attribute("size")->value());
+        while (bone)
+        {
+            _bones.push_back(new BoneAnimated(bone));
+            bone = bone->next_sibling("bone");
+        }
+        assert(n == _bones.size());
+
+        rapidxml::xml_node<> *meshes = animation->first_node("meshes");
+        rapidxml::xml_node<> *mesh = meshes->first_node("mesh");
+        _meshes.resize(atoi(meshes->first_attribute("size")->value()));
+        int counter = 0;
+        while (mesh)
+        {
+            assert(counter < _meshes.size());
+            _meshes[counter] = new ColoredPolygon(mesh);
+            counter++;
+            mesh = mesh->next_sibling("mesh");
+        }
+        assert(counter == _meshes.size());
+    }
+}
+
+void Animation::RegisterBone(BoneAnimated *b)
+{
+    _bones.push_back(b);
 }
 
 void Animation::SaveToFile(const std::string &fileName)
 {
+    std::ofstream file_stored(fileName.c_str());
+
+    rapidxml::xml_document<> doc;
+    rapidxml::xml_node<> *xe = doc.allocate_node(rapidxml::node_element, "animation");
+    doc.append_node(xe);
+
+    // save bones
+    rapidxml::xml_node<> *bones = xe->document()->allocate_node(rapidxml::node_element, "bones");
+    xe->append_node(bones);
+
+    Math::Write(bones, "size", (int)_bones.size());
+    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    {
+        if ((*i)->GetParent() == NULL)
+        {
+            rapidxml::xml_node<> *bone = xe->document()->allocate_node(rapidxml::node_element, "bone");
+            bones->append_node(bone);
+            (*i)->SaveToXml(bone);
+        }
+    }
+
+    // save meshes
+    rapidxml::xml_node<> *meshes = xe->document()->allocate_node(rapidxml::node_element, "meshes");
+    xe->append_node(meshes);
+
+    Math::Write(meshes, "size", (int)_meshes.size());
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        rapidxml::xml_node<> *mesh = xe->document()->allocate_node(rapidxml::node_element, "mesh");
+        meshes->append_node(mesh);
+        _meshes[i]->SaveToXml(mesh);
+    }
+
+    file_stored << doc;
+    file_stored.close();
 
 }

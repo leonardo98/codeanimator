@@ -28,7 +28,7 @@ public:
     void PrintToOutput(const char *s);
 
 private:
-    std::string _storeFileName;
+    QString _storeFileName;
     void createMenus();
     QSplitter *_centralSplitter;
     QSplitter *_codeConsoleSplitter;

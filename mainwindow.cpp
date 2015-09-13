@@ -57,9 +57,9 @@ MainWindow::MainWindow()
 
     // load previos animation
     _storeFileName = settings.value("store_file_name").toString();
-    if (!_storeFileName.empty())
+    if (_storeFileName.size())
     {
-        Animation::Instance()->LoadFromFile(_storeFileName);
+        Animation::Instance()->LoadFromFile(_storeFileName.toStdString());
     }
 
     statusBar()->showMessage(tr("Ready"));
@@ -223,24 +223,24 @@ void MainWindow::open()
     {
         _storeFileName = fileName;
 
-        Animation::Instance()->LoadFromFile(_storeFileName);
+        Animation::Instance()->LoadFromFile(_storeFileName.toStdString());
     }
 }
 
 void MainWindow::save()
 {
-    if (_storeFileName.empty())
+    if (!_storeFileName.size())
     {
         saveAs();
         return;
     }
 
-    Animation::Instance()->SaveToFile(_storeFileName);
+    Animation::Instance()->SaveToFile(_storeFileName.toStdString());
 }
 
 void MainWindow::saveAs()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Save File"), "", tr("Animation (*.aml)"));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", tr("Animation (*.aml)"));
 
     if (fileName.size())
     {
