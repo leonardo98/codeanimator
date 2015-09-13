@@ -1,5 +1,7 @@
 #include "boneanimated.h"
 #include "ogl/render.h"
+#include "extmath.h"
+#include "animation.h"
 
 const float WideCoef = 0.1f;
 
@@ -284,3 +286,74 @@ void BoneAnimated::SetBonePos(const FPoint &pos)
     _pos = pos;
     CalculatePosition(_parentMatrix, 0.f);
 }
+
+BoneAnimated::BoneAnimated(rapidxml::xml_node<> *xe)
+    : x(xe->first_node("x"))
+    , y(xe->first_node("y"))
+    , angle(xe->first_node("angle"))
+    , scaleX(xe->first_node("scaleX"))
+    , scaleY(xe->first_node("scaleY"))
+{
+    _pos.x = atof(xe->first_attribute("x")->value());
+    _pos.y = atof(xe->first_attribute("y")->value());
+    _angle = atof(xe->first_attribute("angle")->value());
+    _length = atof(xe->first_attribute("length")->value());
+    _name = xe->first_attribute("name")->value();
+
+    rapidxml::xml_node<> *children = xe->first_node("children");
+    rapidxml::xml_node<> *bone = children->first_node("bone");
+    _children.resize(atoi(children->first_attribute("size")->value()));
+    int counter = 0;
+    while (bone)
+    {
+        assert(counter < _children.size());
+        _children[counter] = new BoneAnimated(bone);
+        _children[counter]->_parent = this;
+        Animation::Instance()->RegisterBone(_children[counter]);
+        counter++;
+        bone = bone->next_sibling("bone");
+    }
+    assert(counter == _children.size());
+
+}
+
+void BoneAnimated::SaveToXml(rapidxml::xml_node<> *xe)
+{
+    Math::Write(xe, "x", _pos.x);
+    Math::Write(xe, "y", _pos.y);
+    Math::Write(xe, "angle", _angle);
+    Math::Write(xe, "length", _length);
+    Math::Write(xe, "name", _name.c_str());
+
+    rapidxml::xml_node<> *splineX = xe->document()->allocate_node(rapidxml::node_element, "x");
+    xe->append_node(splineX);
+    x.SaveToXml(splineX);
+
+    rapidxml::xml_node<> *splineY = xe->document()->allocate_node(rapidxml::node_element, "y");
+    xe->append_node(splineY);
+    y.SaveToXml(splineY);
+
+    rapidxml::xml_node<> *splineAngle = xe->document()->allocate_node(rapidxml::node_element, "angle");
+    xe->append_node(splineAngle);
+    angle.SaveToXml(splineAngle);
+
+    rapidxml::xml_node<> *splineScaleX = xe->document()->allocate_node(rapidxml::node_element, "scaleX");
+    xe->append_node(splineScaleX);
+    scaleX.SaveToXml(splineScaleX);
+
+    rapidxml::xml_node<> *splineScaleY = xe->document()->allocate_node(rapidxml::node_element, "scaleY");
+    xe->append_node(splineScaleY);
+    scaleY.SaveToXml(splineScaleY);
+
+    rapidxml::xml_node<> *children = xe->document()->allocate_node(rapidxml::node_element, "children");
+    xe->append_node(children);
+
+    Math::Write(children, "size", (int)_children.size());
+    for (unsigned int j = 0; j < _children.size(); ++j)
+    {
+        rapidxml::xml_node<> *bone = xe->document()->allocate_node(rapidxml::node_element, "bone");
+        children->append_node(bone);
+        _children[j]->SaveToXml(bone);
+    }
+}
+

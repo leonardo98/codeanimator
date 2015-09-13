@@ -65,6 +65,9 @@ public:
     void SetName(const std::string &name) { _name = name; }
     const std::string &GetName() { return _name; }
 
+    BoneAnimated(rapidxml::xml_node<> *xe);
+    void SaveToXml(rapidxml::xml_node<> *xe);
+
 };
 
 #endif // BONEANIMATED_H
