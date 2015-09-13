@@ -1,4 +1,5 @@
 #include "spline.h"
+#include "extmath.h"
 
 //BonePosition::BonePosition()
 //{
@@ -302,6 +303,95 @@ float Spline::GetGlobalValue(uint frame, float timeSinceFrame)
     float segmentProgress = (frame - _points[middle].frame) / (_points[middle + 1].frame - _points[middle].frame) + timeSinceFrame;
 
     return GetValue(middle, segmentProgress);
+}
+
+void SplinePoint::LoadFromXml(rapidxml::xml_node<> *xe)
+{
+    frame = atoi(xe->first_attribute("frame")->value());
+    index = atoi(xe->first_attribute("index")->value());
+    indexIn = atoi(xe->first_attribute("indexIn")->value());
+    indexOut = atoi(xe->first_attribute("indexOut")->value());
+    corner = (CornerType)atoi(xe->first_attribute("corner")->value());
+}
+
+void SplinePoint::SaveToXml(rapidxml::xml_node<> *xe)
+{
+    Math::Write(xe, "frame", frame);
+    Math::Write(xe, "index", index);
+    Math::Write(xe, "indexIn", indexIn);
+    Math::Write(xe, "indexOut", indexOut);
+    Math::Write(xe, "corner", (int)corner);
+}
+
+Spline::Spline(rapidxml::xml_node<> *xe)
+{
+    _numDivide = atoi(xe->first_attribute("divide")->value());
+
+    rapidxml::xml_node<> *pool = xe->first_node("pool");
+    int n = atoi(pool->first_attribute("size")->value());
+    assert(n >= 0);
+    _pool.resize(n);
+    uint counter = 0;
+    std::string array = pool->first_attribute("val")->value();
+    std::string::size_type start = 0;
+    std::string::size_type sigma = array.find(";");
+    while (sigma + 1 < array.size())
+    {
+        assert(counter < _pool.size());
+        _pool[counter] = atof(array.substr(start, sigma - start).c_str());
+        ++counter;
+        start = sigma + 1;
+        sigma = array.find(";", start);
+    }
+    assert(counter == _pool.size());
+
+    rapidxml::xml_node<> *points = xe->first_node("points");
+    n = atoi(points->first_attribute("size")->value());
+    assert(n >= 0);
+    _points.resize(n);
+    counter = 0;
+    rapidxml::xml_node<> *p = points->first_node("p");
+    while (p != NULL)
+    {
+        assert(counter < _points.size());
+        _points[counter].LoadFromXml(p);
+        p = p->next_sibling("p");
+        ++counter;
+    }
+    assert(counter == _points.size());
+}
+
+void Spline::SaveToXml(rapidxml::xml_node<> *xe)
+{
+    Math::Write(xe, "divide", _numDivide);
+
+    // save pool
+    rapidxml::xml_node<> *pool = xe->document()->allocate_node(rapidxml::node_element, "pool");
+    xe->append_node(pool);
+
+    std::string array;
+    char buff[20];
+    for (uint i = 0; i < _pool.size(); ++i)
+    {
+        sprintf(buff, "%g", _pool[i]);
+        array += buff;
+        array += ";";
+    }
+
+    Math::Write(pool, "size", (int)_pool.size());
+    Math::Write(pool, "val", array.c_str());
+
+    // save points
+    rapidxml::xml_node<> *points = xe->document()->allocate_node(rapidxml::node_element, "points");
+    xe->append_node(points);
+
+    Math::Write(points, "size", (int)_points.size());
+    for (uint i = 0; i < _points.size(); ++i)
+    {
+        rapidxml::xml_node<> *p = xe->document()->allocate_node(rapidxml::node_element, "p");
+        points->append_node(p);
+        _points[i].SaveToXml(p);
+    }
 }
 
 void SplineMover::OnMouseDown(FPoint mousePos, float wEps, float hEps)

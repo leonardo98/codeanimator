@@ -17,8 +17,8 @@ enum SplineType
 
 enum CornerType
 {
-    corner_type_sharp,
-    corner_type_smooth,
+    corner_type_sharp = 0,
+    corner_type_smooth = 1,
 };
 
 struct SplinePoint
@@ -33,6 +33,9 @@ struct SplinePoint
     SplinePoint()
         : index(-1), indexIn(-1), indexOut(-1), corner(corner_type_sharp), frame(0)
     {}
+
+    void LoadFromXml(rapidxml::xml_node<> *xe);
+    void SaveToXml(rapidxml::xml_node<> *xe);
 };
 
 bool CmpPoints(const SplinePoint &one, const SplinePoint &two);
@@ -73,6 +76,9 @@ public:
     void RemovePoint(uint i);
 
     void Clear();
+
+    Spline(rapidxml::xml_node<> *xe);
+    void SaveToXml(rapidxml::xml_node<> *xe);
 };
 
 class SplineMover : public Spline
