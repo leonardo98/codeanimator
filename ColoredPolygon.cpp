@@ -45,11 +45,17 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
 {
     _boneName = xe->first_attribute("bone")->value();
 
-    rapidxml::xml_node<> *dot = xe->first_node("dot");
-	while (dot != NULL) {
-        _dots.push_back(FPoint(atof(dot->first_attribute("x")->value()), atof(dot->first_attribute("y")->value())));
-        dot = dot->next_sibling("dot");
-	}
+    _dots.resize(atoi(xe->first_attribute("size")->value()));
+    std::string array = xe->first_attribute("dots")->value();
+    std::string::size_type start = 0;
+    std::string::size_type sigma = array.find(";");
+    for (unsigned int j = 0; j < _dots.size(); ++j)
+    {
+        sscanf(array.substr(start, sigma - start).c_str(), "%g %g", &_dots[j].x, &_dots[j].y);
+        start = sigma + 1;
+        sigma = array.find(";", start);
+    }
+
     CalcWidthAndHeight();
     GenerateTriangles();
 	_mouseDown = false;
@@ -172,12 +178,16 @@ bool ColoredPolygon::PixelCheck(const FPoint &point) {
 void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 {
     Math::Write(xe, "bone", _boneName.c_str());
-	for (unsigned int j = 0; j < _dots.size(); ++j) {
-        rapidxml::xml_node<> *dot = xe->document()->allocate_node(rapidxml::node_element, "dot");
-        xe->append_node(dot);
-        Math::Write(dot, "x", _dots[j].x);
-        Math::Write(dot, "y", _dots[j].y);
+    Math::Write(xe, "size", _dots.size());
+    std::string array;
+    for (unsigned int j = 0; j < _dots.size(); ++j)
+    {
+        char buff[100];
+        sprintf(buff, "%g %g;", _dots[j].x, _dots[j].y);
+        array += buff;
 	}
+    Math::Write(xe, "dots", array.c_str());
+
 	if (_triangles.GetVB().Size())
 	{
         rapidxml::xml_node<> *mesh = xe->document()->allocate_node(rapidxml::node_element, "mesh");
@@ -188,21 +198,21 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 		{
             rapidxml::xml_node<> *vertex = xe->document()->allocate_node(rapidxml::node_element, "vert");
             mesh->append_node(vertex);
-			Math::Write(vertex, "x", _triangles.GetVB().VertXY(i).x);
-			Math::Write(vertex, "y", _triangles.GetVB().VertXY(i).y);
-			Math::Write(vertex, "tx", _triangles.GetVB().VertUV(i).x);
-			Math::Write(vertex, "ty", _triangles.GetVB().VertUV(i).y);
+            char buff[1000];
+            sprintf(buff, "%g;%g;%g;%g", _triangles.GetVB().VertXY(i).x, _triangles.GetVB().VertXY(i).y
+                                        , _triangles.GetVB().VertUV(i).x, _triangles.GetVB().VertUV(i).y);
+            Math::Write(vertex, "geom", buff);
 		}
-        rapidxml::xml_node<> *indexes = xe->document()->allocate_node(rapidxml::node_element, "indexes");
+        rapidxml::xml_node<> *indexes = xe->document()->allocate_node(rapidxml::node_element, "indexes");        
         xe->append_node(indexes);
-		for (unsigned int i = 0; i < _triangles.GetVB().SizeIndex(); i += 3)
+
+        std::string array;
+        for (unsigned int i = 0; i < _triangles.GetVB().SizeIndex(); ++i)
 		{
-            rapidxml::xml_node<> *quad = xe->document()->allocate_node(rapidxml::node_element, "poly");
-            indexes->append_node(quad);
-            Math::Write(quad, "v0", (int)_triangles.GetVB().Index(i + 0));
-            Math::Write(quad, "v1", (int)_triangles.GetVB().Index(i + 1));
-            Math::Write(quad, "v2", (int)_triangles.GetVB().Index(i + 2));
+            array += Math::IntToStr((int)_triangles.GetVB().Index(i));
+            array += ";";
 		}
+        Math::Write(indexes, "array", array.c_str());
 	}
 }
 
