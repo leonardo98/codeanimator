@@ -293,6 +293,7 @@ BoneAnimated::BoneAnimated(rapidxml::xml_node<> *xe)
     , angle(xe->first_node("angle"))
     , scaleX(xe->first_node("scaleX"))
     , scaleY(xe->first_node("scaleY"))
+    , _parent(NULL)
 {
     _pos.x = atof(xe->first_attribute("x")->value());
     _pos.y = atof(xe->first_attribute("y")->value());
