@@ -44,6 +44,8 @@ private:
 
     std::string _boneName;
 
+    Matrix _lastDrawMatrix;
+
 public:
 
     void GenerateTriangles();

@@ -117,6 +117,8 @@ ColoredPolygon::ColoredPolygon(const PointList &points)
 
 void ColoredPolygon::Draw()
 {
+    _lastDrawMatrix = Render::GetCurrentMatrix();
+
 	DrawTriangles();
 
 	_screenDots = _dots;
@@ -275,7 +277,10 @@ void ColoredPolygon::DrawTriangles() {
 
 int ColoredPolygon::SearchNearest(float x, float y)
 {
-    static const float SIZEX = 20;
+    FPoint dist;
+    _lastDrawMatrix.GetScale(dist.x, dist.y);
+    float SIZEX = 20 / dist.x;
+
     FPoint p(x, y);
     for (unsigned int i = 0; i < _dots.size(); ++i)
     {
