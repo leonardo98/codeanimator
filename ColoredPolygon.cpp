@@ -45,15 +45,33 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
 {
     _boneName = xe->first_attribute("bone")->value();
 
-    _dots.resize(atoi(xe->first_attribute("size")->value()));
-    std::string array = xe->first_attribute("dots")->value();
-    std::string::size_type start = 0;
-    std::string::size_type sigma = array.find(";");
-    for (unsigned int j = 0; j < _dots.size(); ++j)
+    rapidxml::xml_attribute<> *size = xe->first_attribute("size");
+    if (size)
     {
-        sscanf(array.substr(start, sigma - start).c_str(), "%g %g", &_dots[j].x, &_dots[j].y);
-        start = sigma + 1;
-        sigma = array.find(";", start);
+        _dots.resize(atoi(size->value()));
+        std::string array = xe->first_attribute("dots")->value();
+        std::string::size_type start = 0;
+        std::string::size_type sigma = array.find(";");
+        for (unsigned int j = 0; j < _dots.size(); ++j)
+        {
+            sscanf(array.substr(start, sigma - start).c_str(), "%g %g", &_dots[j].x, &_dots[j].y);
+            start = sigma + 1;
+            sigma = array.find(";", start);
+        }
+    }
+    else
+    {
+        rapidxml::xml_node<> *mesh = xe->first_node("mesh");
+        if (mesh)
+        {
+            _dots.resize(atoi(mesh->first_attribute("vert")->value()));
+            unsigned int count = 0;
+            for (rapidxml::xml_node<> *i = mesh->first_node(); i; i = i->next_sibling())
+            {
+                sscanf(i->first_attribute("geom")->value(), "%g;%g", &_dots[count].x, &_dots[count].y);
+                count++;
+            }
+        }
     }
 
     CalcWidthAndHeight();
@@ -178,15 +196,6 @@ bool ColoredPolygon::PixelCheck(const FPoint &point) {
 void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 {
     Math::Write(xe, "bone", _boneName.c_str());
-    Math::Write(xe, "size", _dots.size());
-    std::string array;
-    for (unsigned int j = 0; j < _dots.size(); ++j)
-    {
-        char buff[100];
-        sprintf(buff, "%g %g;", _dots[j].x, _dots[j].y);
-        array += buff;
-	}
-    Math::Write(xe, "dots", array.c_str());
 
 	if (_triangles.GetVB().Size())
 	{
@@ -214,6 +223,18 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 		}
         Math::Write(indexes, "array", array.c_str());
 	}
+    else
+    {
+        Math::Write(xe, "size", _dots.size());
+        std::string array;
+        for (unsigned int j = 0; j < _dots.size(); ++j)
+        {
+            char buff[100];
+            sprintf(buff, "%g %g;", _dots[j].x, _dots[j].y);
+            array += buff;
+        }
+        Math::Write(xe, "dots", array.c_str());
+     }
 }
 
 int ColoredPolygon::Width() {
