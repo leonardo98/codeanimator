@@ -223,6 +223,13 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     _mouseMovingMode = 0.f;
     FPoint worldClickPos = ScreenToWorld(mousePos);
 
+    if (MainWindow::Instance()->CreateDotMode()
+            && (QApplication::keyboardModifiers() & Qt::ShiftModifier) == 0
+            && Animation::Instance()->PolygonActive(worldClickPos))
+    {
+        Animation::Instance()->PolygonMouseDown(worldClickPos);
+        return;
+    }
     int boneAtPoint = Animation::Instance()->GetBoneAtPoint(worldClickPos);
     Animation::Instance()->Picking(boneAtPoint, (QApplication::keyboardModifiers() & Qt::ControlModifier) != 0);
     if (_hotKeysMode == create_bone_key)
@@ -257,10 +264,6 @@ void Viewer::OnMouseDown(const FPoint &mousePos)
     {
         Animation::Instance()->StartBoneMoving(boneAtPoint, worldClickPos);
         _mouseMoveAction = mouse_moving_bone;
-    }
-    else if (Animation::Instance()->PolygonActive(worldClickPos))
-    {
-        Animation::Instance()->PolygonMouseDown(worldClickPos);
     }
     else
     {

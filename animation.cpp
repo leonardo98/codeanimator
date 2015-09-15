@@ -78,9 +78,15 @@ void Animation::Draw()
     }
 
     // draw meshes
-    for (uint i = 0; i < _meshes.size(); ++i)
+    if (MainWindow::Instance()->CreateDotMode() && _selected.size() == 1)
     {
-        _meshes[i]->DebugDraw(true);
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            {
+                _meshes[i]->DebugDraw(true);
+            }
+        }
     }
 
 
@@ -621,35 +627,59 @@ void Animation::Finish()
 
 bool Animation::PolygonActive(const FPoint &pos)
 {
-    for (uint i = 0; i < _meshes.size(); ++i)
+    if (MainWindow::Instance()->CreateDotMode() && _selected.size() == 1)
     {
-        if (_meshes[i]->PixelCheck(pos))
-            return true;
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            {
+                if (_meshes[i]->PixelCheck(pos))
+                    return true;
+            }
+        }
     }
     return false;
 }
 
 void Animation::PolygonMouseDown(const FPoint &pos)
 {
-    for (uint i = 0; i < _meshes.size(); ++i)
+    if (MainWindow::Instance()->CreateDotMode() && _selected.size() == 1)
     {
-        _meshes[i]->MouseDown(pos);
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            {
+                _meshes[i]->MouseDown(pos);
+            }
+        }
     }
 }
 
 void Animation::PolygonMouseMove(const FPoint &pos)
 {
-    for (uint i = 0; i < _meshes.size(); ++i)
+    if (MainWindow::Instance()->CreateDotMode() && _selected.size() == 1)
     {
-        _meshes[i]->MouseMove(pos);
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            {
+                _meshes[i]->MouseMove(pos);
+            }
+        }
     }
 }
 
 void Animation::PolygonMouseUp(const FPoint &pos)
 {
-    for (uint i = 0; i < _meshes.size(); ++i)
+    if (MainWindow::Instance()->CreateDotMode() && _selected.size() == 1)
     {
-        _meshes[i]->MouseUp(pos);
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            {
+                _meshes[i]->MouseUp(pos);
+            }
+        }
     }
 }
 
