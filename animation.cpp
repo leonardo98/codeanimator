@@ -72,9 +72,9 @@ void Animation::Draw()
     }
 
     // draw selected bones
-    for (uint i = 0; i < _selected.size(); ++i)
+    for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        _bones[_selected[i]]->DrawSelection();
+        _bones[*i]->DrawSelection();
     }
 
     // draw meshes
@@ -179,9 +179,9 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _boneChain.push_back(mb);
 
     std::set<BoneAnimated*> sel;
-    for (uint i = 0; i < _selected.size(); ++i)
+    for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        sel.insert(_bones[_selected[i]]);
+        sel.insert(_bones[*i]);
     }
 
     BoneAnimated *parent = mb->GetParent();
@@ -231,24 +231,24 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
 {
     if (_boneMoving || _selected.size() > 1)
     {
-        for (uint i = 0; i < _selected.size(); ++i)
+        for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
         {
-            if (_bones[_selected[i]]->GetMoveByParent()) continue;
+            if (_bones[*i]->GetMoveByParent()) continue;
 
-            if (_bones[_selected[i]]->GetParent() == NULL)
-                _bones[_selected[i]]->MoveTo(point - _startMovingPos);
+            if (_bones[*i]->GetParent() == NULL)
+                _bones[*i]->MoveTo(point - _startMovingPos);
             else
             {
                 FPoint p(point);
                 FPoint s(_startMovingPos);
 
                 Matrix rev;
-                rev.MakeRevers(_bones[_selected[i]]->GetParent()->GetMatrix());
+                rev.MakeRevers(_bones[*i]->GetParent()->GetMatrix());
 
                 rev.Mul(p);
                 rev.Mul(s);
 
-                _bones[_selected[i]]->MoveTo(p - s);
+                _bones[*i]->MoveTo(p - s);
             }
         }
         _startMovingPos = point;
@@ -257,15 +257,15 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
         {
             for (uint i = 0; i < _bones.size(); ++i)
             {
-                FPoint p(_bones[_selected[0]]->GetBonePos());
-                if (_bones[_selected[0]]->GetParent())
+                FPoint p(_bones[*_selected.begin()]->GetBonePos());
+                if (_bones[*_selected.begin()]->GetParent())
                 {
-                    _bones[_selected[0]]->GetParent()->GetMatrix().Mul(p);
+                    _bones[*_selected.begin()]->GetParent()->GetMatrix().Mul(p);
                 }
 
-                if (i != _selected[0] && _bones[i]->CheckPoint(p))
+                if (i != *_selected.begin() && _bones[i]->CheckPoint(p))
                 {
-                    LinkBones(i, _selected[0]);
+                    LinkBones(i, *_selected.begin());
                     return;
                 }
             }
@@ -273,34 +273,34 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
     }
     else if (_selected.size() == 1)
     {
-        FPoint s(_bones[_selected[0]]->GetBonePos());
+        FPoint s(_bones[*_selected.begin()]->GetBonePos());
         FPoint e(point);
 
-        if (_bones[_selected[0]]->GetParent() == NULL)
-            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle
-                                        + (atan2(point.y - _bones[_selected[0]]->GetBonePos().y, point.x - _bones[_selected[0]]->GetBonePos().x)
-                                            - atan2(_startMovingPos.y - _bones[_selected[0]]->GetBonePos().y, _startMovingPos.x - _bones[_selected[0]]->GetBonePos().x)));
+        if (_bones[*_selected.begin()]->GetParent() == NULL)
+            _bones[*_selected.begin()]->SetBoneAngle(_startRotateAngle
+                                        + (atan2(point.y - _bones[*_selected.begin()]->GetBonePos().y, point.x - _bones[*_selected.begin()]->GetBonePos().x)
+                                            - atan2(_startMovingPos.y - _bones[*_selected.begin()]->GetBonePos().y, _startMovingPos.x - _bones[*_selected.begin()]->GetBonePos().x)));
         else
         {
-            FPoint o(_bones[_selected[0]]->GetBonePos());
+            FPoint o(_bones[*_selected.begin()]->GetBonePos());
             FPoint sm(_startMovingPos);
             Matrix rev;
-            rev.MakeRevers(_bones[_selected[0]]->GetParent()->GetMatrix());
+            rev.MakeRevers(_bones[*_selected.begin()]->GetParent()->GetMatrix());
             rev.Mul(e);
             rev.Mul(sm);
 
-            _bones[_selected[0]]->SetBoneAngle(_startRotateAngle + (atan2(e.y - o.y, e.x - o.x)
+            _bones[*_selected.begin()]->SetBoneAngle(_startRotateAngle + (atan2(e.y - o.y, e.x - o.x)
                                                                     - atan2(sm.y - o.y, sm.x - o.x)));
 
         }
         if (changeLength)
         {
-            _bones[_selected[0]]->SetLength((s - e).Length());
+            _bones[*_selected.begin()]->SetLength((s - e).Length());
         }
         if (_meshGenerateBone >= 0)
         {
             PointList points;
-            BoneAnimated *b = _bones[_selected[0]];
+            BoneAnimated *b = _bones[*_selected.begin()];
 
             FPoint p1(b->GetBonePos());
             FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
@@ -318,22 +318,22 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
 
 void Animation::BoneCreateTo(const FPoint &point)
 {
-    FPoint s(_bones[_selected[0]]->GetBonePos());
+    FPoint s(_bones[*_selected.begin()]->GetBonePos());
     FPoint e(point);
 
-    if (_bones[_selected[0]]->GetParent() != NULL)
+    if (_bones[*_selected.begin()]->GetParent() != NULL)
     {
         Matrix rev;
-        rev.MakeRevers(_bones[_selected[0]]->GetParent()->GetMatrix());
+        rev.MakeRevers(_bones[*_selected.begin()]->GetParent()->GetMatrix());
         rev.Mul(e);
     }
-    _bones[_selected[0]]->SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
-    _bones[_selected[0]]->SetLength((s - e).Length());
+    _bones[*_selected.begin()]->SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
+    _bones[*_selected.begin()]->SetLength((s - e).Length());
 
     if (_meshGenerateBone >= 0)
     {
         PointList points;
-        BoneAnimated *b = _bones[_selected[0]];
+        BoneAnimated *b = _bones[*_selected.begin()];
 
         FPoint p1(b->GetBonePos());
         FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
@@ -386,9 +386,9 @@ void Animation::ExcludeChild()
     {
         _bones[i]->SetMoveByParent(false);
     }
-    for (uint i = 0; i < _selected.size(); ++i)
+    for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        sel.insert(_bones[_selected[i]]);
+        sel.insert(_bones[*i]);
     }
     for (uint i = 0; i < _bones.size(); ++i)
     {
@@ -417,28 +417,25 @@ void Animation::Picking(int index, bool add)
     }
     if (!add)
     {
-        for (uint i = 0; i < _selected.size(); ++i)
+        for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
         {
-            if (_selected[i] == index)
+            if (*i == index)
             {
                 return;
             }
         }
         _selected.clear();
-        _selected.push_back(index);
+        _selected.insert(index);
         ExcludeChild();
         return;
     }
-    for (uint i = 0; i < _selected.size(); ++i)
+    std::set<uint>::iterator i = _selected.find(index);
+    if (i != _selected.end())
     {
-        if (_selected[i] == index)
-        {
-            _selected[i] = _selected.back();
-            _selected.pop_back();
-            return;
-        }
+        _selected.erase(i);
+        return;
     }
-    _selected.push_back(index);
+    _selected.insert(index);
     ExcludeChild();
 }
 
@@ -449,7 +446,7 @@ void Animation::SelectByArea(const Rect &area)
     {
         if (_bones[i]->IfInside(area))
         {
-            _selected.push_back(i);
+            _selected.insert(i);
         }
     }
     ExcludeChild();
@@ -481,10 +478,10 @@ void Animation::LinkBones(int parent, int child)
 
 void Animation::RemoveBones()
 {
-    for (uint i = 0; i < _selected.size(); ++i)
+    for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        delete _bones[_selected[i]];
-        _bones[_selected[i]] = NULL;
+        delete _bones[*i];
+        _bones[*i] = NULL;
     }
     std::set<std::string> names;
     for (uint i = 0; i < _bones.size(); )
@@ -531,9 +528,9 @@ void Animation::Remove()
 
 void Animation::Unlink()
 {
-    for (uint i = 0; i < _selected.size(); ++i)
+    for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        _bones[_selected[i]]->SetParent(NULL);
+        _bones[*i]->SetParent(NULL);
     }
 }
 

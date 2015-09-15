@@ -7,6 +7,7 @@
 #include "ogl/textures.h"
 #include "ogl/sprite.h"
 #include "ColoredPolygon.h"
+#include <set>
 
 class Animation : public QObject
 {
@@ -24,7 +25,7 @@ private:
     int _startMovingBone;
     FPoint _startMovingPos;
     float _startRotateAngle;
-    std::vector<uint> _selected;
+    std::set<uint> _selected;
 
     void ExcludeChild();
 
