@@ -36,8 +36,6 @@ void BoneAnimated::Draw()
     float l = _length;
     float w = WideCoef * _length / 2.f;
     Render::PushMatrix();
-//    Render::MatrixMove(_pos.x, _pos.y);
-//    Render::MatrixRotate(_angle);
     Render::MatrixMul(_matrix);
     Render::DrawTriangle(0.f, - w, l, 0.f, 0.f, w, 0x7FFFFFFF);
     Render::Line(0.f, - w, l, 0.f, 0x7F000000);
@@ -51,8 +49,6 @@ void BoneAnimated::DrawSelection()
     float l = _length;
     float w = WideCoef * _length;
     Render::PushMatrix();
-//    Render::MatrixMove(_pos.x, _pos.y);
-//    Render::MatrixRotate(_angle);
     Render::MatrixMul(_matrix);
     Render::Line(- w, - w, l + w, - w, 0x7F000000);
     Render::Line(- w, w, l + w, w, 0x7F000000);
@@ -184,37 +180,18 @@ bool BoneAnimated::MoveTo(const FPoint &mt)
 
 bool BoneAnimated::IfInside(const Rect &area)
 {
-    if (GetParent() == NULL)
+    FPoint s(0, 0);
+    GetMatrix().Mul(s);
+
+    if (!(area.x1 <= s.x && s.x <= area.x2 && area.y1 <= s.y && s.y <= area.y2))
     {
-        if (!(area.x1 <= _pos.x && _pos.x <= area.x2
-                && area.y1 <= _pos.y && _pos.y <= area.y2))
-        {
-            return false;
-        }
-
-        FPoint p(_length, 0);
-        p.Rotate(_angle);
-        p += _pos;
-
-        return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
+        return false;
     }
-    else
-    {
-        FPoint s(_pos);
-        GetParent()->GetMatrix().Mul(s);
 
-        if (!(area.x1 <= s.x && s.x <= area.x2 && area.y1 <= s.y && s.y <= area.y2))
-        {
-            return false;
-        }
+    FPoint p(_length, 0);
+    GetMatrix().Mul(p);
 
-        FPoint p(_length, 0);
-        p.Rotate(_angle);
-        p += _pos;
-        GetParent()->GetMatrix().Mul(p);
-
-        return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
-    }
+    return (area.x1 <= p.x && p.x <= area.x2 && area.y1 <= p.y && p.y <= area.y2);
 }
 
 void BoneAnimated::SetParent(BoneAnimated *b)
