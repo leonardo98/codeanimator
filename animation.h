@@ -15,6 +15,7 @@ class Animation : public QObject
 public slots:
     void Remove();
     void Unlink();
+    void CreatePointMass();
 
 private:
     std::vector<ColoredPolygon *> _meshes;

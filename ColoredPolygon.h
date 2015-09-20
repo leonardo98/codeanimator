@@ -3,8 +3,21 @@
 
 #include "ogl/sprite.h"
 #include "ogl/rect.h"
+#include "anim/boneanimated.h"
 
 typedef std::vector<FPoint> PointList;
+
+struct BoneMass
+{
+    std::string boneName;
+    BoneAnimated *bone;
+    float mass;
+};
+
+struct OnePointMasses
+{
+    BoneMass p[2];
+};
 
 class ColoredPolygon
 {
@@ -22,6 +35,7 @@ private:
 
     void CalcWidthAndHeight();
 
+    std::vector<OnePointMasses> _masses;
     QVector<FPoint> _dots; //
 	QVector<FPoint> _screenDots;
 	Sprite _triangles;
@@ -68,10 +82,10 @@ public:
 	virtual bool PixelCheck(const FPoint &point);
 	virtual bool GeometryCheck(const FPoint &point);
     bool RemoveDots();
-	virtual void EncapsulateAllDots(Rect &rect);
-	virtual void GetAllLocalDotsRect(Rect &rect);
     virtual bool Selection(const Rect& rect, bool full);
 	virtual void SaveToXml(rapidxml::xml_node<> *xe);
+
+    void BindToBone(BoneAnimated *bone);
 
 	virtual int Width();
 	virtual int Height();

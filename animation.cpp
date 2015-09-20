@@ -789,5 +789,19 @@ void Animation::SaveToFile(const std::string &fileName)
 
     file_stored << doc;
     file_stored.close();
-
 }
+
+void Animation::CreatePointMass()
+{
+    for (uint j = 0; j < _meshes.size(); ++j)
+    {
+        for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
+        {
+            if (_meshes[j]->GetBone() == _bones[(*i)]->GetName())
+            {
+                _meshes[j]->BindToBone(_bones[(*i)]);
+            }
+        }
+    }
+}
+

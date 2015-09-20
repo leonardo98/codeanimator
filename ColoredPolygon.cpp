@@ -292,19 +292,6 @@ int ColoredPolygon::SearchNearest(float x, float y)
     return -1;
 }
 
-void ColoredPolygon::EncapsulateAllDots(Rect &rect) {
-	for (unsigned int i = 0; i < _screenDots.size(); ++i) {
-		//rect.Encapsulate(_screenDots[i].x, _screenDots[i].y);
-        rect.Encapsulate(_dots[i].x, _dots[i].y);
-	}
-}
-
-void ColoredPolygon::GetAllLocalDotsRect(Rect &rect) {
-	for (unsigned int i = 0; i < _dots.size(); ++i) {
-        rect.Encapsulate(_dots[i].x, _dots[i].y);
-	}
-}
-
 bool ColoredPolygon::CheckLines(const FPoint &p)
 {
     for (unsigned int i = 0; i < _dots.size(); ++i)
@@ -489,3 +476,19 @@ bool ColoredPolygon::Selection(const Rect& rect, bool full)
     }
     return !full || _selectedDots.size() == _screenDots.size();
 }
+
+void ColoredPolygon::BindToBone(BoneAnimated *bone)
+{
+    _masses.resize(_dots.size());
+    for (uint i = 0; i < _masses.size(); ++i)
+    {
+        _masses[i].p[0].boneName = bone->GetName();
+        _masses[i].p[0].bone = bone;
+        _masses[i].p[0].mass = 1.f;
+
+        _masses[i].p[1].boneName = "";
+        _masses[i].p[0].bone = NULL;
+        _masses[i].p[0].mass = 0.f;
+    }
+}
+

@@ -190,6 +190,12 @@ void MainWindow::createMenus()
         connect(action, SIGNAL(triggered()), Animation::Instance(), SLOT(Unlink()));
         action->setShortcut(Qt::Key_P);
         menu->addAction(action);
+
+        menu->addSeparator();
+
+        action = new QAction(tr("&Bind points to bones"), this);
+        connect(action, SIGNAL(triggered()), Animation::Instance(), SLOT(CreatePointMass()));
+        menu->addAction(action);
     }
 }
 
