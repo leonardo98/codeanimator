@@ -149,14 +149,8 @@ bool BoneAnimated::CheckPoint(FPoint pos)
 //    if (!_visible)
 //        return false;
 
-    Matrix m;
-//    m.Move(_pos.x, _pos.y);
-//    m.Rotate(_angle);
-
-    m.Mul(_matrix);
-
     Matrix rev;
-    rev.MakeRevers(m);
+    rev.MakeRevers(_matrix);
 
     rev.Mul(pos);
 
@@ -171,14 +165,8 @@ bool BoneAnimated::MoveOrRotate(FPoint pos)
 //    if (!_visible)
 //        return false;
 
-    Matrix m;
-//    m.Move(_pos.x, _pos.y);
-//    m.Rotate(_angle);
-
-    m.Mul(_matrix);
-
     Matrix rev;
-    rev.MakeRevers(m);
+    rev.MakeRevers(_matrix);
 
     rev.Mul(pos);
 
