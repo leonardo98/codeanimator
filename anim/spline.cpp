@@ -281,7 +281,7 @@ bool Spline::Active(uint frame)
     return (_points.size() > 0 && _points.front().frame <= frame && frame < _points.back().frame);
 }
 
-float Spline::GetGlobalValue(uint frame, float timeSinceFrame)
+float Spline::GetValueGlobal(uint frame, float timeSinceFrame)
 {
     if (!Active(frame))
         return 0.f;
@@ -303,6 +303,54 @@ float Spline::GetGlobalValue(uint frame, float timeSinceFrame)
     float segmentProgress = (frame - _points[middle].frame) / (_points[middle + 1].frame - _points[middle].frame) + timeSinceFrame;
 
     return GetValue(middle, segmentProgress);
+}
+
+void Spline::SetValueGlobal(uint frame, float value)
+{
+    if (_points.size() == 0)
+    {
+        SplinePoint p;
+
+        _pool.resize(2);
+        _pool[0] = _pool[1] = 0.f;
+
+        p.frame = 0;
+        p.index = 0;
+        p.indexIn = -1;
+        p.indexOut = -1;
+        p.corner = corner_type_sharp;
+
+        _points.push_back(p);
+
+        p.frame = 9999;
+        p.index = 1;
+        _points.push_back(p);
+    }
+    else
+        assert(_points.size() >= 2);
+
+    uint start = 0;
+    uint end = _points.size() - 2;
+    uint middle = (start + end) / 2;
+
+    while (!(_points[middle].frame <= frame && frame < _points[middle + 1].frame))
+    {
+        if (_points[middle].frame > frame) {
+            end = middle;
+        } else if (_points[middle + 1].frame < frame) {
+            start = middle + 1;
+        }
+        middle = (start + end) / 2;
+    }
+
+    if (_points[middle].frame == frame)
+    {
+        SetValue(middle, frame, value);
+    }
+    else if (_points[middle + 1].frame == frame)
+    {
+        SetValue(middle + 1, frame, value);
+    }
 }
 
 void SplinePoint::LoadFromXml(rapidxml::xml_node<> *xe)
@@ -475,4 +523,3 @@ void SplineMover::OnMouseUp()
 {
     _activePoint = -1;
 }
-
