@@ -28,7 +28,12 @@ public:
 		_matrix[1][0] = 0.f; _matrix[1][1] = 1.f; _matrix[1][2] = 0.f;
 		_matrix[2][0] = 0.f; _matrix[2][1] = 0.f; _matrix[2][2] = 1.f;
 	}
-	Matrix() {
+    void Zero() {
+        _matrix[0][0] = _matrix[0][1] = _matrix[0][2] =
+        _matrix[1][0] = _matrix[1][1] = _matrix[1][2] =
+        _matrix[2][0] = _matrix[2][1] = _matrix[2][2] = 0.f;
+    }
+    Matrix() {
 		Unit();
 	}
 	void Rotate(float angle) {
@@ -111,7 +116,20 @@ public:
 		_matrix[1][2] *= f;
 		_matrix[2][2] *= f;
 	}
-	void MakeRevers(const Matrix &transform) {
+    void Add(Matrix m, float f) {
+        _matrix[0][0] = m._matrix[0][0] * f;
+        _matrix[1][0] = m._matrix[1][0] * f;
+        _matrix[2][0] = m._matrix[2][0] * f;
+
+        _matrix[0][1] = m._matrix[0][1] * f;
+        _matrix[1][1] = m._matrix[1][1] * f;
+        _matrix[2][1] = m._matrix[2][1] * f;
+
+        _matrix[0][2] = m._matrix[0][2] * f;
+        _matrix[1][2] = m._matrix[1][2] * f;
+        _matrix[2][2] = m._matrix[2][2] * f;
+    }
+    void MakeRevers(const Matrix &transform) {
 		float det = transform.Determinant();
 
 		_matrix[0][0] = (transform._matrix[1][1] * transform._matrix[2][2] - transform._matrix[2][1] * transform._matrix[1][2]);
@@ -134,6 +152,28 @@ public:
 		sx = _matrix[0][0];
 		sy = _matrix[1][1];
 	}
+    void PrintToString(char *buff)
+    {
+        sprintf(buff, "%g,%g,%g,%g,%g,%g,%g,%g,%g"
+                , _matrix[0][0], _matrix[0][1], _matrix[0][2]
+                , _matrix[1][0], _matrix[1][1], _matrix[1][2]
+                , _matrix[1][0], _matrix[2][1], _matrix[2][2]
+                );
+    }
+    std::string PrintToString()
+    {
+        char buff[100];
+        PrintToString(buff);
+        return buff;
+    }
+    void ReadFromString(const char *buff)
+    {
+        sscanf(buff, "%g,%g,%g,%g,%g,%g,%g,%g,%g"
+                , &_matrix[0][0], &_matrix[0][1], &_matrix[0][2]
+                , &_matrix[1][0], &_matrix[1][1], &_matrix[1][2]
+                , &_matrix[1][0], &_matrix[2][1], &_matrix[2][2]
+                );
+    }
 };
 
 #endif//MYENGINE_MATRIX_H
