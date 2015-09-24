@@ -275,6 +275,34 @@ void ColoredPolygon::DrawTriangles() {
 	Render::PopColor();
 }
 
+void ColoredPolygon::DrawBinded()
+{
+    if (_triangles.GetVB().Size() != _masses.size())
+    {
+        return;
+    }
+
+    _trianglesBinded = _triangles;
+    Matrix tmp;
+    for (uint i = 0; i < _trianglesBinded.GetVB().Size(); ++i)
+    {
+        tmp.Zero();
+        if (_masses[i].p[0].bone)
+        {
+            tmp.Add(_masses[i].p[0].bone->GetAnimVertMatrix(), _masses[i].p[0].mass);
+        }
+        if (_masses[i].p[1].bone)
+        {
+            tmp.Add(_masses[i].p[1].bone->GetAnimVertMatrix(), _masses[i].p[1].mass);
+        }
+        tmp.Mul(_trianglesBinded.GetVB().VertXY(i));
+    }
+
+    Render::PushColorAndMul(_color);
+    _trianglesBinded.Render();
+    Render::PopColor();
+}
+
 int ColoredPolygon::SearchNearest(float x, float y)
 {
     FPoint dist;
@@ -479,6 +507,7 @@ bool ColoredPolygon::Selection(const Rect& rect, bool full)
 
 void ColoredPolygon::BindToBone(BoneAnimated *bone)
 {
+    bone->FixMatrix();
     _masses.resize(_dots.size());
     for (uint i = 0; i < _masses.size(); ++i)
     {
@@ -487,8 +516,8 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
         _masses[i].p[0].mass = 1.f;
 
         _masses[i].p[1].boneName = "";
-        _masses[i].p[0].bone = NULL;
-        _masses[i].p[0].mass = 0.f;
+        _masses[i].p[1].bone = NULL;
+        _masses[i].p[1].mass = 0.f;
     }
 }
 

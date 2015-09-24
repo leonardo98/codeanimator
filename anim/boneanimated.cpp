@@ -2,6 +2,7 @@
 #include "ogl/render.h"
 #include "extmath.h"
 #include "animation.h"
+#include "mainwindow.h"
 
 const float WideCoef = 0.1f;
 
@@ -111,32 +112,26 @@ void BoneAnimated::CalculatePosition(const Matrix &m, int frame, float p)
     _matrix.Move(_pos.x, _pos.y);
     _matrix.Rotate(_angle);
 
-    _visible = false;
+    _visible = true;
     if (x.Active(frame) || y.Active(frame))
     {
-        _matrix.Move(x.GetGlobalValue(frame, p), y.GetGlobalValue(frame, p));
-        _visible = true;
+        _matrix.Move(x.GetValueGlobal(frame, p), y.GetValueGlobal(frame, p));
     }
 
     if (angle.Active(frame))
     {
-        _matrix.Rotate(angle.GetGlobalValue(frame, p));
-        _visible = true;
+         _matrix.Rotate(angle.GetValueGlobal(frame, p));
     }
 
     if (scaleX.Active(frame) || scaleY.Active(frame))
     {
-        _matrix.Scale(scaleX.Active(frame) ? scaleX.GetGlobalValue(frame, p) : 1.f
-                      , scaleY.Active(frame) ? scaleY.GetGlobalValue(frame, p) : 1.f);
-        _visible = true;
+        _matrix.Scale(scaleX.Active(frame) ? scaleX.GetValueGlobal(frame, p) : 1.f
+                      , scaleY.Active(frame) ? scaleY.GetValueGlobal(frame, p) : 1.f);
     }
 
-    //if (_visible)
+    for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
     {
-        for (BoneList::iterator i = _children.begin(), e = _children.end(); i != e; ++i)
-        {
-            (*i)->CalculatePosition(_matrix, frame, p);
-        }
+        (*i)->CalculatePosition(_matrix, frame, p);
     }
 }
 
@@ -172,9 +167,35 @@ bool BoneAnimated::MoveOrRotate(FPoint pos)
     return -w < pos.y && pos.y < w && - w < pos.x && pos.x < l / 2;
 }
 
+FPoint BoneAnimated::GetBonePos()
+{
+    FPoint p(0, 0);
+    GetMatrix().Mul(p);
+    return p;
+}
+
+FPoint BoneAnimated::GetBoneLocalPos()
+{
+    FPoint p(_pos);
+    if (x.Active(0) || y.Active(0))
+    {
+        p.x += x.GetValueGlobal(0, 0.f);
+        p.y += y.GetValueGlobal(0, 0.f);
+    }
+    return p;
+}
+
 bool BoneAnimated::MoveTo(const FPoint &mt)
 {
-    _pos += mt;
+//    if (MainWindow::Instance()->CreateDotMode())
+//    {
+        _pos += mt;
+//    }
+//    else
+//    {
+//        x.SetValueGlobal(0, x.GetValueGlobal(0) + mt.x);
+//        y.SetValueGlobal(0, y.GetValueGlobal(0) + mt.y);
+//    }
     CalculatePosition(_parentMatrix, 0.f);
 }
 
@@ -260,11 +281,12 @@ BoneAnimated::BoneAnimated(rapidxml::xml_node<> *xe)
     , scaleY(xe->first_node("scaleY"))
     , _parent(NULL)
 {
+    _name = xe->first_attribute("name")->value();
     _pos.x = atof(xe->first_attribute("x")->value());
     _pos.y = atof(xe->first_attribute("y")->value());
     _angle = atof(xe->first_attribute("angle")->value());
     _length = atof(xe->first_attribute("length")->value());
-    _name = xe->first_attribute("name")->value();
+    _bindPointMatrix.ReadFromString(xe->first_attribute("bpm")->value());
 
     rapidxml::xml_node<> *children = xe->first_node("children");
     rapidxml::xml_node<> *bone = children->first_node("bone");
@@ -285,11 +307,12 @@ BoneAnimated::BoneAnimated(rapidxml::xml_node<> *xe)
 
 void BoneAnimated::SaveToXml(rapidxml::xml_node<> *xe)
 {
+    Math::Write(xe, "name", _name.c_str());
     Math::Write(xe, "x", _pos.x);
     Math::Write(xe, "y", _pos.y);
     Math::Write(xe, "angle", _angle);
     Math::Write(xe, "length", _length);
-    Math::Write(xe, "name", _name.c_str());
+    Math::Write(xe, "bpm", _bindPointMatrix.PrintToString().c_str());
 
     rapidxml::xml_node<> *splineX = xe->document()->allocate_node(rapidxml::node_element, "x");
     xe->append_node(splineX);
@@ -323,3 +346,14 @@ void BoneAnimated::SaveToXml(rapidxml::xml_node<> *xe)
     }
 }
 
+void BoneAnimated::FixMatrix()
+{
+    _bindPointMatrix.MakeRevers(GetMatrix());
+}
+
+const Matrix &BoneAnimated::GetAnimVertMatrix()
+{
+    _animMatrix = GetMatrix();
+    _animMatrix.Mul(_bindPointMatrix);
+    return _animMatrix;
+}

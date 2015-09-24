@@ -38,8 +38,9 @@ private:
     std::vector<OnePointMasses> _masses;
     QVector<FPoint> _dots; //
 	QVector<FPoint> _screenDots;
-	Sprite _triangles;
-	bool _mouseDown;
+    Sprite _triangles;
+    Sprite _trianglesBinded;
+    bool _mouseDown;
     QVector<int> _dotUnderCursor;
     QVector<int> _selectedDots;
 
@@ -73,8 +74,9 @@ public:
 
     void UpdatePoints(const PointList &points);
 
-	virtual void Draw();
-	virtual void DebugDraw(bool onlyControl);
+    virtual void Draw();
+    void DrawBinded();
+    virtual void DebugDraw(bool onlyControl);
 	virtual void Update(float dt) {}
 	virtual void MouseDown(const FPoint &mouse);
     virtual bool MouseMove(const FPoint &mouse);
