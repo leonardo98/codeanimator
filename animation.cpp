@@ -411,11 +411,13 @@ void Animation::ExcludeChild()
         BoneAnimated *parent = _bones[i]->GetParent();
         if (parent)
         {
-            while (parent->GetParent())
-            {
+            bool isParentSelected = ( sel.find(parent) != sel.end() );
+            while (!isParentSelected && parent->GetParent())
+            {                
                 parent = parent->GetParent();
+                isParentSelected |= ( parent && sel.find(parent) != sel.end() );
             }
-            _bones[i]->SetMoveByParent(sel.find(parent) != sel.end());
+            _bones[i]->SetMoveByParent(isParentSelected);
         }
     }
 }
