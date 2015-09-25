@@ -53,7 +53,6 @@ void Animation::Draw()
     // calculate new positions and visibility
     Matrix pos;
     pos.Unit();
-
     for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
     {
         if ((*i)->GetParent() == NULL)
@@ -219,7 +218,12 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     _chainPoints.resize(_boneChain.size());
     for (uint i = 0; i < _boneChain.size(); ++i)
     {
-        _chainPoints[i] = _boneChain[i]->GetBonePos();
+        FPoint p(_boneChain[i]->GetBonePos());
+        if (_boneChain[i]->GetParent())
+        {
+            _boneChain[i]->GetParent()->GetMatrix().Mul(p);
+        }
+        _chainPoints[i]= p;
     }
     _chainPoints.push_back(_startMovingPos);
     _deltaAngle.resize(_boneChain.size());
@@ -269,7 +273,13 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
         {
             for (uint i = 0; i < _bones.size(); ++i)
             {
-                if (i != *_selected.begin() && _bones[i]->CheckPoint(_bones[*_selected.begin()]->GetBonePos()))
+                FPoint p(_bones[*_selected.begin()]->GetBonePos());
+                if (_bones[*_selected.begin()]->GetParent())
+                {
+                    _bones[*_selected.begin()]->GetParent()->GetMatrix().Mul(p);
+                }
+
+                if (i != *_selected.begin() && _bones[i]->CheckPoint(p))
                 {
                     LinkBones(i, *_selected.begin());
                     return;
@@ -279,16 +289,16 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
     }
     else if (_selected.size() == 1)
     {
-        FPoint s(_bones[*_selected.begin()]->GetBoneLocalPos());
+        FPoint s(_bones[*_selected.begin()]->GetBonePos());
         FPoint e(point);
 
         if (_bones[*_selected.begin()]->GetParent() == NULL)
             _bones[*_selected.begin()]->SetBoneAngle(_startRotateAngle
-                                        + (atan2(point.y - _bones[*_selected.begin()]->GetBoneLocalPos().y, point.x - _bones[*_selected.begin()]->GetBoneLocalPos().x)
-                                            - atan2(_startMovingPos.y - _bones[*_selected.begin()]->GetBoneLocalPos().y, _startMovingPos.x - _bones[*_selected.begin()]->GetBoneLocalPos().x)));
+                                        + (atan2(point.y - _bones[*_selected.begin()]->GetBonePos().y, point.x - _bones[*_selected.begin()]->GetBonePos().x)
+                                            - atan2(_startMovingPos.y - _bones[*_selected.begin()]->GetBonePos().y, _startMovingPos.x - _bones[*_selected.begin()]->GetBonePos().x)));
         else
         {
-            FPoint o(_bones[*_selected.begin()]->GetBoneLocalPos());
+            FPoint o(_bones[*_selected.begin()]->GetBonePos());
             FPoint sm(_startMovingPos);
             Matrix rev;
             rev.MakeRevers(_bones[*_selected.begin()]->GetParent()->GetMatrix());
@@ -308,8 +318,8 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
             PointList points;
             BoneAnimated *b = _bones[*_selected.begin()];
 
-            FPoint p1(b->GetBoneLocalPos());
-            FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBoneLocalPos();
+            FPoint p1(b->GetBonePos());
+            FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
             FPoint o = *FPoint(0.f, b->GetLength() * 0.314f).Rotate(b->GetBoneAngle());
 
             points.push_back(p1 + o);

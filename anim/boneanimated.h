@@ -46,7 +46,7 @@ public:
     void SetParent(BoneAnimated *b);
     BoneAnimated *GetParent() { return _parent; }
     BoneAnimated *GetBoneAtPoint(const FPoint &pos);
-    void CalculatePosition(const Matrix &m, int frame, float p = 0.f);
+    void CalculatePosition(const Matrix &, int frame, float p = 0.f);
     void SetLength(float l) { _length = std::max(BONE_LENGTH_MIN, l); }
     float GetLength() { return _length; }
     void SetVisible(bool v) { _visible = v; }
@@ -57,8 +57,7 @@ public:
     bool MoveTo(const FPoint &mt);
 
     void SetBonePos(const FPoint &pos);
-    FPoint GetBonePos();
-    FPoint GetBoneLocalPos();
+    const FPoint &GetBonePos() { return _pos; }
     void SetBoneAngle(float a);
     float GetBoneAngle() { return _angle; }    
 
