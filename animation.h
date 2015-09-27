@@ -82,6 +82,13 @@ public:
 
     void RegisterBone(BoneAnimated *b);
 
+    BoneAnimated *GetDebugBone()
+    {
+        if (_selected.size())
+            return _bones[*_selected.begin()];
+        return NULL;
+    }
+
 };
 
 void UpdateChain(PointList &points, const FPoint &target);
