@@ -392,7 +392,7 @@ std::string Math::CutFileName(const std::string &filePath) {
 	return filePath.substr(0, last);
 } 
 
-bool Math::GenerateTriangles(QVector<FPoint> inputDots, Sprite &sprite, DWORD color, GLTexture2D * texture, const Matrix *transform)
+bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, DWORD color, GLTexture2D * texture, const Matrix *transform)
 {
 	if (inputDots.size() < 3)
 	{
@@ -551,4 +551,28 @@ void Math::FillTriangle(int index, int a, int b, int c, VertexBuffer &vb)
 	vb.Index(index * 3) = a;
 	vb.Index(index * 3 + 1) = b;
 	vb.Index(index * 3 + 2) = c;
+}
+
+//bool Math::Convex(const FPoint &a, const FPoint &b, const FPoint &c, const FPoint &d)
+//{
+//    float aa = VMul(FPoint(b.x - a.x, b.y - a.y), FPoint(d.x - a.x, d.y - a.y));
+//    float ab = VMul(FPoint(c.x - b.x, c.y - b.y), FPoint(a.x - b.x, a.y - b.y));
+//    if (aa * ab < 0) return false;
+//    float ac = VMul(FPoint(d.x - c.x, d.y - c.y), FPoint(b.x - c.x, b.y - c.y));
+//    if (aa * ac < 0) return false;
+//    float ad = VMul(FPoint(a.x - d.x, a.y - d.y), FPoint(c.x - d.x, c.y - d.y));
+//    return (aa * ad > 0);
+//}
+
+float Math::SignedSquare(const QVector<FPoint> &dots)
+{
+    if (dots.empty()) return 0.f;
+
+    float r = 0.f;
+    const FPoint &a = dots[0];
+    for (uint i = 2; i < dots.size(); ++i)
+    {
+        r += VMul(FPoint(dots[i - 1].x - a.x, dots[i - 1].y - a.y), FPoint(dots[i].x - a.x, dots[i].y - a.y));
+    }
+    return r;
 }

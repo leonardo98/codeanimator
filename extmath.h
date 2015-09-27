@@ -44,9 +44,12 @@ public:
 	static std::string GetOnlyFileName(const std::string &filePath);
 	static std::string ProcessTexture(const char *filePath, const std::string &currentWorkDir);
     static std::string CutFileName(const std::string &filePath);
-	static bool GenerateTriangles(QVector<FPoint> dots, Sprite &vb, DWORD color = 0xFFFFFFFF, GLTexture2D * texture = 0, const Matrix *transform = NULL);
+    static bool GenerateTriangles(const QVector<FPoint> &, Sprite &vb, DWORD color = 0xFFFFFFFF, GLTexture2D * texture = 0, const Matrix *transform = NULL);
 	//static void FillTriangle(const FPoint &a, const FPoint &b, const FPoint &c, VertexBuffer &vb, DWORD color = 0xFFFFFFFF, GLTexture2D * texture = 0, const Matrix *transform = NULL);
 	static void FillTriangle(int index, int a, int b, int c, VertexBuffer &vb);
+
+    static float SignedSquare(const QVector<FPoint> &dots);
+//    static bool Convex(const FPoint &a, const FPoint &b, const FPoint &c, const FPoint &d);
 };
 
 #endif//MYENGINE_MATH_H
