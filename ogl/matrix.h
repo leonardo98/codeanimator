@@ -117,17 +117,17 @@ public:
 		_matrix[2][2] *= f;
 	}
     void Add(Matrix m, float f) {
-        _matrix[0][0] = m._matrix[0][0] * f;
-        _matrix[1][0] = m._matrix[1][0] * f;
-        _matrix[2][0] = m._matrix[2][0] * f;
+        _matrix[0][0] += m._matrix[0][0] * f;
+        _matrix[1][0] += m._matrix[1][0] * f;
+        _matrix[2][0] += m._matrix[2][0] * f;
 
-        _matrix[0][1] = m._matrix[0][1] * f;
-        _matrix[1][1] = m._matrix[1][1] * f;
-        _matrix[2][1] = m._matrix[2][1] * f;
+        _matrix[0][1] += m._matrix[0][1] * f;
+        _matrix[1][1] += m._matrix[1][1] * f;
+        _matrix[2][1] += m._matrix[2][1] * f;
 
-        _matrix[0][2] = m._matrix[0][2] * f;
-        _matrix[1][2] = m._matrix[1][2] * f;
-        _matrix[2][2] = m._matrix[2][2] * f;
+        _matrix[0][2] += m._matrix[0][2] * f;
+        _matrix[1][2] += m._matrix[1][2] * f;
+        _matrix[2][2] += m._matrix[2][2] * f;
     }
     void MakeRevers(const Matrix &transform) {
 		float det = transform.Determinant();
