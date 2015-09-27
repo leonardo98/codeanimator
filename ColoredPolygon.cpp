@@ -12,6 +12,11 @@
 
 GLTexture2D * h_base = NULL;// = Core::getTexture(":main/gfx/red.png");
 
+bool CmpBoneDistance(const std::pair<BoneAnimated *, float> &one, const std::pair<BoneAnimated *, float> &two)
+{
+    return one.second < two.second;
+}
+
 void ColoredPolygon::InitCorners()
 {
     if (h_base == NULL)
@@ -186,6 +191,53 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
 
     Render::PopMatrix();
 //		Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
+
+
+    if (!Animation::Instance()->GetDebugBone())
+        return;
+
+    BoneList bones;
+    bones.push_back(Animation::Instance()->GetDebugBone());
+    Animation::Instance()->GetDebugBone()->GetBoneList(bones);
+
+    float signSq = Math::SignedSquare(_dots);
+
+    for (unsigned int j = 0; j < _selectedDots.size(); ++j)
+    {
+        uint i = _selectedDots[j];
+
+        FPoint &a = _dots[(i + _dots.size() - 1) % _dots.size()];
+        FPoint &b = _dots[i];
+        FPoint &c = _dots[(i + 1) % _dots.size()];
+
+        std::vector<std::pair<BoneAnimated *, float> > boneDistance;
+        for (uint j = 0; j < bones.size(); ++j)
+        {
+            BoneAnimated *d = bones[j];
+
+            FPoint s(0, 0);
+            FPoint e(d->GetLength(), 0);
+            d->GetMatrix().Mul(s);
+            d->GetMatrix().Mul(e);
+            FPoint center = 0.5f * (s + e);
+            if ((s - b).Length() < d->GetLength() / 2
+                    || (e - b).Length() < d->GetLength() / 2
+                    || Math::Distance(s, e, b) < d->GetLength() / 2
+                    )
+            {
+                if (Math::VMul(a - center, b - center) * signSq >= 0.f || Math::VMul(b - center, c - center) * signSq >= 0.f)
+                {
+                     boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, (b - center).Length()));
+                }
+            }
+        }
+        std::sort(boneDistance.begin(), boneDistance.end(), CmpBoneDistance);
+        for (uint i = 0; i < std::min((size_t)2, boneDistance.size()); ++i)
+        {
+            boneDistance[i].first->DrawRed();
+        }
+    }
+
 }
 
 bool ColoredPolygon::PixelCheck(const FPoint &point) { 
@@ -506,18 +558,105 @@ bool ColoredPolygon::Selection(const Rect& rect, bool full)
 }
 
 void ColoredPolygon::BindToBone(BoneAnimated *bone)
-{
-    bone->FixMatrix();
+{    
+    BoneList bones;
+    bones.push_back(bone);
+    bone->GetBoneList(bones);
+    for (uint j = 0; j < bones.size(); ++j)
+    {
+        bones[j]->FixMatrix();
+    }
+
     _masses.resize(_dots.size());
+    float signSq = Math::SignedSquare(_dots);
+
+    std::vector<uint> skipped;
+
     for (uint i = 0; i < _masses.size(); ++i)
     {
-        _masses[i].p[0].boneName = bone->GetName();
-        _masses[i].p[0].bone = bone;
-        _masses[i].p[0].mass = 1.f;
+        FPoint &a = _dots[(i + _dots.size() - 1) % _dots.size()];
+        FPoint &b = _dots[i];
+        FPoint &c = _dots[(i + 1) % _dots.size()];
 
-        _masses[i].p[1].boneName = "";
-        _masses[i].p[1].bone = NULL;
-        _masses[i].p[1].mass = 0.f;
+        std::vector<std::pair<BoneAnimated *, float> > boneDistance;
+        for (uint j = 0; j < bones.size(); ++j)
+        {
+            BoneAnimated *d = bones[j];
+
+            FPoint s(0, 0);
+            FPoint e(d->GetLength(), 0);
+            d->GetMatrix().Mul(s);
+            d->GetMatrix().Mul(e);
+            FPoint center = 0.5f * (s + e);
+            if ((s - b).Length() < d->GetLength() / 2
+                    || (e - b).Length() < d->GetLength() / 2
+                    || Math::Distance(s, e, b) < d->GetLength() / 2
+                    )
+            {
+                if (Math::VMul(a - center, b - center) * signSq >= 0.f || Math::VMul(b - center, c - center) * signSq >= 0.f)
+                {
+                     boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, (b - center).Length()));
+                }
+            }
+        }
+
+        if (boneDistance.size() == 1)
+        {
+            _masses[i].p[0].boneName = boneDistance.back().first->GetName();
+            _masses[i].p[0].bone = boneDistance.back().first;
+            _masses[i].p[0].mass = 1.f;
+
+            _masses[i].p[1].boneName = "";
+            _masses[i].p[1].bone = NULL;
+            _masses[i].p[1].mass = 0.f;
+        }
+        else if (boneDistance.size() >= 2)
+        {
+            std::sort(boneDistance.begin(), boneDistance.end(), CmpBoneDistance);
+            float m = boneDistance[0].second + boneDistance[1].second;
+
+            _masses[i].p[0].boneName = boneDistance[0].first->GetName();
+            _masses[i].p[0].bone = boneDistance[0].first;
+            _masses[i].p[0].mass = boneDistance[1].second / m;
+
+            _masses[i].p[1].boneName = boneDistance[1].first->GetName();
+            _masses[i].p[1].bone = boneDistance[1].first;
+            _masses[i].p[1].mass = boneDistance[0].second / m;
+        }
+        else
+        {
+            skipped.push_back(i);
+        }
     }
+
+    if (skipped.size())
+    {
+        assert(false);// fail
+    }
+
+//    uint counter = 0;
+//    for (uint i = 0; i < skipped.size(); ++i)
+//    {
+//        uint start = (skipped[i] + _dots.size() - 1) % _dots.size();
+//        for (; counter < _dots.size(); (start + _dots.size() - 1) % _dots.size())
+//        {
+//            counter++;
+//        }
+//        if (counter >= _dots.size())
+//        {
+//            assert(false);//fail
+//        }
+//        uint finish = skipped[i];
+//        for (; counter < _dots.size(); (start + _dots.size() - 1) % _dots.size())
+//        {
+//            counter++;
+//        }
+//        if (counter >= _dots.size())
+//        {
+//            assert(false);//fail
+//        }
+
+//        if (_masses[])
+//    }
 }
 
