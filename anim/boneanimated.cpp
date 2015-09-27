@@ -29,6 +29,14 @@ BoneAnimated::BoneAnimated()
     _moveByParent = false;
 }
 
+void BoneAnimated::DrawRed()
+{
+    Render::PushMatrix();
+    Render::MatrixMul(_matrix);
+    Render::Line(_length, 0.f, 0.f, 0.f, 0xFF00FF00);
+    Render::PopMatrix();
+}
+
 void BoneAnimated::Draw()
 {
     //if (!_visible) return;
@@ -42,6 +50,19 @@ void BoneAnimated::Draw()
     Render::Line(l, 0.f, 0.f, w, 0x7F000000);
     Render::Line(0.f, - w, 0.f, w, 0x7F000000);
     Render::PopMatrix();
+
+
+
+
+    FPoint s(0, 0);
+    FPoint e(GetLength(), 0);
+    GetMatrix().Mul(s);
+    GetMatrix().Mul(e);
+
+    Render::Circle(s.x, s.y, 10, 0xFFFF0000);
+    Render::Circle(e.x, e.y, 10, 0xFFFF0000);
+
+
 }
 
 void BoneAnimated::DrawSelection()
@@ -336,3 +357,13 @@ const Matrix &BoneAnimated::GetAnimVertMatrix()
     _animMatrix.Mul(_bindPointMatrix);
     return _animMatrix;
 }
+
+void BoneAnimated::GetBoneList(BoneList &bones)
+{
+    for (auto o : _children)
+    {
+        bones.push_back(o);
+        o->GetBoneList(bones);
+    }
+}
+

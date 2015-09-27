@@ -36,10 +36,12 @@ public:
     Spline scaleX;
     Spline scaleY;
 public:
+    void GetBoneList(BoneList &bones);
     const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
     virtual ~BoneAnimated();
     void Draw();
+    void DrawRed();
     void DrawSelection();
     bool AddChild(BoneAnimated *);
     void RemoveChild(BoneAnimated *);
