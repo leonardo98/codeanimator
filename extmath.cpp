@@ -294,7 +294,13 @@ bool Math::Inside(const FPoint &m, const FPoint &a, const FPoint &b, const FPoin
 float Math::Distance(const FPoint &one, const FPoint &two, const FPoint &point) {
 	float d = 0;
 	float ab = (one - two).Length();
-	STrinagle(ab, (two - point).Length(), (point - one).Length(), d);
+    float bc = (two - point).Length();
+    float ca = (point - one).Length();
+
+    if (bc * bc + ab * ab - ca * ca < 0) return bc;
+    if (ca * ca + ab * ab - bc * bc < 0) return ca;
+
+    STrinagle(ab, bc, ca, d);
 	return d * 2 / ab; 
 }
 
