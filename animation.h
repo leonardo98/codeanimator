@@ -82,6 +82,8 @@ public:
 
     void RegisterBone(BoneAnimated *b);
 
+    void ResetBones();
+
     BoneAnimated *GetDebugBone()
     {
         if (_selected.size())

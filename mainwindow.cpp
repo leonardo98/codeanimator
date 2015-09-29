@@ -67,6 +67,12 @@ MainWindow::MainWindow()
     connect(_viewer, SIGNAL(uploadTexture()), this, SLOT(uploadLastTexture()));
 }
 
+void MainWindow::changeMode()
+{
+    if (CreateDotMode())
+        Animation::Instance()->ResetBones();
+}
+
 void MainWindow::PrintToOutput(const char *s)
 {
     _console->PrintToOutput(s);
@@ -163,18 +169,21 @@ void MainWindow::createMenus()
         action->setActionGroup(group);
         action->setCheckable(true);
         action->setChecked(false);
+        connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
 
         action = new QAction(tr("&Bone"), this);
         action->setActionGroup(group);
         action->setCheckable(true);
         action->setChecked(false);
+        connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
 
         _editPoints = action = new QAction(tr("&Texture"), this);
         action->setActionGroup(group);
         action->setCheckable(true);
         action->setChecked(true);
+        connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
     }
     {

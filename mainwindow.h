@@ -20,6 +20,7 @@ private slots:
     void saveAs();
     void save();
     void open();
+    void changeMode();
 public:
     MainWindow();
     virtual ~MainWindow();

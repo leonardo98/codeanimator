@@ -17,10 +17,13 @@ private:
     BoneList _children;
     bool _visible;
     Matrix _parentMatrix;
-    Matrix _bindPointMatrix;// mul it before point mul
     Matrix _animMatrix;
     Matrix _matrix;
     bool _moveByParent;
+
+    Matrix _bindPointMatrix;// mul it before point mul
+    FPoint _bindPos;
+    float _bindAngle;
 
     // for editor
     FPoint _pos;
@@ -75,6 +78,8 @@ public:
     void SaveToXml(rapidxml::xml_node<> *xe);
 
     const Matrix &GetAnimVertMatrix();
+
+    void ResetPos();
 
 };
 

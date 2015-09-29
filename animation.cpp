@@ -817,3 +817,10 @@ void Animation::CreatePointMass()
     }
 }
 
+void Animation::ResetBones()
+{
+    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    {
+        (*i)->ResetPos();
+    }
+}
