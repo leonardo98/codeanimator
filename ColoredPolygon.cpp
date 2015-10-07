@@ -262,7 +262,7 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
             rapidxml::xml_node<> *vertex = xe->document()->allocate_node(rapidxml::node_element, "vert");
             mesh->append_node(vertex);
             char buff[1000];
-            sprintf(buff, "%g;%g;%g;%g", _triangles.GetVB().VertXY(i).x, _triangles.GetVB().VertXY(i).y
+            sprintf(buff, "%0.0f;%0.0f;%g;%g", _triangles.GetVB().VertXY(i).x, _triangles.GetVB().VertXY(i).y
                                         , _triangles.GetVB().VertUV(i).x, _triangles.GetVB().VertUV(i).y);
             Math::Write(vertex, "geom", buff);
 		}
@@ -588,14 +588,20 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
             d->GetMatrix().Mul(s);
             d->GetMatrix().Mul(e);
             FPoint center = 0.5f * (s + e);
-            if ((s - b).Length() < d->GetLength() / 2
-                    || (e - b).Length() < d->GetLength() / 2
-                    || Math::Distance(s, e, b) < d->GetLength() / 2
-                    )
+
+            if (Math::VMul(a - center, b - center) * signSq >= 0.f || Math::VMul(b - center, c - center) * signSq >= 0.f)
             {
-                if (Math::VMul(a - center, b - center) * signSq >= 0.f || Math::VMul(b - center, c - center) * signSq >= 0.f)
+                if ((d->GetParent() == NULL && (s - b).Length() < d->GetLength() / 2)
+                        || (!d->HasChild() && (e - b).Length() < d->GetLength() / 2))
                 {
-                     boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, (b - center).Length()));
+                    boneDistance.push_back(
+                                std::make_pair<BoneAnimated *, float>
+                                (d, 0.f)
+                                );
+                }
+                else
+                {
+                    boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, Math::Distance(s, e, b) ) );
                 }
             }
         }
