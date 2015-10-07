@@ -39,6 +39,7 @@ public:
     Spline scaleX;
     Spline scaleY;
 public:
+    bool HasChild() { return !_children.empty(); }
     void GetBoneList(BoneList &bones);
     const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
