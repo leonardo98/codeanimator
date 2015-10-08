@@ -74,6 +74,10 @@ protected:
 
     std::string _cursorText;
 
+    GLuint text_texture;
+    uint text_width;
+    uint text_height;
+
 public:
     Viewer(QWidget *parent);
 

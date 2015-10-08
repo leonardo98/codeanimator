@@ -17,6 +17,9 @@ Viewer::Viewer(QWidget *parent)
     , _hotKeysMode(none_key)
     , _mouseMoveAction(mouse_none)
     , _chainState(chain_none)
+    , text_texture(0)
+    , text_width(100)
+    , text_height(100)
 {
     Render::InitApplication();
 
@@ -306,9 +309,10 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
     Animation::Instance()->PolygonMouseMove(newMmouseWorld);
 
-    if (Animation::Instance()->GetBoneAtPoint(newMmouseWorld) >= 0)
+    int index = Animation::Instance()->GetBoneAtPoint(newMmouseWorld);
+    if (index >= 0)
     {
-        _cursorText = "bone";
+        _cursorText = "bone : \"" + Animation::Instance()->GetBone(index)->GetName() + "\"";
     }
     else
     {
@@ -369,6 +373,8 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
 
     char buff[100];
     sprintf(buff, "x: %0.2f, y: %0.2f; %s", _mouseWorld.x, _mouseWorld.y, _cursorText.c_str());
+
+    Render::TextToTexture(_cursorText.c_str(), text_texture, text_width, text_height);
 
     mainWindow->statusBar()->showMessage(tr(buff));
 }
@@ -483,6 +489,9 @@ void Viewer::paintGL()
 //            x += 64;
 //        }
 //    }
+
+    if (text_texture)
+        Render::DrawBar(_lastMousePos.x, _lastMousePos.y - text_height - 3, text_width, text_height, 0xFFFFFFFF, text_texture);
 }
 
 void Viewer::Update()
@@ -497,3 +506,4 @@ void Viewer::UpdateSelection(const Rect &area)
     FPoint end = ScreenToWorld(FPoint(area.x2, area.y2));
     Animation::Instance()->SelectByArea(Rect(start.x, start.y, end.x, end.y));
 }
+
