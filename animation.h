@@ -91,6 +91,13 @@ public:
         return NULL;
     }
 
+    BoneAnimated *GetBone(int index)
+    {
+        if (index >= 0)
+            return _bones[index];
+        return NULL;
+    }
+
 };
 
 void UpdateChain(PointList &points, const FPoint &target);
