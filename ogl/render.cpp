@@ -103,10 +103,20 @@ bool Render::InitApplication() {
 
 VertexBuffer tmp_quad_for_bar;
 
-void Render::DrawBar(float x, float y, float width, float height, DWORD color) {
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-	Render::PushColorAndMul(color);
+void Render::DrawBar(float x, float y, float width, float height, DWORD color, GLuint texture)
+{
+    if (0xFFFFFFFF == texture)
+    {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
+    }
+    else
+    {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texture);
+    }
+
+    Render::PushColorAndMul(color);
 	tmp_quad_for_bar.Resize(4, 6);
 	tmp_quad_for_bar.VertXY(0).x = x;
 	tmp_quad_for_bar.VertXY(0).y = y;
@@ -116,12 +126,20 @@ void Render::DrawBar(float x, float y, float width, float height, DWORD color) {
 	tmp_quad_for_bar.VertXY(2).y = y + height;
 	tmp_quad_for_bar.VertXY(3).x = x;
 	tmp_quad_for_bar.VertXY(3).y = y + height;
-	for (int i = 0; i < 4; i++) {
-		tmp_quad_for_bar.VertUV(i).x = 0;
-		tmp_quad_for_bar.VertUV(i).y = 0;
-	}
-	tmp_quad_for_bar.Draw();
-    glEnable(GL_TEXTURE_2D);
+
+    tmp_quad_for_bar.VertUV(0).x = 0.f;
+    tmp_quad_for_bar.VertUV(0).y = 0.f;
+    tmp_quad_for_bar.VertUV(1).x = 1.f;
+    tmp_quad_for_bar.VertUV(1).y = 0.f;
+    tmp_quad_for_bar.VertUV(2).x = 1.f;
+    tmp_quad_for_bar.VertUV(2).y = 1.f;
+    tmp_quad_for_bar.VertUV(3).x = 0.f;
+    tmp_quad_for_bar.VertUV(3).y = 1.f;
+
+    tmp_quad_for_bar.Draw();
+
+    if (0xFFFFFFFF == texture) glEnable(GL_TEXTURE_2D);
+
 	Render::PopColor();
 }
 
@@ -441,4 +459,77 @@ DWORD Render::GetColor() {
 //#else
 //	return _currentColor[_currentColorIndex];
 //#endif
+}
+
+void Render::TextToTexture(QString const &text, GLuint &texture, uint &width, uint &height)
+{
+    QFont font("Sans", 15);
+    QFontMetrics fm(font);
+    width = fm.width(text);
+    height = fm.height();
+
+    QImage textimg(width, height, QImage::Format_RGBA8888);
+    QPainter painter(&textimg);
+
+    painter.fillRect(0, 0, width, height, QColor(0, 0, 0, 255));
+    painter.setBrush(QColor(255, 255, 255));
+    painter.setPen(QColor(255, 255, 255));
+    painter.setFont(font);
+    painter.drawText(0, height - 1, text);
+
+    if (!texture)
+    {
+        glGenTextures(1, &texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA8,
+            512, 32, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    }
+    else
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+    }
+
+    glPixelStorei(GL_UNPACK_SWAP_BYTES,   GL_FALSE);
+    glPixelStorei(GL_UNPACK_LSB_FIRST,    GL_FALSE);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH,   0);
+    glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS,    0);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS,  0);
+    glPixelStorei(GL_UNPACK_SKIP_IMAGES,  0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,    4);
+
+
+    static unsigned int buff[512 * 32];
+    memset(buff, 0, 512 * 32 * 4);
+    for (uint j = 0; j < height; ++j)
+    {
+        for (uint i = 0; i < width; ++i)
+        {
+            if (((uint *)textimg.constBits())[i + j * width] != 0xFF000000)
+            {
+                buff[i + j * 512] = ((uint *)textimg.constBits())[i + j * width];
+            }
+        }
+    }
+
+    glTexSubImage2D(
+        GL_TEXTURE_2D, 0,
+        0, 0,
+        512, 32,
+        GL_RGBA, GL_UNSIGNED_BYTE, buff );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    width = 512;
+    height = 32;
+
 }

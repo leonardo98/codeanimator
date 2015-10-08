@@ -90,7 +90,7 @@ public:
 	static bool ShowAskMessage(const char *str, const char *caption);
 	static bool IsRightMouseButton();
 	static bool IsLeftMouseButton();
-    static void DrawBar(float x, float y, float width, float height, DWORD color);
+    static void DrawBar(float x, float y, float width, float height, DWORD color, GLuint texture = 0xFFFFFFFF);
     static void DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, DWORD color);
     static void DrawBarTextured(float x, float y, float width, float height, DWORD color);
 
@@ -112,6 +112,8 @@ public:
 
 	static int ScreenWidth() { return _screenWidth; }
 	static int ScreenHeight() { return _screenHeight; }
+
+    static void TextToTexture(QString const &text, GLuint &texture, uint &width, uint &height);
 
 private:
 	static bool addBlendingGlobal;
