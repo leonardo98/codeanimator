@@ -515,9 +515,7 @@ void Viewer::UpdateSelection(const Rect &area)
 
 void Viewer::ShowContextMenu(const QPoint&pos)
 {
-    FPoint mouseWorld = ScreenToWorld(FPoint(pos.x(), pos.y()));
-
-    int index = Animation::Instance()->GetBoneAtPoint(mouseWorld);
+    int index = Animation::Instance()->GetBoneAtPoint(_mouseWorld);
     if (index == -1)
     {
         return;
