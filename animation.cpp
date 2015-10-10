@@ -32,6 +32,15 @@ Animation::~Animation()
 
 void Animation::Draw()
 {
+    if (MainWindow::Instance()->CreateDotMode())
+    {
+        _bones = &_bonesOrigin;
+    }
+    else
+    {
+        _bones = &_bonesAnimation;
+    }
+
     if (_baseSprite && MainWindow::Instance()->CreateDotMode())
     {
         Render::SetColor(0x7FFFFFFF);
@@ -40,7 +49,7 @@ void Animation::Draw()
     }
 
     // hide all bones
-    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    for (BoneList::iterator i = _bones->begin(), e = _bones->end(); i != e; ++i)
     {
         (*i)->SetVisible(false);
     }
@@ -48,7 +57,7 @@ void Animation::Draw()
     // calculate new positions and visibility
     Matrix pos;
     pos.Unit();
-    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    for (BoneList::iterator i = _bones->begin(), e = _bones->end(); i != e; ++i)
     {
         if ((*i)->GetParent() == NULL)
             (*i)->CalculatePosition(pos, 0.f);
@@ -71,7 +80,7 @@ void Animation::Draw()
     }
 
     // draw bones
-    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    for (BoneList::iterator i = _bones->begin(), e = _bones->end(); i != e; ++i)
     {
         (*i)->Draw();
     }
@@ -79,7 +88,7 @@ void Animation::Draw()
     // draw selected bones
     for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        _bones[*i]->DrawSelection();
+        (*_bones)[*i]->DrawSelection();
     }
 
     // draw meshes
@@ -87,7 +96,7 @@ void Animation::Draw()
     {
         for (uint i = 0; i < _meshes.size(); ++i)
         {
-            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            if (_meshes[i]->GetBone() == (*_bones)[*_selected.begin()]->GetName())
             {
                 _meshes[i]->DebugDraw(true);
             }
@@ -98,7 +107,7 @@ void Animation::Draw()
 std::string Animation::GenerateUnicBoneName()
 {
     std::set<std::string> allNames;
-    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    for (BoneList::iterator i = _bones->begin(), e = _bones->end(); i != e; ++i)
     {
         allNames.insert((*i)->GetName());
     }
@@ -113,11 +122,11 @@ std::string Animation::GenerateUnicBoneName()
 
 uint Animation::CreateBone(FPoint pos, bool generateMesh)
 {
-    uint r = _bones.size();
+    uint r = _bones->size();
     BoneAnimated *b = new BoneAnimated();
     b->SetBonePos(pos);
     b->SetName(GenerateUnicBoneName());
-    _bones.push_back(b);
+    _bones->push_back(b);
 
     if (generateMesh)
     {
@@ -143,16 +152,16 @@ uint Animation::CreateBone(FPoint pos, bool generateMesh)
 
 int Animation::GetBoneAtPoint(const FPoint &pos)
 {
-    for (uint i = 0; i < _bones.size(); ++i)
+    for (uint i = 0; i < _bones->size(); ++i)
     {
-        if (_bones[i]->CheckPoint(pos))
+        if ((*_bones)[i]->CheckPoint(pos))
         {
-            BoneAnimated *b = _bones[i]->GetBoneAtPoint(pos);
+            BoneAnimated *b = (*_bones)[i]->GetBoneAtPoint(pos);
             if (b)
             {
-                for (uint j = 0; j < _bones.size(); ++j)
+                for (uint j = 0; j < _bones->size(); ++j)
                 {
-                    if (_bones[j] == b)
+                    if ((*_bones)[j] == b)
                     {
                         return (int)j;
                     }
@@ -166,15 +175,15 @@ int Animation::GetBoneAtPoint(const FPoint &pos)
 
 void Animation::StartBoneMoving(uint index, const FPoint &point)
 {
-    _boneMoving = _bones[index]->MoveOrRotate(point);
+    _boneMoving = (*_bones)[index]->MoveOrRotate(point);
     _startMovingPos = point;
-    _startRotateAngle = _bones[index]->GetBoneAngle();
+    _startRotateAngle = (*_bones)[index]->GetBoneAngle();
     _startMovingBone = index;
 
     // -=IK=-
 
     //bone under cursor
-    BoneAnimated *mb = _bones[_startMovingBone];
+    BoneAnimated *mb = (*_bones)[_startMovingBone];
 
     //find all selected parents
     _boneChain.clear();
@@ -183,7 +192,7 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
     std::set<BoneAnimated*> sel;
     for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        sel.insert(_bones[*i]);
+        sel.insert((*_bones)[*i]);
     }
 
     BoneAnimated *parent = mb->GetParent();
@@ -235,37 +244,37 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
     {
         for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
         {
-            if (_bones[*i]->GetMoveByParent()) continue;
+            if ((*_bones)[*i]->GetMoveByParent()) continue;
 
-            if (_bones[*i]->GetParent() == NULL)
-                _bones[*i]->MoveTo(point - _startMovingPos);
+            if ((*_bones)[*i]->GetParent() == NULL)
+                (*_bones)[*i]->MoveTo(point - _startMovingPos);
             else
             {
                 FPoint p(point);
                 FPoint s(_startMovingPos);
 
                 Matrix rev;
-                rev.MakeRevers(_bones[*i]->GetParent()->GetMatrix());
+                rev.MakeRevers((*_bones)[*i]->GetParent()->GetMatrix());
 
                 rev.Mul(p);
                 rev.Mul(s);
 
-                _bones[*i]->MoveTo(p - s);
+                (*_bones)[*i]->MoveTo(p - s);
             }
         }
         _startMovingPos = point;
 
         if (_selected.size() == 1)
         {
-            for (uint i = 0; i < _bones.size(); ++i)
+            for (uint i = 0; i < _bones->size(); ++i)
             {
-                FPoint p(_bones[*_selected.begin()]->GetBonePos());
-                if (_bones[*_selected.begin()]->GetParent())
+                FPoint p((*_bones)[*_selected.begin()]->GetBonePos());
+                if ((*_bones)[*_selected.begin()]->GetParent())
                 {
-                    _bones[*_selected.begin()]->GetParent()->GetMatrix().Mul(p);
+                    (*_bones)[*_selected.begin()]->GetParent()->GetMatrix().Mul(p);
                 }
 
-                if (i != *_selected.begin() && _bones[i]->CheckPoint(p))
+                if (i != *_selected.begin() && (*_bones)[i]->CheckPoint(p))
                 {
                     LinkBones(i, *_selected.begin());
                     return;
@@ -275,34 +284,34 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
     }
     else if (_selected.size() == 1)
     {
-        FPoint s(_bones[*_selected.begin()]->GetBonePos());
+        FPoint s((*_bones)[*_selected.begin()]->GetBonePos());
         FPoint e(point);
 
-        if (_bones[*_selected.begin()]->GetParent() == NULL)
-            _bones[*_selected.begin()]->SetBoneAngle(_startRotateAngle
-                                        + (atan2(point.y - _bones[*_selected.begin()]->GetBonePos().y, point.x - _bones[*_selected.begin()]->GetBonePos().x)
-                                            - atan2(_startMovingPos.y - _bones[*_selected.begin()]->GetBonePos().y, _startMovingPos.x - _bones[*_selected.begin()]->GetBonePos().x)));
+        if ((*_bones)[*_selected.begin()]->GetParent() == NULL)
+            (*_bones)[*_selected.begin()]->SetBoneAngle(_startRotateAngle
+                                        + (atan2(point.y - (*_bones)[*_selected.begin()]->GetBonePos().y, point.x - (*_bones)[*_selected.begin()]->GetBonePos().x)
+                                            - atan2(_startMovingPos.y - (*_bones)[*_selected.begin()]->GetBonePos().y, _startMovingPos.x - (*_bones)[*_selected.begin()]->GetBonePos().x)));
         else
         {
-            FPoint o(_bones[*_selected.begin()]->GetBonePos());
+            FPoint o((*_bones)[*_selected.begin()]->GetBonePos());
             FPoint sm(_startMovingPos);
             Matrix rev;
-            rev.MakeRevers(_bones[*_selected.begin()]->GetParent()->GetMatrix());
+            rev.MakeRevers((*_bones)[*_selected.begin()]->GetParent()->GetMatrix());
             rev.Mul(e);
             rev.Mul(sm);
 
-            _bones[*_selected.begin()]->SetBoneAngle(_startRotateAngle + (atan2(e.y - o.y, e.x - o.x)
+            (*_bones)[*_selected.begin()]->SetBoneAngle(_startRotateAngle + (atan2(e.y - o.y, e.x - o.x)
                                                                     - atan2(sm.y - o.y, sm.x - o.x)));
 
         }
         if (changeLength)
         {
-            _bones[*_selected.begin()]->SetLength((s - e).Length());
+            (*_bones)[*_selected.begin()]->SetLength((s - e).Length());
         }
         if (_meshGenerateBone >= 0)
         {
             PointList points;
-            BoneAnimated *b = _bones[*_selected.begin()];
+            BoneAnimated *b = (*_bones)[*_selected.begin()];
 
             FPoint p1(b->GetBonePos());
             FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
@@ -320,22 +329,22 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
 
 void Animation::BoneCreateTo(const FPoint &point)
 {
-    FPoint s(_bones[*_selected.begin()]->GetBonePos());
+    FPoint s((*_bones)[*_selected.begin()]->GetBonePos());
     FPoint e(point);
 
-    if (_bones[*_selected.begin()]->GetParent() != NULL)
+    if ((*_bones)[*_selected.begin()]->GetParent() != NULL)
     {
         Matrix rev;
-        rev.MakeRevers(_bones[*_selected.begin()]->GetParent()->GetMatrix());
+        rev.MakeRevers((*_bones)[*_selected.begin()]->GetParent()->GetMatrix());
         rev.Mul(e);
     }
-    _bones[*_selected.begin()]->SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
-    _bones[*_selected.begin()]->SetLength((s - e).Length());
+    (*_bones)[*_selected.begin()]->SetBoneAngle(atan2(e.y - s.y, e.x - s.x));
+    (*_bones)[*_selected.begin()]->SetLength((s - e).Length());
 
     if (_meshGenerateBone >= 0)
     {
         PointList points;
-        BoneAnimated *b = _bones[*_selected.begin()];
+        BoneAnimated *b = (*_bones)[*_selected.begin()];
 
         FPoint p1(b->GetBonePos());
         FPoint p2 = *FPoint(b->GetLength(), 0.f).Rotate(b->GetBoneAngle()) + b->GetBonePos();
@@ -382,17 +391,17 @@ void Animation::IKBoneMove(const FPoint &point)
 void Animation::ExcludeChild()
 {
     std::set<BoneAnimated*> sel;
-    for (uint i = 0; i < _bones.size(); ++i)
+    for (uint i = 0; i < _bones->size(); ++i)
     {
-        _bones[i]->SetMoveByParent(false);
+        (*_bones)[i]->SetMoveByParent(false);
     }
     for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        sel.insert(_bones[*i]);
+        sel.insert((*_bones)[*i]);
     }
-    for (uint i = 0; i < _bones.size(); ++i)
+    for (uint i = 0; i < _bones->size(); ++i)
     {
-        BoneAnimated *parent = _bones[i]->GetParent();
+        BoneAnimated *parent = (*_bones)[i]->GetParent();
         if (parent)
         {
             bool isParentSelected = ( sel.find(parent) != sel.end() );
@@ -401,7 +410,7 @@ void Animation::ExcludeChild()
                 parent = parent->GetParent();
                 isParentSelected |= ( parent && sel.find(parent) != sel.end() );
             }
-            _bones[i]->SetMoveByParent(isParentSelected);
+            (*_bones)[i]->SetMoveByParent(isParentSelected);
         }
     }
 }
@@ -444,9 +453,9 @@ void Animation::Picking(int index, bool add)
 void Animation::SelectByArea(const Rect &area)
 {
     _selected.clear();
-    for (uint i = 0; i < _bones.size(); ++i)
+    for (uint i = 0; i < _bones->size(); ++i)
     {
-        if (_bones[i]->IfInside(area))
+        if ((*_bones)[i]->IfInside(area))
         {
             _selected.insert(i);
         }
@@ -458,15 +467,15 @@ void Animation::LinkBones(int parent, int child)
 {
     if (parent >= 0 && child >= 0)
     {
-        if (_bones[child]->GetParent() != _bones[parent])
+        if ((*_bones)[child]->GetParent() != (*_bones)[parent])
         {
-            _bones[child]->SetParent(_bones[parent]);
+            (*_bones)[child]->SetParent((*_bones)[parent]);
         }
         return;
     }
     if (child >= 0)
     {
-        _bones[child]->SetParent(NULL);
+        (*_bones)[child]->SetParent(NULL);
         return;
     }
     if (parent >= 0)
@@ -481,20 +490,20 @@ void Animation::RemoveBones()
 {
     for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        delete _bones[*i];
-        _bones[*i] = NULL;
+        delete (*_bones)[*i];
+        (*_bones)[*i] = NULL;
     }
     std::set<std::string> names;
-    for (uint i = 0; i < _bones.size(); )
+    for (uint i = 0; i < _bones->size(); )
     {
-        if (_bones[i] == NULL)
+        if ((*_bones)[i] == NULL)
         {
-            _bones[i] = _bones.back();
-            _bones.pop_back();
+            (*_bones)[i] = _bones->back();
+            _bones->pop_back();
         }
         else
         {
-            names.insert(_bones[i]->GetName());
+            names.insert((*_bones)[i]->GetName());
             ++i;
         }
     }
@@ -531,7 +540,7 @@ void Animation::Unlink()
 {
     for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
     {
-        _bones[*i]->SetParent(NULL);
+        (*_bones)[*i]->SetParent(NULL);
     }
 }
 
@@ -603,8 +612,8 @@ void Animation::StartBoneCreating(uint index, const FPoint &point)
 
 FPoint Animation::GetBoneEnd(uint index)
 {
-    FPoint r(_bones[index]->GetLength(), 0.f);
-    _bones[index]->GetMatrix().Mul(r);
+    FPoint r((*_bones)[index]->GetLength(), 0.f);
+    (*_bones)[index]->GetMatrix().Mul(r);
     return r;
 }
 
@@ -619,7 +628,7 @@ bool Animation::PolygonActive(const FPoint &pos)
     {
         for (uint i = 0; i < _meshes.size(); ++i)
         {
-            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            if (_meshes[i]->GetBone() == (*_bones)[*_selected.begin()]->GetName())
             {
                 if (_meshes[i]->PixelCheck(pos))
                     return true;
@@ -635,7 +644,7 @@ void Animation::PolygonMouseDown(const FPoint &pos)
     {
         for (uint i = 0; i < _meshes.size(); ++i)
         {
-            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            if (_meshes[i]->GetBone() == (*_bones)[*_selected.begin()]->GetName())
             {
                 _meshes[i]->MouseDown(pos);
             }
@@ -649,7 +658,7 @@ void Animation::PolygonMouseMove(const FPoint &pos)
     {
         for (uint i = 0; i < _meshes.size(); ++i)
         {
-            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            if (_meshes[i]->GetBone() == (*_bones)[*_selected.begin()]->GetName())
             {
                 _meshes[i]->MouseMove(pos);
             }
@@ -663,7 +672,7 @@ void Animation::PolygonMouseUp(const FPoint &pos)
     {
         for (uint i = 0; i < _meshes.size(); ++i)
         {
-            if (_meshes[i]->GetBone() == _bones[*_selected.begin()]->GetName())
+            if (_meshes[i]->GetBone() == (*_bones)[*_selected.begin()]->GetName())
             {
                 _meshes[i]->MouseUp(pos);
             }
@@ -686,11 +695,17 @@ void Animation::LoadFromFile(const std::string &fileName)
     }
     _meshes.clear();
 
-    for (uint i = 0; i < _bones.size(); ++i)
+    for (uint i = 0; i < _bonesOrigin.size(); ++i)
     {
-        delete _bones[i];
+        delete _bonesOrigin[i];
     }
-    _bones.clear();
+    _bonesOrigin.clear();
+
+    for (uint i = 0; i < _bonesAnimation.size(); ++i)
+    {
+        delete _bonesAnimation[i];
+    }
+    _bonesAnimation.clear();
 
     _deltaAngle.clear();
     _boneChain.clear();
@@ -704,36 +719,54 @@ void Animation::LoadFromFile(const std::string &fileName)
         buffer.push_back('\0');
         rapidxml::xml_document<> doc;
         doc.parse<0>(&buffer[0]);
-        rapidxml::xml_node<> *animation = doc.first_node();
+        rapidxml::xml_node<> *root = doc.first_node();
 
-        rapidxml::xml_node<> *bones = animation->first_node("bones");
-        rapidxml::xml_node<> *bone = bones->first_node("bone");
-        int n = atoi(bones->first_attribute("size")->value());
-        while (bone)
-        {
-            _bones.push_back(new BoneAnimated(bone));
-            bone = bone->next_sibling("bone");
+        { // load meshes
+            rapidxml::xml_node<> *meshes = root->first_node("meshes");
+            rapidxml::xml_node<> *mesh = meshes->first_node("mesh");
+            _meshes.resize(atoi(meshes->first_attribute("size")->value()));
+            int counter = 0;
+            while (mesh)
+            {
+                assert(counter < _meshes.size());
+                _meshes[counter] = new ColoredPolygon(mesh);
+                counter++;
+                mesh = mesh->next_sibling("mesh");
+            }
+            assert(counter == _meshes.size());
         }
-        assert(n == _bones.size());
-
-        rapidxml::xml_node<> *meshes = animation->first_node("meshes");
-        rapidxml::xml_node<> *mesh = meshes->first_node("mesh");
-        _meshes.resize(atoi(meshes->first_attribute("size")->value()));
-        int counter = 0;
-        while (mesh)
-        {
-            assert(counter < _meshes.size());
-            _meshes[counter] = new ColoredPolygon(mesh);
-            counter++;
-            mesh = mesh->next_sibling("mesh");
+        { // load bones origin
+            rapidxml::xml_node<> *bones = root->first_node("origin");
+            rapidxml::xml_node<> *bone = bones ? bones->first_node("bone") : NULL;
+            int n = bone ? atoi(bones->first_attribute("size")->value()) : 0;
+            _bones = &_bonesOrigin;
+            while (bone)
+            {
+                _bonesOrigin.push_back(new BoneAnimated(bone));
+                bone = bone->next_sibling("bone");
+            }
+            assert(n == _bonesOrigin.size());
+            _bones = NULL;
         }
-        assert(counter == _meshes.size());
+        { // load animation
+            rapidxml::xml_node<> *bones = root->first_node("animation");
+            rapidxml::xml_node<> *bone = bones ? bones->first_node("bone") : NULL;
+            int n = bone ? atoi(bones->first_attribute("size")->value()) : 0;
+            _bones = &_bonesAnimation;
+            while (bone)
+            {
+                _bonesAnimation.push_back(new BoneAnimated(bone));
+                bone = bone->next_sibling("bone");
+            }
+            assert(n == _bonesAnimation.size());
+            _bones = NULL;
+        }
     }
 }
 
 void Animation::RegisterBone(BoneAnimated *b)
 {
-    _bones.push_back(b);
+    _bones->push_back(b);
 }
 
 void Animation::SaveToFile(const std::string &fileName)
@@ -741,15 +774,15 @@ void Animation::SaveToFile(const std::string &fileName)
     std::ofstream file_stored(fileName.c_str());
 
     rapidxml::xml_document<> doc;
-    rapidxml::xml_node<> *xe = doc.allocate_node(rapidxml::node_element, "animation");
+    rapidxml::xml_node<> *xe = doc.allocate_node(rapidxml::node_element, "root");
     doc.append_node(xe);
 
     // save bones
-    rapidxml::xml_node<> *bones = xe->document()->allocate_node(rapidxml::node_element, "bones");
+    rapidxml::xml_node<> *bones = xe->document()->allocate_node(rapidxml::node_element, "origin");
     xe->append_node(bones);
 
-    Math::Write(bones, "size", (int)_bones.size());
-    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    Math::Write(bones, "size", (int)_bonesOrigin.size());
+    for (BoneList::iterator i = _bonesOrigin.begin(), e = _bonesOrigin.end(); i != e; ++i)
     {
         if ((*i)->GetParent() == NULL)
         {
@@ -781,9 +814,9 @@ void Animation::CreatePointMass()
     {
         for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
         {
-            if (_meshes[j]->GetBone() == _bones[(*i)]->GetName())
+            if (_meshes[j]->GetBone() == (*_bones)[(*i)]->GetName())
             {
-                _meshes[j]->BindToBone(_bones[(*i)]);
+                _meshes[j]->BindToBone((*_bones)[(*i)]);
             }
         }
     }
@@ -791,7 +824,7 @@ void Animation::CreatePointMass()
 
 void Animation::ResetBones()
 {
-    for (BoneList::iterator i = _bones.begin(), e = _bones.end(); i != e; ++i)
+    for (BoneList::iterator i = _bones->begin(), e = _bones->end(); i != e; ++i)
     {
         (*i)->ResetPos();
     }

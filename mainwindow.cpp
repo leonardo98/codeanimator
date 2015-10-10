@@ -185,6 +185,7 @@ void MainWindow::createMenus()
         action->setChecked(true);
         connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
+
     }
     {
         menu = menuBar()->addMenu(tr("&Animation"));

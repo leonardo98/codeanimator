@@ -20,7 +20,9 @@ public slots:
 private:
     std::vector<ColoredPolygon *> _meshes;
     int _meshGenerateBone;
-    BoneList _bones;
+    BoneList _bonesAnimation;
+    BoneList *_bones;
+    BoneList _bonesOrigin;
     static Animation *_instance;
     bool _boneMoving; // move or rotate
     int _startMovingBone;
@@ -86,14 +88,14 @@ public:
     BoneAnimated *GetDebugBone()
     {
         if (_selected.size())
-            return _bones[*_selected.begin()];
+            return (*_bones)[*_selected.begin()];
         return NULL;
     }
 
     BoneAnimated *GetBone(int index)
     {
         if (index >= 0)
-            return _bones[index];
+            return (*_bones)[index];
         return NULL;
     }
 
