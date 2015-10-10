@@ -69,8 +69,11 @@ MainWindow::MainWindow()
 
 void MainWindow::changeMode()
 {
-    if (CreateDotMode())
-        Animation::Instance()->ResetBones();
+    if (!CreateDotMode())
+    {
+        Animation::Instance()->DuplicateNewBones();
+        Animation::Instance()->ReplaceBonesWith();
+    }
 }
 
 void MainWindow::PrintToOutput(const char *s)
