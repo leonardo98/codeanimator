@@ -335,25 +335,40 @@ void BoneAnimated::SaveToXml(rapidxml::xml_node<> *xe)
     Math::Write(xe, "length", _length);
     Math::Write(xe, "bpm", _bindPointMatrix.PrintToString().c_str());
 
-    rapidxml::xml_node<> *splineX = xe->document()->allocate_node(rapidxml::node_element, "x");
-    xe->append_node(splineX);
-    x.SaveToXml(splineX);
+    if (!x.Empty())
+    {
+        rapidxml::xml_node<> *splineX = xe->document()->allocate_node(rapidxml::node_element, "x");
+        xe->append_node(splineX);
+        x.SaveToXml(splineX);
+    }
 
-    rapidxml::xml_node<> *splineY = xe->document()->allocate_node(rapidxml::node_element, "y");
-    xe->append_node(splineY);
-    y.SaveToXml(splineY);
+    if (!y.Empty())
+    {
+        rapidxml::xml_node<> *splineY = xe->document()->allocate_node(rapidxml::node_element, "y");
+        xe->append_node(splineY);
+        y.SaveToXml(splineY);
+    }
 
-    rapidxml::xml_node<> *splineAngle = xe->document()->allocate_node(rapidxml::node_element, "angle");
-    xe->append_node(splineAngle);
-    angle.SaveToXml(splineAngle);
+    if (!angle.Empty())
+    {
+        rapidxml::xml_node<> *splineAngle = xe->document()->allocate_node(rapidxml::node_element, "angle");
+        xe->append_node(splineAngle);
+        angle.SaveToXml(splineAngle);
+    }
 
-    rapidxml::xml_node<> *splineScaleX = xe->document()->allocate_node(rapidxml::node_element, "scaleX");
-    xe->append_node(splineScaleX);
-    scaleX.SaveToXml(splineScaleX);
+    if (!scaleX.Empty())
+    {
+        rapidxml::xml_node<> *splineScaleX = xe->document()->allocate_node(rapidxml::node_element, "scaleX");
+        xe->append_node(splineScaleX);
+        scaleX.SaveToXml(splineScaleX);
+    }
 
-    rapidxml::xml_node<> *splineScaleY = xe->document()->allocate_node(rapidxml::node_element, "scaleY");
-    xe->append_node(splineScaleY);
-    scaleY.SaveToXml(splineScaleY);
+    if (!scaleY.Empty())
+    {
+        rapidxml::xml_node<> *splineScaleY = xe->document()->allocate_node(rapidxml::node_element, "scaleY");
+        xe->append_node(splineScaleY);
+        scaleY.SaveToXml(splineScaleY);
+    }
 
     rapidxml::xml_node<> *children = xe->document()->allocate_node(rapidxml::node_element, "children");
     xe->append_node(children);

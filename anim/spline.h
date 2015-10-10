@@ -79,6 +79,8 @@ public:
 
     void Clear();
 
+    bool Empty() { return _points.empty(); }
+
     Spline(rapidxml::xml_node<> *xe);
     void SaveToXml(rapidxml::xml_node<> *xe);
 };

@@ -372,7 +372,10 @@ void SplinePoint::SaveToXml(rapidxml::xml_node<> *xe)
 }
 
 Spline::Spline(rapidxml::xml_node<> *xe)
+    :_numDivide(10)
 {
+    if (xe == NULL) return;
+
     _numDivide = atoi(xe->first_attribute("divide")->value());
 
     rapidxml::xml_node<> *pool = xe->first_node("pool");
@@ -411,6 +414,8 @@ Spline::Spline(rapidxml::xml_node<> *xe)
 
 void Spline::SaveToXml(rapidxml::xml_node<> *xe)
 {
+    if (_points.size() == 0) return;
+
     Math::Write(xe, "divide", _numDivide);
 
     // save pool
