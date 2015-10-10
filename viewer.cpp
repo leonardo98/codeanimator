@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include "animation.h"
 #include "mainwindow.h"
+#include <QMenu>
 
 Viewer::Viewer(QWidget *parent)
     : QGLWidget(parent)
@@ -32,6 +33,10 @@ Viewer::Viewer(QWidget *parent)
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
     //setE(true);
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(ShowContextMenu(const QPoint&)));
 
     new Animation();//todo: make it beauty
 }
@@ -120,11 +125,12 @@ void Viewer::mousePressEvent(QMouseEvent *event)
     _lastMousePos = mousePos;
     if (event->button() == Qt::LeftButton)
     {
-        OnMouseDown(mousePos);
-    }
-    else if (event->button() == Qt::RightButton)
-    {
-        _mouseMoveAction = mouse_dragging_world;
+        if (QApplication::keyboardModifiers() & Qt::ControlModifier)
+        {
+            _mouseMoveAction = mouse_dragging_world;
+        }
+        else
+            OnMouseDown(mousePos);
     }
 }
 
@@ -505,5 +511,43 @@ void Viewer::UpdateSelection(const Rect &area)
     FPoint start = ScreenToWorld(FPoint(area.x1, area.y1));
     FPoint end = ScreenToWorld(FPoint(area.x2, area.y2));
     Animation::Instance()->SelectByArea(Rect(start.x, start.y, end.x, end.y));
+}
+
+void Viewer::ShowContextMenu(const QPoint&pos)
+{
+    FPoint mouseWorld = ScreenToWorld(FPoint(pos.x(), pos.y()));
+
+    int index = Animation::Instance()->GetBoneAtPoint(mouseWorld);
+    if (index == -1)
+    {
+        return;
+    }
+
+    QPoint globalPos = mapToGlobal(pos);
+        // for QAbstractScrollArea and derived classes you would use:
+        // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+
+    QMenu myMenu;
+    QMenu *splines = new QMenu( tr("Edit spline"));
+    myMenu.addMenu( splines );
+
+    QAction *action;
+    action = splines->addAction("X");
+    action = splines->addAction("Y");
+    action = splines->addAction("Angle");
+    action = splines->addAction("ScaleX");
+    action = splines->addAction("ScaleY");
+
+    // ...
+
+    QAction* selectedItem = myMenu.exec(globalPos);
+    if (selectedItem)
+    {
+        // something was chosen, do stuff
+    }
+    else
+    {
+        // nothing was chosen
+    }
 }
 

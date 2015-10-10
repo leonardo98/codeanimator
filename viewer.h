@@ -23,6 +23,7 @@ class Viewer
     Q_OBJECT
 public slots:
     void Update();
+    void ShowContextMenu(const QPoint&);
 signals:
     void uploadTexture();
 protected:
