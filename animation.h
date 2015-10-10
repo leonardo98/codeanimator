@@ -30,7 +30,6 @@ private:
 
     void ExcludeChild();
 
-//    PointList testPoints;
     std::vector<float> _deltaAngle;
     std::vector<BoneAnimated *> _boneChain;
     PointList _chainPoints;

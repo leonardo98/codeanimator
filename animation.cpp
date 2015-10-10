@@ -16,11 +16,6 @@ Animation::Animation()
     _texture = NULL;
     _baseSprite = NULL;
     _meshGenerateBone = -1;
-
-//    testPoints.push_back(FPoint(0, 0));
-//    testPoints.push_back(FPoint(0, 100));
-//    testPoints.push_back(FPoint(100, 100));
-//    testPoints.push_back(FPoint(100, 0));
 }
 
 Animation::~Animation()
@@ -98,14 +93,6 @@ void Animation::Draw()
             }
         }
     }
-
-
-//    for (int i = 0; i < (int)testPoints.size() - 1; ++i)
-//        Render::Line(testPoints[i].x, testPoints[i].y,
-//                     testPoints[i + 1].x, testPoints[i + 1].y, 0xFFFFFFFF);
-//    for (int i = 0; i < (int)_chainPoints.size() - 1; ++i)
-//        Render::Line(_chainPoints[i].x, _chainPoints[i].y,
-//                     _chainPoints[i + 1].x, _chainPoints[i + 1].y, 0xFFFFFFFF);
 }
 
 std::string Animation::GenerateUnicBoneName()
@@ -147,7 +134,6 @@ uint Animation::CreateBone(FPoint pos, bool generateMesh)
 
         ColoredPolygon *c = new ColoredPolygon(points);
         c->SetBone(b->GetName());
-//        b->SetMesh(_meshes.size());
         _meshGenerateBone = _meshes.size();
         _meshes.push_back(c);
     }
@@ -374,7 +360,6 @@ void Animation::IKBoneMove(const FPoint &point)
 
     //ik - search positions
     UpdateChain(_chainPoints, point);
-//    testPoints = points;
 
     //update bone positiobns
     for (int i = 0; i < _boneChain.size(); ++i)
@@ -387,7 +372,6 @@ void Animation::IKBoneMove(const FPoint &point)
             Matrix rev;
             rev.MakeRevers(_boneChain[i]->GetParent()->GetMatrix());
 
-            //rev.Mul(a);
             rev.Mul(b);
         }
 
@@ -489,7 +473,6 @@ void Animation::LinkBones(int parent, int child)
     {
         assert(false);
         // todo: i do not know what to do)
-        //_bones[parent]->
         return;
     }
 }
@@ -565,13 +548,6 @@ void UpdateChain(PointList &points, const FPoint &target)
             FPoint d(b - a);
             FPoint t(target - a);
 
-//            float sinAngle = (d.x * t.y - d.y * t.x) / (d.Length() * t.Length());
-//            int n = sinAngle < 0 ? -1 : 1;
-//            float angle = asin(sinAngle);
-//            if (n == -1)
-//            {
-//                angle = M_PI - angle;
-//            }
             float angle = atan2(t.y, t.x) - atan2(d.y, d.x);
 
             for (int j = i + 1; j < points.size(); ++j)
@@ -719,10 +695,6 @@ void Animation::LoadFromFile(const std::string &fileName)
     _deltaAngle.clear();
     _boneChain.clear();
     _chainPoints.clear();
-
-//    GLTexture2D *_texture;
-//    Sprite *_baseSprite;
-//    std::string _fileName;
 
     std::ifstream myfile(fileName.c_str());
     std::vector<char> buffer((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>( ));
