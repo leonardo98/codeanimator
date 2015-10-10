@@ -639,30 +639,25 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
     {
         assert(false);// fail
     }
-
-//    uint counter = 0;
-//    for (uint i = 0; i < skipped.size(); ++i)
-//    {
-//        uint start = (skipped[i] + _dots.size() - 1) % _dots.size();
-//        for (; counter < _dots.size(); (start + _dots.size() - 1) % _dots.size())
-//        {
-//            counter++;
-//        }
-//        if (counter >= _dots.size())
-//        {
-//            assert(false);//fail
-//        }
-//        uint finish = skipped[i];
-//        for (; counter < _dots.size(); (start + _dots.size() - 1) % _dots.size())
-//        {
-//            counter++;
-//        }
-//        if (counter >= _dots.size())
-//        {
-//            assert(false);//fail
-//        }
-
-//        if (_masses[])
-//    }
 }
 
+void ColoredPolygon::ReplaceBonesWith(BoneList &bones)
+{
+    std::map<std::string, BoneAnimated *> byNames;
+    for (const auto i : bones)
+    {
+        byNames[i->GetName()] = i;
+    }
+
+    for (uint i = 0; i < _masses.size(); ++i)
+    {
+        for (int j = 0; j < 2; ++j)
+        {
+            if (!_masses[i].p[0].boneName.empty())
+            {
+                assert(byNames.find(_masses[i].p[0].bone->GetName()) != byNames.end());
+                _masses[i].p[0].bone = byNames[_masses[i].p[0].bone->GetName()];
+            }
+        }
+    }
+}

@@ -63,6 +63,7 @@ private:
 
 public:
 
+    void ReplaceBonesWith(BoneList &bones);
     void GenerateTriangles();
     const std::string &GetBone() { return _boneName; }
     void SetBone(const std::string &name) { _boneName = name; }
