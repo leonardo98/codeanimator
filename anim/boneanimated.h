@@ -22,8 +22,6 @@ private:
     bool _moveByParent;
 
     Matrix _bindPointMatrix;// mul it before point mul
-    FPoint _bindPos;
-    float _bindAngle;
 
     // for editor
     FPoint _pos;
@@ -43,6 +41,7 @@ public:
     void GetBoneList(BoneList &bones);
     const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
+    BoneAnimated(const BoneAnimated &b);
     virtual ~BoneAnimated();
     void Draw();
     void DrawRed();
@@ -79,8 +78,6 @@ public:
     void SaveToXml(rapidxml::xml_node<> *xe);
 
     const Matrix &GetAnimVertMatrix();
-
-    void ResetPos();
 
 };
 

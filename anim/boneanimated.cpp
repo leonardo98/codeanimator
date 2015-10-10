@@ -288,9 +288,6 @@ BoneAnimated::BoneAnimated(rapidxml::xml_node<> *xe)
     _length = atof(xe->first_attribute("length")->value());
     _bindPointMatrix.ReadFromString(xe->first_attribute("bpm")->value());
 
-    _bindPos = _pos;
-    _bindAngle = _angle;
-
     rapidxml::xml_node<> *children = xe->first_node("children");
     rapidxml::xml_node<> *bone = children->first_node("bone");
     _children.resize(atoi(children->first_attribute("size")->value()));
@@ -305,7 +302,28 @@ BoneAnimated::BoneAnimated(rapidxml::xml_node<> *xe)
         bone = bone->next_sibling("bone");
     }
     assert(counter == _children.size());
+}
 
+BoneAnimated::BoneAnimated(const BoneAnimated &b)
+    : x(b.x)
+    , y(b.y)
+    , angle(b.angle)
+    , scaleX(b.scaleX)
+    , scaleY(b.scaleY)
+    , _parent(NULL)
+    , _name(b._name)
+    , _length(b._length)
+    , _bindPointMatrix(b._bindPointMatrix)
+    , _pos(b._pos)
+    , _angle(b._angle)
+{
+    _children.resize(b._children.size());
+    for (uint i = 0; i < b._children.size();++i)
+    {
+        _children[i] = new BoneAnimated(*b._children[i]);
+        _children[i]->_parent = this;
+        Animation::Instance()->RegisterBone(_children[i]);
+    }
 }
 
 void BoneAnimated::SaveToXml(rapidxml::xml_node<> *xe)
@@ -352,14 +370,6 @@ void BoneAnimated::SaveToXml(rapidxml::xml_node<> *xe)
 void BoneAnimated::FixMatrix()
 {
     _bindPointMatrix.MakeRevers(GetMatrix());
-    _bindPos = _pos;
-    _bindAngle = _angle;
-}
-
-void BoneAnimated::ResetPos()
-{
-    _pos = _bindPos;
-    _angle = _bindAngle;
 }
 
 const Matrix &BoneAnimated::GetAnimVertMatrix()
