@@ -780,10 +780,10 @@ void Animation::LoadFromFile(const std::string &fileName)
             _bones = NULL;
         }
 
-//        for (uint i = 0; i < _meshes.size(); ++i)
-//        {
-//            _meshes[i]->ReplaceBonesWith(_bonesAnimation);
-//        }
+        for (uint i = 0; i < _meshes.size(); ++i)
+        {
+            _meshes[i]->ReplaceBonesWith(_bonesAnimation);
+        }
 
 
     }

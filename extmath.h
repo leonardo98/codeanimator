@@ -8,6 +8,22 @@
 #include "ogl/vertexbuffer.h"
 #include "ogl/sprite.h"
 
+class BoneAnimated;
+
+struct BoneMass
+{
+    std::string boneName;
+    BoneAnimated *bone;
+    float mass;
+    BoneMass() : bone(NULL) {}
+};
+
+struct OnePoint
+{
+    FPoint pos;
+    BoneMass p[2];
+};
+
 class Math {
 public:
 	static int round(float a);
@@ -44,12 +60,13 @@ public:
 	static std::string GetOnlyFileName(const std::string &filePath);
 	static std::string ProcessTexture(const char *filePath, const std::string &currentWorkDir);
     static std::string CutFileName(const std::string &filePath);
-    static bool GenerateTriangles(const QVector<FPoint> &, Sprite &vb, DWORD color = 0xFFFFFFFF, GLTexture2D * texture = 0, const Matrix *transform = NULL);
+    static bool GenerateTriangles(const std::vector<OnePoint> &, Sprite &vb, DWORD color = 0xFFFFFFFF, GLTexture2D * texture = 0, const Matrix *transform = NULL);
 	//static void FillTriangle(const FPoint &a, const FPoint &b, const FPoint &c, VertexBuffer &vb, DWORD color = 0xFFFFFFFF, GLTexture2D * texture = 0, const Matrix *transform = NULL);
 	static void FillTriangle(int index, int a, int b, int c, VertexBuffer &vb);
 
-    static float SignedSquare(const QVector<FPoint> &dots);
+    static float SignedSquare(const std::vector<OnePoint> &dots);
 //    static bool Convex(const FPoint &a, const FPoint &b, const FPoint &c, const FPoint &d);
+    static bool Inside(const FPoint &m, const std::vector<OnePoint> &dots);
 };
 
 #endif//MYENGINE_MATH_H

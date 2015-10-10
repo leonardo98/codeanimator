@@ -282,6 +282,27 @@ bool Math::Inside(const FPoint &m, const QVector<FPoint> &dots) {
 	return (counter % 2 == 1);
 }
 
+bool Math::Inside(const FPoint &m, const std::vector<OnePoint> &dots) {
+    //
+    int counter = 0;
+    int n = dots.size();
+    for (int j = 0; j < n; ++j) {
+        const FPoint *a2 = &dots[j].pos;
+        const FPoint *b2 = &dots[(j + 1) % dots.size()].pos;
+        if ((a2->x < b2->x && a2->x < m.x && m.x <= b2->x)
+            || (a2->x > b2->x && a2->x >= m.x && m.x > b2->x)
+            ) {//         a2b2
+            float k = (a2->y - b2->y) / (a2->x - b2->x);
+            float b = a2->y - a2->x * k;
+            float y = k * m.x + b;
+            if (y > m.y) {
+                ++counter;
+            }
+        }
+    }
+    return (counter % 2 == 1);
+}
+
 bool Math::Inside(const FPoint &m, const FPoint &a, const FPoint &b, const FPoint &c) {
 	QVector<FPoint> d;
 	d.push_back(a);
@@ -398,7 +419,7 @@ std::string Math::CutFileName(const std::string &filePath) {
 	return filePath.substr(0, last);
 } 
 
-bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, DWORD color, GLTexture2D * texture, const Matrix *transform)
+bool Math::GenerateTriangles(const std::vector<OnePoint> &inputDots, Sprite &sprite, DWORD color, GLTexture2D * texture, const Matrix *transform)
 {
 	if (inputDots.size() < 3)
 	{
@@ -416,18 +437,18 @@ bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, D
 	if (texture && transform != NULL) 
 	{
 		for (unsigned int i = 0; i < vb.Size(); ++i) {
-			vb.VertXY(i).x = inputDots[i].x;
-			vb.VertXY(i).y = inputDots[i].y;
+            vb.VertXY(i).x = inputDots[i].pos.x;
+            vb.VertXY(i).y = inputDots[i].pos.y;
 			transform->Mul(vb.VertXY(i).x, vb.VertXY(i).y, vb.VertUV(i).x, vb.VertUV(i).y);
 		}
 	}
 	else
 	{
 		for (unsigned int i = 0; i < vb.Size(); ++i) {
-			vb.VertXY(i).x = inputDots[i].x;
-			vb.VertXY(i).y = inputDots[i].y;
-			vb.VertUV(i).x = inputDots[i].x / 512.f;
-			vb.VertUV(i).y = inputDots[i].y / 512.f;
+            vb.VertXY(i).x = inputDots[i].pos.x;
+            vb.VertXY(i).y = inputDots[i].pos.y;
+            vb.VertUV(i).x = inputDots[i].pos.x / 512.f;
+            vb.VertUV(i).y = inputDots[i].pos.y / 512.f;
 		}
 	}
 	float sign = 0.f;
@@ -439,9 +460,9 @@ bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, D
 		int index = 0;
 		float minAngle = 180.f;
 		for (unsigned int i = 0; i < inputDots.size(); ++i) {
-			a = &inputDots[i];
-			b = &inputDots[(i + 1) % inputDots.size()];
-			c = &inputDots[(i + 2) % inputDots.size()];
+            a = &inputDots[i].pos;
+            b = &inputDots[(i + 1) % inputDots.size()].pos;
+            c = &inputDots[(i + 2) % inputDots.size()].pos;
 			FPoint m((*a + *b + *c) / 3);
 			if (Math::Inside(m, inputDots)) {
                 FPoint tmpPoint((*c - *b));
@@ -455,9 +476,9 @@ bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, D
 				}
 			}
 		}
-		a = &inputDots[index];
-		b = &inputDots[(index + 1) % inputDots.size()];
-		c = &inputDots[(index + 2) % inputDots.size()];
+        a = &inputDots[index].pos;
+        b = &inputDots[(index + 1) % inputDots.size()].pos;
+        c = &inputDots[(index + 2) % inputDots.size()].pos;
 		sign = Math::VMul(*b - *a, *c - *b);
 	}
 	int counter = 0;
@@ -487,21 +508,21 @@ bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, D
             int opt = -1;
             for (unsigned int i = 0; i < dots.size(); ++i)
             {
-				a = &inputDots[dots[i]];
-				b = &inputDots[dots[(i + 1) % dots.size()]];
-				c = &inputDots[dots[(i + 2) % dots.size()]];
+                a = &inputDots[dots[i]].pos;
+                b = &inputDots[dots[(i + 1) % dots.size()]].pos;
+                c = &inputDots[dots[(i + 2) % dots.size()]].pos;
 				
 				bool intersection = false;
 				for (unsigned int j = 0; j < dots.size() && !intersection; ++j) {
-					const FPoint *a2 = &inputDots[dots[j]];
-					const FPoint *b2 = &inputDots[dots[(j + 1) % dots.size()]];
+                    const FPoint *a2 = &inputDots[dots[j]].pos;
+                    const FPoint *b2 = &inputDots[dots[(j + 1) % dots.size()]].pos;
 					intersection = (Math::Intersection(*a, *c, *a2, *b2, NULL) 
 									|| Math::Intersection(*a, *b, *a2, *b2, NULL)
 									|| Math::Intersection(*b, *c, *a2, *b2, NULL));
 				}
 
 				for (unsigned int j = 0; j < dots.size() && !intersection; ++j) {
-					const FPoint *a2 = &inputDots[dots[j]];
+                    const FPoint *a2 = &inputDots[dots[j]].pos;
 					intersection = (a2 != a && a2 != b && a2 != c && Math::Inside(*a2, *a, *b, *c));
 				}
 
@@ -509,9 +530,9 @@ bool Math::GenerateTriangles(const QVector<FPoint> &inputDots, Sprite &sprite, D
                 {
                     if (opt >= 0)
                     {
-                        const FPoint *oa = &inputDots[dots[opt]];
-                        const FPoint *ob = &inputDots[dots[(opt + 1) % dots.size()]];
-                        const FPoint *oc = &inputDots[dots[(opt + 2) % dots.size()]];
+                        const FPoint *oa = &inputDots[dots[opt]].pos;
+                        const FPoint *ob = &inputDots[dots[(opt + 1) % dots.size()]].pos;
+                        const FPoint *oc = &inputDots[dots[(opt + 2) % dots.size()]].pos;
 
                         float al = (*b - *c).Length();
                         float bl = (*a - *c).Length();
@@ -570,15 +591,15 @@ void Math::FillTriangle(int index, int a, int b, int c, VertexBuffer &vb)
 //    return (aa * ad > 0);
 //}
 
-float Math::SignedSquare(const QVector<FPoint> &dots)
+float Math::SignedSquare(const std::vector<OnePoint> &dots)
 {
     if (dots.empty()) return 0.f;
 
     float r = 0.f;
-    const FPoint &a = dots[0];
+    const FPoint &a = dots[0].pos;
     for (uint i = 2; i < dots.size(); ++i)
     {
-        r += VMul(FPoint(dots[i - 1].x - a.x, dots[i - 1].y - a.y), FPoint(dots[i].x - a.x, dots[i].y - a.y));
+        r += VMul(FPoint(dots[i - 1].pos.x - a.x, dots[i - 1].pos.y - a.y), FPoint(dots[i].pos.x - a.x, dots[i].pos.y - a.y));
     }
     return r;
 }

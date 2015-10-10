@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "ColoredPolygon.h"
-#include "extmath.h"
 //#include "../Core/Core.h"
 //#include "../Core/Messager.h"
 //#include "../Core/InputSystem.h"
@@ -59,7 +58,7 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
         std::string::size_type sigma = array.find(";");
         for (unsigned int j = 0; j < _dots.size(); ++j)
         {
-            sscanf(array.substr(start, sigma - start).c_str(), "%g %g", &_dots[j].x, &_dots[j].y);
+            sscanf(array.substr(start, sigma - start).c_str(), "%g %g", &_dots[j].pos.x, &_dots[j].pos.y);
             start = sigma + 1;
             sigma = array.find(";", start);
         }
@@ -73,7 +72,7 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
             unsigned int count = 0;
             for (rapidxml::xml_node<> *i = mesh->first_node(); i; i = i->next_sibling())
             {
-                sscanf(i->first_attribute("geom")->value(), "%g;%g", &_dots[count].x, &_dots[count].y);
+                sscanf(i->first_attribute("geom")->value(), "%g;%g", &_dots[count].pos.x, &_dots[count].pos.y);
                 count++;
             }
         }
@@ -94,7 +93,7 @@ void ColoredPolygon::UpdatePoints(const PointList &points)
     _dots.resize(points.size());
     for (uint i = 0; i < points.size(); ++i)
     {
-        _dots[i] = points[i];
+        _dots[i].pos = points[i];
     }
     CalcWidthAndHeight();
     GenerateTriangles();
@@ -108,7 +107,7 @@ ColoredPolygon::ColoredPolygon(const PointList &points)
     _dots.resize(points.size());
     for (uint i = 0; i < points.size(); ++i)
     {
-        _dots[i] = points[i];
+        _dots[i].pos = points[i];
     }
     CalcWidthAndHeight();
     GenerateTriangles();
@@ -126,14 +125,15 @@ void ColoredPolygon::Draw()
 
 	DrawTriangles();
 
-	_screenDots = _dots;
+    _screenDots.resize(_dots.size());
 	for (unsigned int i = 0; i < _dots.size(); ++i) {
+        _screenDots[i] = _dots[i].pos;
 		Render::GetCurrentMatrix().Mul(_screenDots[i]);	
 	}
 	if (_triangles.GetVB().Size() == 0) 
 	{
 		for (unsigned int i = 0; i < _dots.size(); ++i) {
-			Render::Line(_dots[i].x, _dots[i].y, _dots[(i + 1) % _dots.size()].x, _dots[(i + 1) % _dots.size()].y, 0xFFFFFFFF);
+            Render::Line(_dots[i].pos.x, _dots[i].pos.y, _dots[(i + 1) % _dots.size()].pos.x, _dots[(i + 1) % _dots.size()].pos.y, 0xFFFFFFFF);
 		}
 	}
 }
@@ -163,7 +163,7 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
     //parent = Render::GetCurrentMatrix();
     for (unsigned int i = 0; i < _dots.size(); ++i)
     {
-        Render::Line(_dots[i].x, _dots[i].y, _dots[(i + 1) % _dots.size()].x, _dots[(i + 1) % _dots.size()].y, 0xFFFFFFFF);
+        Render::Line(_dots[i].pos.x, _dots[i].pos.y, _dots[(i + 1) % _dots.size()].pos.x, _dots[(i + 1) % _dots.size()].pos.y, 0xFFFFFFFF);
     }
 
     Render::SetMatrixUnit();
@@ -206,9 +206,9 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
     {
         uint i = _selectedDots[j];
 
-        FPoint &a = _dots[(i + _dots.size() - 1) % _dots.size()];
-        FPoint &b = _dots[i];
-        FPoint &c = _dots[(i + 1) % _dots.size()];
+        FPoint &a = _dots[(i + _dots.size() - 1) % _dots.size()].pos;
+        FPoint &b = _dots[i].pos;
+        FPoint &c = _dots[(i + 1) % _dots.size()].pos;
 
         std::vector<std::pair<BoneAnimated *, float> > boneDistance;
         for (uint j = 0; j < bones.size(); ++j)
@@ -279,12 +279,12 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 	}
     else
     {
-        Math::Write(xe, "size", _dots.size());
+        Math::Write(xe, "size", (int)_dots.size());
         std::string array;
         for (unsigned int j = 0; j < _dots.size(); ++j)
         {
             char buff[100];
-            sprintf(buff, "%g %g;", _dots[j].x, _dots[j].y);
+            sprintf(buff, "%g %g;", _dots[j].pos.x, _dots[j].pos.y);
             array += buff;
         }
         Math::Write(xe, "dots", array.c_str());
@@ -303,7 +303,7 @@ void ColoredPolygon::CalcWidthAndHeight() {
 	Rect rect;
 	rect.Clear();
 	for (unsigned int i = 0; i < _dots.size(); ++i) {
-		rect.Encapsulate(_dots[i].x, _dots[i].y);
+        rect.Encapsulate(_dots[i].pos.x, _dots[i].pos.y);
 	}
 	_width = fabs(rect.x2 - rect.x1);
 	_height = fabs(rect.y2 - rect.y1);
@@ -329,25 +329,23 @@ void ColoredPolygon::DrawTriangles() {
 
 void ColoredPolygon::DrawBinded()
 {
-    if (_triangles.GetVB().Size() != _masses.size())
-    {
-        return;
-    }
-
     _trianglesBinded = _triangles;
     Matrix tmp;
     for (uint i = 0; i < _trianglesBinded.GetVB().Size(); ++i)
     {
+        bool needMul = false;
         tmp.Zero();
-        if (_masses[i].p[0].bone)
+        if (_dots[i].p[0].bone)
         {
-            tmp.Add(_masses[i].p[0].bone->GetAnimVertMatrix(), _masses[i].p[0].mass);
+            tmp.Add(_dots[i].p[0].bone->GetAnimVertMatrix(), _dots[i].p[0].mass);
+            needMul = true;
         }
-        if (_masses[i].p[1].bone)
+        if (_dots[i].p[1].bone)
         {
-            tmp.Add(_masses[i].p[1].bone->GetAnimVertMatrix(), _masses[i].p[1].mass);
+            tmp.Add(_dots[i].p[1].bone->GetAnimVertMatrix(), _dots[i].p[1].mass);
         }
-        tmp.Mul(_trianglesBinded.GetVB().VertXY(i));
+        if (needMul)
+            tmp.Mul(_trianglesBinded.GetVB().VertXY(i));
     }
 
     Render::PushColorAndMul(_color);
@@ -364,7 +362,7 @@ int ColoredPolygon::SearchNearest(float x, float y)
     FPoint p(x, y);
     for (unsigned int i = 0; i < _dots.size(); ++i)
     {
-        if ((_dots[i] - p).Length() < SIZEX)
+        if ((_dots[i].pos - p).Length() < SIZEX)
         {
             return i;
         }
@@ -376,7 +374,7 @@ bool ColoredPolygon::CheckLines(const FPoint &p)
 {
     for (unsigned int i = 0; i < _dots.size(); ++i)
     {
-        if (Math::DotNearLine(_dots[i], _dots[(i + 1) % _dots.size()], p))
+        if (Math::DotNearLine(_dots[i].pos, _dots[(i + 1) % _dots.size()].pos, p))
         {
             return true;
         }
@@ -389,15 +387,17 @@ int ColoredPolygon::CreateDot(float x, float y) {
 		return false;
 	}
 	int result = -1;
+    OnePoint point;
 	FPoint p(x, y);
 	for (unsigned int i = 0; i < _dots.size() && result < 0; ++i) {
-		if (Math::DotNearLine(_dots[i], _dots[(i + 1) % _dots.size()], p)) {
+        if (Math::DotNearLine(_dots[i].pos, _dots[(i + 1) % _dots.size()].pos, p)) {
 			unsigned int index = (i + 1) % _dots.size();
+            point.pos = p;
 			if (index < _dots.size()) {
-				_dots.insert(_dots.begin() + index, p);
+                _dots.insert(_dots.begin() + index, point);
 				result = index;
 			} else {
-				_dots.push_back(p);
+                _dots.push_back(point);
 				result = _dots.size() - 1;
 			}
 		}
@@ -412,7 +412,7 @@ void ColoredPolygon::RemoveDot(QVector<int> index) {
 	if (_dots.size() <= 3) {
 		return;
 	}
-    QVector<FPoint> tmp;
+    std::vector<OnePoint> tmp;
     for (int i = 0; i < _dots.size(); ++i)
     {
         int j = 0;
@@ -460,18 +460,8 @@ void ColoredPolygon::MouseDown(const FPoint &mouse) {
 }
 
 bool ColoredPolygon::MouseMove(const FPoint &mousePos) {
-    if (!MainWindow::Instance()->CreateDotMode() && _mouseDown) {
-//		Matrix reverse;
-//		reverse.MakeRevers(parent);
-
-//		FPoint start(_mousePos);
-//		FPoint end(mousePos);
-//		reverse.Mul(start);
-//		reverse.Mul(end);
-
-//		_pos.x += (end.x - start.x);
-//		_pos.y += (end.y - start.y);
-//		_mousePos = mousePos;
+    if (!MainWindow::Instance()->CreateDotMode() && _mouseDown)
+    {
         return true;
 	}
 
@@ -498,11 +488,12 @@ bool ColoredPolygon::MouseMove(const FPoint &mousePos) {
 	} else {
         for (unsigned int i = 0; i < _dotUnderCursor.size(); ++i)
         {
-            _dots[_dotUnderCursor[i]].x += (end.x - start.x);
-            _dots[_dotUnderCursor[i]].y += (end.y - start.y);
+            _dots[_dotUnderCursor[i]].pos.x += (end.x - start.x);
+            _dots[_dotUnderCursor[i]].pos.y += (end.y - start.y);
         }
 		CalcWidthAndHeight();
-	}
+        GenerateTriangles();
+    }
 	_mousePos = mousePos;
     return true;
 }
@@ -567,16 +558,15 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
         bones[j]->FixMatrix();
     }
 
-    _masses.resize(_dots.size());
     float signSq = Math::SignedSquare(_dots);
 
     std::vector<uint> skipped;
 
-    for (uint i = 0; i < _masses.size(); ++i)
+    for (uint i = 0; i < _dots.size(); ++i)
     {
-        FPoint &a = _dots[(i + _dots.size() - 1) % _dots.size()];
-        FPoint &b = _dots[i];
-        FPoint &c = _dots[(i + 1) % _dots.size()];
+        FPoint &a = _dots[(i + _dots.size() - 1) % _dots.size()].pos;
+        FPoint &b = _dots[i].pos;
+        FPoint &c = _dots[(i + 1) % _dots.size()].pos;
 
         std::vector<std::pair<BoneAnimated *, float> > boneDistance;
         for (uint j = 0; j < bones.size(); ++j)
@@ -608,26 +598,26 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
 
         if (boneDistance.size() == 1)
         {
-            _masses[i].p[0].boneName = boneDistance.back().first->GetName();
-            _masses[i].p[0].bone = boneDistance.back().first;
-            _masses[i].p[0].mass = 1.f;
+            _dots[i].p[0].boneName = boneDistance.back().first->GetName();
+            _dots[i].p[0].bone = boneDistance.back().first;
+            _dots[i].p[0].mass = 1.f;
 
-            _masses[i].p[1].boneName = "";
-            _masses[i].p[1].bone = NULL;
-            _masses[i].p[1].mass = 0.f;
+            _dots[i].p[1].boneName = "";
+            _dots[i].p[1].bone = NULL;
+            _dots[i].p[1].mass = 0.f;
         }
         else if (boneDistance.size() >= 2)
         {
             std::sort(boneDistance.begin(), boneDistance.end(), CmpBoneDistance);
             float m = boneDistance[0].second + boneDistance[1].second;
 
-            _masses[i].p[0].boneName = boneDistance[0].first->GetName();
-            _masses[i].p[0].bone = boneDistance[0].first;
-            _masses[i].p[0].mass = boneDistance[1].second / m;
+            _dots[i].p[0].boneName = boneDistance[0].first->GetName();
+            _dots[i].p[0].bone = boneDistance[0].first;
+            _dots[i].p[0].mass = boneDistance[1].second / m;
 
-            _masses[i].p[1].boneName = boneDistance[1].first->GetName();
-            _masses[i].p[1].bone = boneDistance[1].first;
-            _masses[i].p[1].mass = boneDistance[0].second / m;
+            _dots[i].p[1].boneName = boneDistance[1].first->GetName();
+            _dots[i].p[1].bone = boneDistance[1].first;
+            _dots[i].p[1].mass = boneDistance[0].second / m;
         }
         else
         {
@@ -649,14 +639,14 @@ void ColoredPolygon::ReplaceBonesWith(BoneList &bones)
         byNames[i->GetName()] = i;
     }
 
-    for (uint i = 0; i < _masses.size(); ++i)
+    for (uint i = 0; i < _dots.size(); ++i)
     {
         for (int j = 0; j < 2; ++j)
         {
-            if (!_masses[i].p[0].boneName.empty())
+            if (!_dots[i].p[0].boneName.empty())
             {
-                assert(byNames.find(_masses[i].p[0].bone->GetName()) != byNames.end());
-                _masses[i].p[0].bone = byNames[_masses[i].p[0].bone->GetName()];
+                assert(byNames.find(_dots[i].p[0].bone->GetName()) != byNames.end());
+                _dots[i].p[0].bone = byNames[_dots[i].p[0].bone->GetName()];
             }
         }
     }

@@ -4,20 +4,9 @@
 #include "ogl/sprite.h"
 #include "ogl/rect.h"
 #include "anim/boneanimated.h"
+#include "extmath.h"
 
 typedef std::vector<FPoint> PointList;
-
-struct BoneMass
-{
-    std::string boneName;
-    BoneAnimated *bone;
-    float mass;
-};
-
-struct OnePointMasses
-{
-    BoneMass p[2];
-};
 
 class ColoredPolygon
 {
@@ -35,8 +24,7 @@ private:
 
     void CalcWidthAndHeight();
 
-    std::vector<OnePointMasses> _masses;
-    QVector<FPoint> _dots; //
+    std::vector<OnePoint> _dots; //
 	QVector<FPoint> _screenDots;
     Sprite _triangles;
     Sprite _trianglesBinded;
