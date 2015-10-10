@@ -220,14 +220,20 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
             d->GetMatrix().Mul(s);
             d->GetMatrix().Mul(e);
             FPoint center = 0.5f * (s + e);
-            if ((s - b).Length() < d->GetLength() / 2
-                    || (e - b).Length() < d->GetLength() / 2
-                    || Math::Distance(s, e, b) < d->GetLength() / 2
-                    )
+
+            if (Math::VMul(a - center, b - center) * signSq >= 0.f || Math::VMul(b - center, c - center) * signSq >= 0.f)
             {
-                if (Math::VMul(a - center, b - center) * signSq >= 0.f || Math::VMul(b - center, c - center) * signSq >= 0.f)
+                if ((d->GetParent() == NULL && (s - b).Length() < d->GetLength() / 2)
+                        || (!d->HasChild() && (e - b).Length() < d->GetLength() / 2))
                 {
-                     boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, (b - center).Length()));
+                    boneDistance.push_back(
+                                std::make_pair<BoneAnimated *, float>
+                                (d, 0.f)
+                                );
+                }
+                else
+                {
+                    boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, Math::Distance(s, e, b) ) );
                 }
             }
         }
