@@ -78,12 +78,14 @@ public:
 
     void RemoveBones();
 
+    void ReplaceBonesWith();
+
     void LoadFromFile(const std::string &fileName);
     void SaveToFile(const std::string &fileName);
 
     void RegisterBone(BoneAnimated *b);
 
-    void ResetBones();
+    void DuplicateNewBones();
 
     BoneAnimated *GetDebugBone()
     {

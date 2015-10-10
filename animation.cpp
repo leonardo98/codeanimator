@@ -507,6 +507,17 @@ void Animation::RemoveBones()
             ++i;
         }
     }
+
+    if (_bones == &_bonesOrigin)
+        _bones = &_bonesAnimation;
+    else
+        _bones = &_bonesOrigin;
+
+    for (uint i = 0; i < _bones->size(); ++i)
+    {
+        names.insert((*_bones)[i]->GetName());
+    }
+
     for (uint i = 0; i < _meshes.size();)
     {
         if (names.find(_meshes[i]->GetBone()) == names.end())
@@ -684,8 +695,15 @@ void Animation::LoadFromFile(const std::string &fileName)
 {
     _boneMoving = false;
     _startMovingBone = -1;
-    _texture = NULL;
-    _baseSprite = NULL;
+
+//    if (_texture)
+//        delete _texture;
+
+//    if (_baseSprite)
+//        delete _baseSprite;
+
+//    _texture = NULL;
+//    _baseSprite = NULL;
     _meshGenerateBone = -1;
     _selected.clear();
 
@@ -822,10 +840,53 @@ void Animation::CreatePointMass()
     }
 }
 
-void Animation::ResetBones()
+void Animation::DuplicateNewBones()
 {
-    for (BoneList::iterator i = _bones->begin(), e = _bones->end(); i != e; ++i)
+    std::set<std::string> boneNames;
+    for (uint i = 0; i < _bonesAnimation.size(); ++i)
     {
-        (*i)->ResetPos();
+        boneNames.insert(_bonesAnimation[i]->GetName());
+    }
+
+    std::set<std::string> meshedNames;
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        meshedNames.insert(_meshes[i]->GetBone());
+    }
+
+    BoneList nb;
+    for (uint i = 0; i < _bonesOrigin.size(); ++i)
+    {
+        if (boneNames.find(_bonesOrigin[i]->GetName()) == boneNames.end()
+                && meshedNames.find(_bonesOrigin[i]->GetName()) != meshedNames.end())
+        {
+            nb.push_back(_bonesOrigin[i]);
+
+            for (uint j = 0; j < _meshes.size(); ++j)
+            {
+                if (_meshes[j]->GetBone() == _bonesOrigin[i]->GetName())
+                {
+                    _meshes[j]->BindToBone(_bonesOrigin[i]);
+                }
+            }
+        }
+    }
+
+    if (nb.size() > 0)
+    {
+        _bones = &_bonesAnimation;
+        for (uint i = 0; i < nb.size(); ++i)
+        {
+            assert(nb[i]->GetParent() == NULL);
+            _bonesAnimation.push_back(new BoneAnimated(*nb[i]));
+        }
+    }
+}
+
+void Animation::ReplaceBonesWith()
+{
+    for (auto m : _meshes)
+    {
+        m->ReplaceBonesWith(_bonesAnimation);
     }
 }
