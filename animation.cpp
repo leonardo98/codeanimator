@@ -779,6 +779,13 @@ void Animation::LoadFromFile(const std::string &fileName)
             assert(n == _bonesAnimation.size());
             _bones = NULL;
         }
+
+//        for (uint i = 0; i < _meshes.size(); ++i)
+//        {
+//            _meshes[i]->ReplaceBonesWith(_bonesAnimation);
+//        }
+
+
     }
 }
 
@@ -795,7 +802,7 @@ void Animation::SaveToFile(const std::string &fileName)
     rapidxml::xml_node<> *xe = doc.allocate_node(rapidxml::node_element, "root");
     doc.append_node(xe);
 
-    // save bones
+    // save bones origin
     rapidxml::xml_node<> *bones = xe->document()->allocate_node(rapidxml::node_element, "origin");
     xe->append_node(bones);
 
@@ -820,6 +827,23 @@ void Animation::SaveToFile(const std::string &fileName)
         rapidxml::xml_node<> *mesh = xe->document()->allocate_node(rapidxml::node_element, "mesh");
         meshes->append_node(mesh);
         _meshes[i]->SaveToXml(mesh);
+    }
+
+    // save bones animated
+    {
+        rapidxml::xml_node<> *bones = xe->document()->allocate_node(rapidxml::node_element, "animation");
+        xe->append_node(bones);
+
+        Math::Write(bones, "size", (int)_bonesAnimation.size());
+        for (BoneList::iterator i = _bonesAnimation.begin(), e = _bonesAnimation.end(); i != e; ++i)
+        {
+            if ((*i)->GetParent() == NULL)
+            {
+                rapidxml::xml_node<> *bone = xe->document()->allocate_node(rapidxml::node_element, "bone");
+                bones->append_node(bone);
+                (*i)->SaveToXml(bone);
+            }
+        }
     }
 
     file_stored << doc;
