@@ -649,10 +649,10 @@ void ColoredPolygon::ReplaceBonesWith(BoneList &bones)
     {
         for (int j = 0; j < 2; ++j)
         {
-            if (!_dots[i].p[0].boneName.empty())
+            if (!_dots[i].p[j].boneName.empty())
             {
-                assert(byNames.find(_dots[i].p[0].bone->GetName()) != byNames.end());
-                _dots[i].p[0].bone = byNames[_dots[i].p[0].bone->GetName()];
+                assert(byNames.find(_dots[i].p[j].bone->GetName()) != byNames.end());
+                _dots[i].p[j].bone = byNames[_dots[i].p[j].bone->GetName()];
             }
         }
     }
