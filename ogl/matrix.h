@@ -157,7 +157,7 @@ public:
         sprintf(buff, "%g,%g,%g,%g,%g,%g,%g,%g,%g"
                 , _matrix[0][0], _matrix[0][1], _matrix[0][2]
                 , _matrix[1][0], _matrix[1][1], _matrix[1][2]
-                , _matrix[1][0], _matrix[2][1], _matrix[2][2]
+                , _matrix[2][0], _matrix[2][1], _matrix[2][2]
                 );
     }
     std::string PrintToString()
@@ -171,7 +171,7 @@ public:
         sscanf(buff, "%g,%g,%g,%g,%g,%g,%g,%g,%g"
                 , &_matrix[0][0], &_matrix[0][1], &_matrix[0][2]
                 , &_matrix[1][0], &_matrix[1][1], &_matrix[1][2]
-                , &_matrix[1][0], &_matrix[2][1], &_matrix[2][2]
+                , &_matrix[2][0], &_matrix[2][1], &_matrix[2][2]
                 );
     }
 };
