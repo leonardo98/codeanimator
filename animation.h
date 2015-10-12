@@ -78,7 +78,7 @@ public:
 
     void RemoveBones();
 
-    void ReplaceBonesWith();
+    void ReplaceBones();
 
     void LoadFromFile(const std::string &fileName);
     void SaveToFile(const std::string &fileName);

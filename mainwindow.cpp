@@ -72,7 +72,7 @@ void MainWindow::changeMode()
     if (!CreateDotMode())
     {
         Animation::Instance()->DuplicateNewBones();
-        Animation::Instance()->ReplaceBonesWith();
+        Animation::Instance()->ReplaceBones();
     }
 }
 

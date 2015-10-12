@@ -530,6 +530,7 @@ void Animation::RemoveBones()
             ++i;
     }
     _selected.clear();
+    ReplaceBones();
 }
 
 void Animation::Remove()
@@ -907,7 +908,7 @@ void Animation::DuplicateNewBones()
     }
 }
 
-void Animation::ReplaceBonesWith()
+void Animation::ReplaceBones()
 {
     for (auto m : _meshes)
     {
