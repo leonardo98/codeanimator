@@ -68,11 +68,31 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
         rapidxml::xml_node<> *mesh = xe->first_node("mesh");
         if (mesh)
         {
-            _dots.resize(atoi(mesh->first_attribute("vert")->value()));
+            int vert = atoi(mesh->first_attribute("vert")->value());
+            int ind = atoi(mesh->first_attribute("ind")->value());
+            _triangles.GetVB().Resize(vert, ind);
+            _dots.resize(vert);
+            //_dots.resize(atoi(mesh->first_attribute("vert")->value()));
             unsigned int count = 0;
             for (rapidxml::xml_node<> *i = mesh->first_node(); i; i = i->next_sibling())
             {
-                sscanf(i->first_attribute("geom")->value(), "%g;%g", &_dots[count].pos.x, &_dots[count].pos.y);
+                sscanf(i->first_attribute("geom")->value(), "%g;%g;%g;%g"
+                       , &_triangles.GetVB().VertXY(count).x
+                       , &_triangles.GetVB().VertXY(count).y
+                       , &_triangles.GetVB().VertUV(count).x
+                       , &_triangles.GetVB().VertUV(count).y
+                       );
+                _dots[count].pos = _triangles.GetVB().VertXY(count);
+                std::string s(i->first_attribute("mass")->value());
+                std::string::size_type start = 0;
+                std::string::size_type end = s.find(" ", start);
+                _dots[count].p[0].boneName = s.substr(start, end - start);
+                start = end + 1; end = s.find(";", start);
+                _dots[count].p[0].mass = atof(s.substr(start, end - start).c_str());
+                start = end + 1; end = s.find(" ", start);
+                _dots[count].p[1].boneName = s.substr(start, end - start);
+                start = end + 1;
+                _dots[count].p[1].mass = atof(s.substr(start).c_str());
                 count++;
             }
         }
@@ -271,7 +291,11 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
             sprintf(buff, "%0.0f;%0.0f;%g;%g", _triangles.GetVB().VertXY(i).x, _triangles.GetVB().VertXY(i).y
                                         , _triangles.GetVB().VertUV(i).x, _triangles.GetVB().VertUV(i).y);
             Math::Write(vertex, "geom", buff);
-		}
+
+            sprintf(buff, "%s %f;%s %f", _dots[i].p[0].boneName.c_str(), _dots[i].p[0].mass
+                                        , _dots[i].p[1].boneName.c_str(), _dots[i].p[1].mass);
+            Math::Write(vertex, "mass", buff);
+        }
         rapidxml::xml_node<> *indexes = xe->document()->allocate_node(rapidxml::node_element, "indexes");        
         xe->append_node(indexes);
 
@@ -651,9 +675,19 @@ void ColoredPolygon::ReplaceBonesWith(BoneList &bones)
         {
             if (!_dots[i].p[j].boneName.empty())
             {
-                assert(byNames.find(_dots[i].p[j].bone->GetName()) != byNames.end());
-                _dots[i].p[j].bone = byNames[_dots[i].p[j].bone->GetName()];
+                if (byNames.find(_dots[i].p[j].boneName) != byNames.end())
+                {
+                    _dots[i].p[j].bone = byNames[_dots[i].p[j].boneName];
+                }
+                else
+                {
+                    _dots[i].p[j].bone = NULL;
+                    _dots[i].p[j].mass = 0.f;
+                    _dots[i].p[j].boneName.clear();
+                }
             }
         }
     }
 }
+
+

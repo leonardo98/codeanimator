@@ -82,6 +82,8 @@ public:
 	virtual int Height();
 
 	virtual const char *GetIconTexture();
+
+    void ResetMass();
 };
 
 
