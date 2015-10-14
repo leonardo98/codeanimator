@@ -101,6 +101,8 @@ public:
         return NULL;
     }
 
+    void MoveLayer(int offset);
+
 };
 
 void UpdateChain(PointList &points, const FPoint &target);

@@ -915,3 +915,34 @@ void Animation::ReplaceBones()
         m->ReplaceBonesWith(_bonesAnimation);
     }
 }
+
+void Animation::MoveLayer(int offset)
+{
+    if (MainWindow::Instance()->CreateDotMode()) return;
+
+    std::set<std::string> names;
+    for (std::set<uint>::iterator i = _selected.begin(); i != _selected.end(); ++i)
+    {
+        names.insert((*_bones)[*i]->GetName());
+    }
+
+    std::vector<int> selMeshes;
+    for (uint i = 0; i < _meshes.size(); ++i)
+    {
+        if (names.find(_meshes[i]->GetBone()) != names.end())
+        {
+            selMeshes.push_back(i);
+        }
+    }
+
+    if (selMeshes.size() != 1) return;
+
+    int meshIndex = selMeshes[0];
+    int newMeshIndex = meshIndex + offset;
+    newMeshIndex = std::min((int)_meshes.size() - 1, std::max(0, newMeshIndex));
+    if (meshIndex != newMeshIndex)
+    {
+        std::swap(_meshes[meshIndex], _meshes[newMeshIndex]);
+    }
+}
+
