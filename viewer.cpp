@@ -187,6 +187,14 @@ void Viewer::keyPressEvent(QKeyEvent *event)
     {
         Animation::Instance()->Remove();
     }
+    else if (event->key() == Qt::Key_Up)
+    {
+        Animation::Instance()->MoveLayer(QApplication::keyboardModifiers() & Qt::ControlModifier ? 0xFFFF : 1);
+    }
+    else if (event->key() == Qt::Key_Down)
+    {
+        Animation::Instance()->MoveLayer( - (QApplication::keyboardModifiers() & Qt::ControlModifier ? 0xFFFF : 1));
+    }
 }
 
 void Viewer::keyReleaseEvent(QKeyEvent *event)
