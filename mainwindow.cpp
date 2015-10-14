@@ -178,14 +178,14 @@ void MainWindow::createMenus()
         action = new QAction(tr("&Bone"), this);
         action->setActionGroup(group);
         action->setCheckable(true);
-        action->setChecked(false);
+        action->setChecked(true);
         connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
 
         _editPoints = action = new QAction(tr("&Texture"), this);
         action->setActionGroup(group);
         action->setCheckable(true);
-        action->setChecked(true);
+        action->setChecked(false);
         connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
 
