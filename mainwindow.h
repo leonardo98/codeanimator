@@ -25,6 +25,8 @@ public:
     MainWindow();
     virtual ~MainWindow();
     bool CreateDotMode();
+    bool AnimationMode();
+    bool BoneEditMode();
     static MainWindow *Instance() { return (MainWindow *)mainWindow; }
     void PrintToOutput(const char *s);
 
@@ -39,6 +41,8 @@ private:
     SplineEditor *_splineEditor;
 
     QAction *_editPoints;
+    QAction *_editAnimation;
+    QAction *_editBone;
 
     QConsoleWidget *_console;
     QSettings settings;

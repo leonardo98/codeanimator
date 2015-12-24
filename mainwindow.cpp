@@ -168,17 +168,17 @@ void MainWindow::createMenus()
 
         menu = menuBar()->addMenu(tr("&Mode"));
 
-        action = new QAction(tr("&Animation"), this);
-        action->setActionGroup(group);
-        action->setCheckable(true);
-        action->setChecked(false);
-        connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
-        menu->addAction(action);
-
-        action = new QAction(tr("&Bone"), this);
+        _editAnimation = action = new QAction(tr("&Animation"), this);
         action->setActionGroup(group);
         action->setCheckable(true);
         action->setChecked(true);
+        connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
+        menu->addAction(action);
+
+        _editBone = action = new QAction(tr("&Bone"), this);
+        action->setActionGroup(group);
+        action->setCheckable(true);
+        action->setChecked(false);
         connect(action, SIGNAL(changed()), this, SLOT(changeMode()));
         menu->addAction(action);
 
@@ -232,6 +232,16 @@ void MainWindow::chooseTexture()
 bool MainWindow::CreateDotMode()
 {
     return _editPoints->isChecked();
+}
+
+bool MainWindow::AnimationMode()
+{
+    return _editAnimation->isChecked();
+}
+
+bool MainWindow::BoneEditMode()
+{
+    return _editBone->isChecked();
 }
 
 void MainWindow::open()

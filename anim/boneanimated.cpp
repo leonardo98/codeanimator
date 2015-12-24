@@ -37,6 +37,20 @@ void BoneAnimated::DrawRed()
     Render::PopMatrix();
 }
 
+FPoint BoneAnimated::GetEndPoint()
+{
+    FPoint p(_length, 0.f);
+    GetMatrix().Mul(p);
+    return p;
+}
+
+FPoint BoneAnimated::GetGlobalBonePos()
+{
+    FPoint p(_pos);
+    if (GetParent()) GetParent()->GetMatrix().Mul(p);
+    return p;
+}
+
 void BoneAnimated::Draw()
 {
     //if (!_visible) return;
@@ -197,6 +211,11 @@ bool BoneAnimated::MoveTo(const FPoint &mt)
 {
     _pos += mt;
     CalculatePosition(_parentMatrix, 0.f);
+}
+
+void BoneAnimated::MoveEnd(const FPoint &dst, const FPoint &src)
+{
+
 }
 
 bool BoneAnimated::IfInside(const Rect &area)

@@ -16,6 +16,7 @@ Animation::Animation()
     _texture = NULL;
     _baseSprite = NULL;
     _meshGenerateBone = -1;
+    _moveParentEnd = false;
 }
 
 Animation::~Animation()
@@ -175,6 +176,8 @@ int Animation::GetBoneAtPoint(const FPoint &pos)
 
 void Animation::StartBoneMoving(uint index, const FPoint &point)
 {
+    _moveParentEnd = false;
+
     _boneMoving = (*_bones)[index]->MoveOrRotate(point);
     _startMovingPos = point;
     _startRotateAngle = (*_bones)[index]->GetBoneAngle();
@@ -236,6 +239,18 @@ void Animation::StartBoneMoving(uint index, const FPoint &point)
         _deltaAngle[i] = - atan2f(b.y - a.y, b.x - a.x);
     }
 
+    if (parent)
+    {
+        _parentEndShift = parent->GetEndPoint() - _startMovingPos;
+        _moveParentEnd = (parent->GetEndPoint() - (*_bones)[_startMovingBone]->GetGlobalBonePos()).Length() < 5
+                //&& parent->GetChildren().size() == 1
+                && MainWindow::Instance()->AnimationMode()
+                ;
+        _startMovingPosLocal = (*_bones)[_startMovingBone]->GetBonePos();
+        _localShift = _startMovingPosLocal.x - parent->GetLength();
+    }
+    else
+        _moveParentEnd = false;
 }
 
 void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
@@ -250,21 +265,47 @@ void Animation::BoneMoveTo(const FPoint &point, bool changeLength)
                 (*_bones)[*i]->MoveTo(point - _startMovingPos);
             else
             {
-                FPoint p(point);
-                FPoint s(_startMovingPos);
+                BoneAnimated *parent = (*_bones)[*i]->GetParent();
 
-                Matrix rev;
-                rev.MakeRevers((*_bones)[*i]->GetParent()->GetMatrix());
+                if (_moveParentEnd)
+                {
+                    //change length
+                    FPoint e = point + _parentEndShift;
+                    FPoint ss = (parent->GetGlobalBonePos());
+                    parent->SetLength((e - ss).Length());
 
-                rev.Mul(p);
-                rev.Mul(s);
+                    //change angle
+                    if (parent->GetParent())
+                    {
+                        Matrix rev;
+                        rev.MakeRevers(parent->GetParent()->GetMatrix());
+                        rev.Mul(e);
+                        rev.Mul(ss);
+                    }
+                    parent->SetBoneAngle(atan2(e.y - ss.y, e.x - ss.x));
+                    {
+                        float l = parent->GetLength() + _localShift;
+                        FPoint localPos = (*_bones)[*i]->GetBonePos();
+                        localPos.x = l;
+                        (*_bones)[*i]->SetBonePos(localPos);
+                    }
+                }
+                else
+                {
+                    FPoint p(point);
+                    FPoint s(_startMovingPos);
 
-                (*_bones)[*i]->MoveTo(p - s);
+                    Matrix rev;
+                    rev.MakeRevers(parent->GetMatrix());
+                    rev.Mul(p);
+                    rev.Mul(s);
+                    (*_bones)[*i]->MoveTo(p - s);
+                }
             }
         }
         _startMovingPos = point;
 
-        if (_selected.size() == 1)
+        if (_selected.size() == 1 && MainWindow::Instance()->BoneEditMode())
         {
             for (uint i = 0; i < _bones->size(); ++i)
             {

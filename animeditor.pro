@@ -53,3 +53,4 @@ DISTFILES +=
 RESOURCES += \
     resources.qrc
 
+QMAKE_MAC_SDK = macosx10.11

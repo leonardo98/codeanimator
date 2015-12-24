@@ -37,7 +37,10 @@ public:
     Spline scaleX;
     Spline scaleY;
 public:
+    void MoveEnd(const FPoint &dst, const FPoint &src);
     bool HasChild() { return !_children.empty(); }
+    BoneList &GetChildren() { return _children; }
+    FPoint GetEndPoint();
     void GetBoneList(BoneList &bones);
     const Matrix &GetMatrix() { return _matrix; }
     BoneAnimated();
@@ -63,6 +66,7 @@ public:
 
     void SetBonePos(const FPoint &pos);
     const FPoint &GetBonePos() { return _pos; }
+    FPoint GetGlobalBonePos();
     void SetBoneAngle(float a);
     float GetBoneAngle() { return _angle; }    
 

@@ -27,6 +27,10 @@ private:
     bool _boneMoving; // move or rotate
     int _startMovingBone;
     FPoint _startMovingPos;
+    FPoint _startMovingPosLocal;
+    float _localShift;
+    bool _moveParentEnd;
+    FPoint _parentEndShift;
     float _startRotateAngle;
     std::set<uint> _selected;
 
