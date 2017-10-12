@@ -19,6 +19,7 @@ typedef unsigned int DWORD;
 #include "ogl/fpoint.h"
 
 #include "rapidxml/rapidxml.hpp"
+
 #include <QMessageBox>
 #include <QMainWindow>
 

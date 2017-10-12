@@ -1,13 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QSplitter>
 #include "animeditor.h"
 #include "viewer.h"
 #include "qconsolewidget.h"
 #include "splineeditor.h"
+
 #include <QSettings>
+#include <QMainWindow>
+#include <QSplitter>
 
 class MainWindow : public QMainWindow
 {

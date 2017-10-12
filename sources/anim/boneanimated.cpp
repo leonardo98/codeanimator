@@ -193,7 +193,7 @@ bool BoneAnimated::MoveOrRotate(FPoint pos)
     return -w < pos.y && pos.y < w && - w < pos.x && pos.x < l / 2;
 }
 
-bool BoneAnimated::MoveTo(const FPoint &mt)
+void BoneAnimated::MoveTo(const FPoint &mt)
 {
     _pos += mt;
     CalculatePosition(_parentMatrix, 0.f);

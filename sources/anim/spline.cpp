@@ -242,7 +242,7 @@ void Spline::Draw(QPainter &painter, const Matrix &m)
         DrawSegment(painter, i, lm);
     }
 
-    for (uint i = 0; i < _points.size(); ++i)
+    for (uint i = 0; i + 1 < _points.size(); ++i)
     {
         lm = m;
         lm.Move(_points[i].frame, 0.f);

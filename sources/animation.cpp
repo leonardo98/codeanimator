@@ -1,9 +1,11 @@
 #include "animation.h"
-#include <set>
 #include "ogl/render.h"
 #include "mainwindow.h"
 #include "extmath.h"
+
 #include "rapidxml/rapidxml_print.hpp"
+
+#include <set>
 
 Animation *Animation::_instance = NULL;
 
@@ -16,6 +18,7 @@ Animation::Animation()
     _texture = NULL;
     _baseSprite = NULL;
     _meshGenerateBone = -1;
+    _bones = NULL;
 }
 
 Animation::~Animation()
@@ -152,6 +155,10 @@ uint Animation::CreateBone(FPoint pos, bool generateMesh)
 
 int Animation::GetBoneAtPoint(const FPoint &pos)
 {
+    if (!_bones)
+    {
+        return -1;
+    }
     for (uint i = 0; i < _bones->size(); ++i)
     {
         if ((*_bones)[i]->CheckPoint(pos))

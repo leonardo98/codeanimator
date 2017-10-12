@@ -1,9 +1,10 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
-#include <QGLWidget>
 #include "ogl/fpoint.h"
 #include "SelectionTool.h"
+
+#include <QGLWidget>
 
 enum MouseActionState
 {

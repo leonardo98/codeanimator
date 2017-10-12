@@ -59,7 +59,7 @@ public:
     bool IfInside(const Rect &area);
     bool CheckPoint(FPoint pos);
     bool MoveOrRotate(FPoint pos);
-    bool MoveTo(const FPoint &mt);
+    void MoveTo(const FPoint &mt);
 
     void SetBonePos(const FPoint &pos);
     const FPoint &GetBonePos() { return _pos; }

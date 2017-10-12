@@ -8,6 +8,12 @@
 
 typedef std::vector<FPoint> PointList;
 
+struct BoneDistance
+{
+    BoneAnimated *bone;
+    float distance;
+};
+
 class ColoredPolygon
 {
 private:
@@ -20,25 +26,25 @@ private:
 
     bool _debugDraw;
     int _width;
-	int _height;
+    int _height;
 
     void CalcWidthAndHeight();
 
     std::vector<OnePoint> _dots; //
-	QVector<FPoint> _screenDots;
+    QVector<FPoint> _screenDots;
     Sprite _triangles;
     Sprite _trianglesBinded;
     bool _mouseDown;
     QVector<int> _dotUnderCursor;
     QVector<int> _selectedDots;
 
-	VertexBuffer tri;
-	void FillTriangle(const FPoint &a, const FPoint &b, const FPoint &c, VertexBuffer &tri);
-	void DrawTriangles();
+    VertexBuffer tri;
+    void FillTriangle(const FPoint &a, const FPoint &b, const FPoint &c, VertexBuffer &tri);
+    void DrawTriangles();
 
     int SearchNearest(float x, float y);
 
-	int CreateDot(float x, float y);
+    int CreateDot(float x, float y);
     bool CheckLines(const FPoint &p);
     void RemoveDot(QVector<int> index);
 
@@ -56,8 +62,8 @@ public:
     const std::string &GetBone() { return _boneName; }
     void SetBone(const std::string &name) { _boneName = name; }
 
-	virtual ~ColoredPolygon();
-	ColoredPolygon(rapidxml::xml_node<> *xe);
+    virtual ~ColoredPolygon();
+    ColoredPolygon(rapidxml::xml_node<> *xe);
     ColoredPolygon(const ColoredPolygon &c);
     ColoredPolygon(const PointList &points);
 
@@ -66,22 +72,22 @@ public:
     virtual void Draw();
     void DrawBinded();
     virtual void DebugDraw(bool onlyControl);
-	virtual void Update(float dt) {}
-	virtual void MouseDown(const FPoint &mouse);
+    virtual void Update(float dt) {}
+    virtual void MouseDown(const FPoint &mouse);
     virtual bool MouseMove(const FPoint &mouse);
-	virtual void MouseUp(const FPoint &mouse);
-	virtual bool PixelCheck(const FPoint &point);
-	virtual bool GeometryCheck(const FPoint &point);
+    virtual void MouseUp(const FPoint &mouse);
+    virtual bool PixelCheck(const FPoint &point);
+    virtual bool GeometryCheck(const FPoint &point);
     bool RemoveDots();
     virtual bool Selection(const Rect& rect, bool full);
-	virtual void SaveToXml(rapidxml::xml_node<> *xe);
+    virtual void SaveToXml(rapidxml::xml_node<> *xe);
 
     void BindToBone(BoneAnimated *bone);
 
-	virtual int Width();
-	virtual int Height();
+    virtual int Width();
+    virtual int Height();
 
-	virtual const char *GetIconTexture();
+    virtual const char *GetIconTexture();
 
     void ResetMass();
 };

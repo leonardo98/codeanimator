@@ -1,12 +1,13 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include <QObject>
-
 #include "anim/boneanimated.h"
 #include "ogl/textures.h"
 #include "ogl/sprite.h"
 #include "ColoredPolygon.h"
+
+#include <QObject>
+
 #include <set>
 
 class Animation : public QObject

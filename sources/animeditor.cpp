@@ -38,9 +38,9 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets>
-
 #include "animeditor.h"
+
+#include <QtWidgets>
 
 //![constructor]
 

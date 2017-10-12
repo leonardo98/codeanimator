@@ -1,9 +1,10 @@
 #ifndef SPLINEEDITOR_H
 #define SPLINEEDITOR_H
 
-#include <QWidget>
 #include "anim/spline.h"
 #include "ogl/matrix.h"
+
+#include <QWidget>
 
 class SplineEditor : public QWidget
 {
@@ -20,7 +21,7 @@ private:
     SplineMover _spline;
 
 protected:
-    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    virtual void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
     Matrix _viewMatrix;
     static SplineEditor * _instance;
 

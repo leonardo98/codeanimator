@@ -1,4 +1,5 @@
 #include "splineeditor.h"
+
 #include <QMouseEvent>
 
 SplineEditor * SplineEditor::_instance = NULL;
@@ -36,7 +37,7 @@ SplineEditor::SplineEditor(QWidget *parent) : QWidget(parent)
     //setMouseTracking(true);
 }
 
-void SplineEditor::paintEvent(QPaintEvent *) Q_DECL_OVERRIDE
+void SplineEditor::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 

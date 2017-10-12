@@ -1,4 +1,10 @@
-#include <Python.h>
+#ifdef _DEBUG
+#undef _DEBUG
+#include <python.h>
+#define _DEBUG
+#else
+#include <python.h>
+#endif
 
 #include "bindspline.h"
 #include "splineeditor.h"
@@ -149,9 +155,39 @@ static PyMethodDef SplineMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+struct module_state {
+    PyObject *error;
+};
+
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+
+static int myextension_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int myextension_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "spline",
+    NULL,
+    sizeof(struct module_state),
+    SplineMethods,
+    NULL,
+    myextension_traverse,
+    myextension_clear,
+    NULL
+};
+
 PyMODINIT_FUNC InitSpline(void)
 {
-    (void) Py_InitModule("spline", SplineMethods);
+    //(void) Py_InitModule("spline", SplineMethods);
+    PyObject *module = PyModule_Create(&moduledef);
+    return module;
 }
 
 void InitSplineModule()

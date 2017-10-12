@@ -10,7 +10,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 
 #OpenGL
-#find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED)
 
 find_package( PythonLibs 3.5 ) # - do not find PythonLibs (only PC tested)
 if (NOT PYTHONLIBS_FOUND)
@@ -44,7 +44,7 @@ qt5_add_resources(RESOURCE_ADDED ${RESOURCE})
 
 include_directories(
     ${PYTHON_INCLUDE_DIR}
-	${CMAKE_SOURCE_DIR}/sources/
+    ${CMAKE_SOURCE_DIR}/sources/
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCE_ADDED})
@@ -55,4 +55,4 @@ qt5_use_modules(${PROJECT_NAME}
     Widgets
     OpenGL)
 
-target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} Qt5::Widgets Qt5::Gui Qt5::Core Qt5::OpenGL)
+target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} Qt5::Widgets Qt5::Gui Qt5::Core Qt5::OpenGL ${OPENGL_LIBRARIES})

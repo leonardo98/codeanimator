@@ -1,7 +1,18 @@
+#ifdef _DEBUG
+#undef _DEBUG
+#include <python.h>
+#define _DEBUG
+#else
+#include <python.h>
+#endif
+
 #include "qconsolewidget.h"
 #include "bindspline.h"
 
 #include <QKeyEvent>
+
+PyObject *_pModule;
+PyObject *_catcher;
 
 QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 {
@@ -17,18 +28,18 @@ QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 
     {
         std::string stdOutErr =
-"import sys\n\
-class CatchOutErr:\n\
-  def __init__(self):\n\
-    self.value = ''\n\
-  def reset(self):\n\
-    self.value = ''\n\
-  def write(self, txt):\n\
-    self.value += txt\n\
-catchOutErr = CatchOutErr()\n\
-sys.stdout = catchOutErr\n\
-sys.stderr = catchOutErr\n\
-"; //this is python code to redirect stdouts/stderr
+            "import sys\n\
+            class CatchOutErr:\n\
+                def __init__(self):\n\
+                self.value = ''\n\
+                def reset(self):\n\
+                self.value = ''\n\
+                def write(self, txt):\n\
+                self.value += txt\n\
+            catchOutErr = CatchOutErr()\n\
+            sys.stdout = catchOutErr\n\
+            sys.stderr = catchOutErr\n\
+            "; //this is python code to redirect stdouts/stderr
 
         /* Initialize the Python interpreter.  Required. */
         Py_Initialize();
@@ -137,8 +148,9 @@ void QConsoleWidget::keyPressEvent(QKeyEvent *event)
             PyErr_Print(); //make python print any errors
             PyObject *output = PyObject_GetAttrString(_catcher,"value"); //get the stdout and stderr from our catchOutErr object
             PyRun_SimpleString("catchOutErr.reset()");
-
-            insertPlainText(PyString_AsString(output));
+            
+            PyObject* pyStr = PyUnicode_AsEncodedString(output, "utf-8", "Error ~");
+            insertPlainText(PyBytes_AS_STRING(pyStr));
         }
 
         fixedPosition = textCursor().position();

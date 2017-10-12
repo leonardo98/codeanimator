@@ -1,12 +1,13 @@
 #include "viewer.h"
 #include "ogl/render.h"
+#include "animation.h"
+#include "mainwindow.h"
+
 #include <QWheelEvent>
 #include <QTimer>
 #include <QStatusBar>
 #include <QApplication>
 #include <QKeyEvent>
-#include "animation.h"
-#include "mainwindow.h"
 #include <QMenu>
 
 Viewer::Viewer(QWidget *parent)
@@ -81,11 +82,11 @@ bool Viewer::OnMouseWheel(float value)
     float MIN = 1 / 32.f;
     float MAX = 4.f;
     _viewScale += value * _viewScale;
-//	if (direction > 0 && _viewScale < MAX) {
-//		_viewScale *= 1.09f;
-//	} else if (direction < 0 && _viewScale > MIN) {
-//		_viewScale *= 0.9f;
-//	}
+//    if (direction > 0 && _viewScale < MAX) {
+//        _viewScale *= 1.09f;
+//    } else if (direction < 0 && _viewScale > MIN) {
+//        _viewScale *= 0.9f;
+//    }
     _viewScale = std::min(MAX, std::max(MIN, _viewScale));
     _worldOffset = ScreenToWorld(FPoint(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2));
     _screenOffset = FPoint(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -300,13 +301,13 @@ void Viewer::OnMouseUp()
 {
     _mouseMovingMode = 0.f;
     _mouseDown = false;
-//	if (_currents.beauty.size() == 1) {
-//		_currents.beauty[0]->MouseUp(_lastMousePos);
-//	}
-//	if (_pushCopyOnMouseUp) {
+//    if (_currents.beauty.size() == 1) {
+//        _currents.beauty[0]->MouseUp(_lastMousePos);
+//    }
+//    if (_pushCopyOnMouseUp) {
 //        PushCopyToRedoUndoManager();
-//		_pushCopyOnMouseUp = false;
-//	}
+//        _pushCopyOnMouseUp = false;
+//    }
     _mouseMoveAction = mouse_none;
     Animation::Instance()->Finish();
 
@@ -350,36 +351,36 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
     else if (_mouseMoveAction == mouse_dragging_world)
     {
         _worldOffset -= (mousePos - _lastMousePos) / _viewScale;
-//	} else if (_mouseMoveAction == mouse_moving_beauty/* || _mouseMoveAction == mouse_moving_group*/) {
-//		if ((mousePos - _mouseDownPos).Length() > 10 || _mouseMovingMode >= 0.2f) {
-//			_mouseMovingMode = 0.2f;
+//    } else if (_mouseMoveAction == mouse_moving_beauty/* || _mouseMoveAction == mouse_moving_group*/) {
+//        if ((mousePos - _mouseDownPos).Length() > 10 || _mouseMovingMode >= 0.2f) {
+//            _mouseMovingMode = 0.2f;
 
-//			if (!TileEditorInterface::Instance()->CreateDotMode()) {
-//				for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
-//					_currents.beauty[i]->ShiftTo(newMmouseWorld.x - _mouseWorld.x, newMmouseWorld.y - _mouseWorld.y);
-//				}
+//            if (!TileEditorInterface::Instance()->CreateDotMode()) {
+//                for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
+//                    _currents.beauty[i]->ShiftTo(newMmouseWorld.x - _mouseWorld.x, newMmouseWorld.y - _mouseWorld.y);
+//                }
 //                TileEditorInterface::Instance()->UpdateProperties();
-//			}
-//			else
-//			{
-//				for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
-//					_currents.beauty[i]->MouseMove(mousePos);
-//				}
-//			}
-//			if (_currents.beauty.size()) {
-//				_pushCopyOnMouseUp = true;
-//			}
-//		}
-//	}
-//	else if (_mouseMoveAction == mouse_moving_beauty_control)
-//	{
-//		for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
+//            }
+//            else
+//            {
+//                for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
+//                    _currents.beauty[i]->MouseMove(mousePos);
+//                }
+//            }
+//            if (_currents.beauty.size()) {
+//                _pushCopyOnMouseUp = true;
+//            }
+//        }
+//    }
+//    else if (_mouseMoveAction == mouse_moving_beauty_control)
+//    {
+//        for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
 //            _pushCopyOnMouseUp |= _currents.beauty[i]->MouseMove(mousePos);
-//		}
+//        }
 //        TileEditorInterface::Instance()->UpdateProperties();
-//	}
-//	if (!_mouseDown && !TileEditorInterface::Instance()->CreateDotMode()) {//
-//		_currents.beautyUnderCursor = BeautyAtPoint(newMmouseWorld);
+//    }
+//    if (!_mouseDown && !TileEditorInterface::Instance()->CreateDotMode()) {//
+//        _currents.beautyUnderCursor = BeautyAtPoint(newMmouseWorld);
     }
 
     _lastMousePos = mousePos;
@@ -422,20 +423,20 @@ void Viewer::paintGL()
 
         Animation::Instance()->Draw();
 
-//		if (_currents.beautyUnderCursor) {
-//			Render::SetAlpha(0x5F);
-//			_currents.beautyUnderCursor->DebugDraw(true);
-//			Render::SetAlpha(0xFF);
-//		}
-//		if (_currents.beauty.size()) {
-//			Render::SetAlpha(0xAF);
-//			for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
-//				_currents.beauty[i]->DebugDraw(true);
-//			}
-//			Render::SetAlpha(0xFF);
-//		}
+//        if (_currents.beautyUnderCursor) {
+//            Render::SetAlpha(0x5F);
+//            _currents.beautyUnderCursor->DebugDraw(true);
+//            Render::SetAlpha(0xFF);
+//        }
+//        if (_currents.beauty.size()) {
+//            Render::SetAlpha(0xAF);
+//            for (unsigned int i = 0; i < _currents.beauty.size(); ++i) {
+//                _currents.beauty[i]->DebugDraw(true);
+//            }
+//            Render::SetAlpha(0xFF);
+//        }
 
-        //		if (TileEditorInterface::Instance()->NetVisible())
+        //        if (TileEditorInterface::Instance()->NetVisible())
         {
             Matrix m;
             m.MakeRevers(Render::GetCurrentMatrix());
@@ -481,11 +482,11 @@ void Viewer::paintGL()
         //Render::DrawCachingLine();
     }
 
-    //	char buff[10];
-//	Math::FloatToChar(_viewScale, buff);
-//	Render::PrintString(940, 0, "", buff);
+    //    char buff[10];
+//    Math::FloatToChar(_viewScale, buff);
+//    Render::PrintString(940, 0, "", buff);
     SelectionTool::Draw();
-//	Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
+//    Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
 //    {
 //        float x = _widgetWidth / 2 - (64 * _commandButtons.size()) / 2;
 //        for (unsigned int i = 0; i < _commandButtons.size(); ++i)

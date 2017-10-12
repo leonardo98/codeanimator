@@ -1,19 +1,18 @@
-#include <QApplication>
 #include "ColoredPolygon.h"
-//#include "../Core/Core.h"
-//#include "../Core/Messager.h"
-//#include "../Core/InputSystem.h"
 #include "mainwindow.h"
 #include "animation.h"
-#include <math.h>
 #include "ogl/render.h"
+
+#include <QApplication>
+
 #include <set>
+#include <math.h>
 
 GLTexture2D * h_base = NULL;// = Core::getTexture(":main/gfx/red.png");
 
-bool CmpBoneDistance(const std::pair<BoneAnimated *, float> &one, const std::pair<BoneAnimated *, float> &two)
+bool CmpBoneDistance(const BoneDistance &one, const BoneDistance &two)
 {
-    return one.second < two.second;
+    return one.distance < two.distance;
 }
 
 void ColoredPolygon::InitCorners()
@@ -34,10 +33,10 @@ ColoredPolygon::~ColoredPolygon()
 
 ColoredPolygon::ColoredPolygon(const ColoredPolygon &c) 
 {
-	_dots = c._dots;
-	CalcWidthAndHeight();
-	GenerateTriangles();
-	_mouseDown = false;
+    _dots = c._dots;
+    CalcWidthAndHeight();
+    GenerateTriangles();
+    _mouseDown = false;
     _dotUnderCursor.clear();
     _selectedDots.clear();
     _debugDraw = false;
@@ -100,7 +99,7 @@ ColoredPolygon::ColoredPolygon(rapidxml::xml_node<> *xe)
 
     CalcWidthAndHeight();
     GenerateTriangles();
-	_mouseDown = false;
+    _mouseDown = false;
     _dotUnderCursor.clear();
     _selectedDots.clear();
     _debugDraw = false;
@@ -143,27 +142,27 @@ void ColoredPolygon::Draw()
 {
     _lastDrawMatrix = Render::GetCurrentMatrix();
 
-	DrawTriangles();
+    DrawTriangles();
 
     _screenDots.resize(_dots.size());
-	for (unsigned int i = 0; i < _dots.size(); ++i) {
+    for (unsigned int i = 0; i < _dots.size(); ++i) {
         _screenDots[i] = _dots[i].pos;
-		Render::GetCurrentMatrix().Mul(_screenDots[i]);	
-	}
-	if (_triangles.GetVB().Size() == 0) 
-	{
-		for (unsigned int i = 0; i < _dots.size(); ++i) {
+        Render::GetCurrentMatrix().Mul(_screenDots[i]);    
+    }
+    if (_triangles.GetVB().Size() == 0) 
+    {
+        for (unsigned int i = 0; i < _dots.size(); ++i) {
             Render::Line(_dots[i].pos.x, _dots[i].pos.y, _dots[(i + 1) % _dots.size()].pos.x, _dots[(i + 1) % _dots.size()].pos.y, 0xFFFFFFFF);
-		}
-	}
+        }
+    }
 }
 
 void ColoredPolygon::DebugDraw(bool onlyControl)
 {
     if (!onlyControl)
     {
-		Draw();
-	}
+        Draw();
+    }
 
     _debugDraw = true;
 
@@ -210,7 +209,7 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
     Render::SetAlpha(Math::round(0xFF * alpha));
 
     Render::PopMatrix();
-//		Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
+//        Render::SetFiltering(TileEditorInterface::Instance()->FilteringTexture());
 
 
     if (!Animation::Instance()->GetDebugBone())
@@ -230,7 +229,7 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
         FPoint &b = _dots[i].pos;
         FPoint &c = _dots[(i + 1) % _dots.size()].pos;
 
-        std::vector<std::pair<BoneAnimated *, float> > boneDistance;
+        std::vector<BoneDistance> boneDistance;
         for (uint j = 0; j < bones.size(); ++j)
         {
             BoneAnimated *d = bones[j];
@@ -246,21 +245,18 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
                 if ((d->GetParent() == NULL && (s - b).Length() < d->GetLength() / 2)
                         || (!d->HasChild() && (e - b).Length() < d->GetLength() / 2))
                 {
-                    boneDistance.push_back(
-                                std::make_pair<BoneAnimated *, float>
-                                (d, 0.f)
-                                );
+                    boneDistance.push_back({ d, 0.f });
                 }
                 else
                 {
-                    boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, Math::Distance(s, e, b) ) );
+                    boneDistance.push_back({ d, Math::Distance(s, e, b) });
                 }
             }
         }
         std::sort(boneDistance.begin(), boneDistance.end(), CmpBoneDistance);
         for (uint i = 0; i < std::min((size_t)2, boneDistance.size()); ++i)
         {
-            boneDistance[i].first->DrawRed();
+            boneDistance[i].bone->DrawRed();
         }
     }
 
@@ -268,8 +264,8 @@ void ColoredPolygon::DebugDraw(bool onlyControl)
 
 bool ColoredPolygon::PixelCheck(const FPoint &point) { 
     if (Math::Inside(point, _dots) || CheckLines(point)) {
-		return true;
-	}
+        return true;
+    }
     return SearchNearest(point.x, point.y) >= 0;
 }
 
@@ -277,14 +273,14 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 {
     Math::Write(xe, "bone", _boneName.c_str());
 
-	if (_triangles.GetVB().Size())
-	{
+    if (_triangles.GetVB().Size())
+    {
         rapidxml::xml_node<> *mesh = xe->document()->allocate_node(rapidxml::node_element, "mesh");
         xe->append_node(mesh);
         Math::Write(mesh, "vert", (int)_triangles.GetVB().Size());
         Math::Write(mesh, "ind", (int)_triangles.GetVB().SizeIndex());
-		for (unsigned int i = 0; i < _triangles.GetVB().Size(); ++i)
-		{
+        for (unsigned int i = 0; i < _triangles.GetVB().Size(); ++i)
+        {
             rapidxml::xml_node<> *vertex = xe->document()->allocate_node(rapidxml::node_element, "vert");
             mesh->append_node(vertex);
             char buff[1000];
@@ -301,12 +297,12 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 
         std::string array;
         for (unsigned int i = 0; i < _triangles.GetVB().SizeIndex(); ++i)
-		{
+        {
             array += Math::IntToStr((int)_triangles.GetVB().Index(i));
             array += ";";
-		}
+        }
         Math::Write(indexes, "array", array.c_str());
-	}
+    }
     else
     {
         Math::Write(xe, "size", (int)_dots.size());
@@ -322,21 +318,21 @@ void ColoredPolygon::SaveToXml(rapidxml::xml_node<> *xe)
 }
 
 int ColoredPolygon::Width() {
-	return _width;
+    return _width;
 }
 
 int ColoredPolygon::Height() {
-	return _height;
+    return _height;
 }
 
 void ColoredPolygon::CalcWidthAndHeight() {
-	Rect rect;
-	rect.Clear();
-	for (unsigned int i = 0; i < _dots.size(); ++i) {
+    Rect rect;
+    rect.Clear();
+    for (unsigned int i = 0; i < _dots.size(); ++i) {
         rect.Encapsulate(_dots[i].pos.x, _dots[i].pos.y);
-	}
-	_width = fabs(rect.x2 - rect.x1);
-	_height = fabs(rect.y2 - rect.y1);
+    }
+    _width = fabs(rect.x2 - rect.x1);
+    _height = fabs(rect.y2 - rect.y1);
 }
 
 void ColoredPolygon::GenerateTriangles()
@@ -353,8 +349,8 @@ void ColoredPolygon::GenerateTriangles()
 
 void ColoredPolygon::DrawTriangles() {
     Render::PushColorAndMul(_color);
-	_triangles.Render();
-	Render::PopColor();
+    _triangles.Render();
+    Render::PopColor();
 }
 
 void ColoredPolygon::DrawBinded()
@@ -413,35 +409,35 @@ bool ColoredPolygon::CheckLines(const FPoint &p)
 }
 
 int ColoredPolygon::CreateDot(float x, float y) {
-	if (_dots.size() >= 50) {
-		return false;
-	}
-	int result = -1;
+    if (_dots.size() >= 50) {
+        return false;
+    }
+    int result = -1;
     OnePoint point;
-	FPoint p(x, y);
-	for (unsigned int i = 0; i < _dots.size() && result < 0; ++i) {
+    FPoint p(x, y);
+    for (unsigned int i = 0; i < _dots.size() && result < 0; ++i) {
         if (Math::DotNearLine(_dots[i].pos, _dots[(i + 1) % _dots.size()].pos, p)) {
-			unsigned int index = (i + 1) % _dots.size();
+            unsigned int index = (i + 1) % _dots.size();
             point.pos = p;
-			if (index < _dots.size()) {
+            if (index < _dots.size()) {
                 _dots.insert(_dots.begin() + index, point);
-				result = index;
-			} else {
+                result = index;
+            } else {
                 _dots.push_back(point);
-				result = _dots.size() - 1;
-			}
-		}
-	}
-	if (result >= 0) {
-		GenerateTriangles();
-	}
-	return result;
+                result = _dots.size() - 1;
+            }
+        }
+    }
+    if (result >= 0) {
+        GenerateTriangles();
+    }
+    return result;
 }
 
 void ColoredPolygon::RemoveDot(QVector<int> index) {
-	if (_dots.size() <= 3) {
-		return;
-	}
+    if (_dots.size() <= 3) {
+        return;
+    }
     std::vector<OnePoint> tmp;
     for (int i = 0; i < _dots.size(); ++i)
     {
@@ -458,12 +454,12 @@ void ColoredPolygon::RemoveDot(QVector<int> index) {
 void ColoredPolygon::MouseDown(const FPoint &mouse) {
     _selectedDots.clear();
 
-	if (!_debugDraw) {
-		return;
-	}
+    if (!_debugDraw) {
+        return;
+    }
     if (!MainWindow::Instance()->CreateDotMode()) {
         _selectedDots = _dotUnderCursor;
-	}
+    }
 
     int index = SearchNearest(mouse.x, mouse.y);
     if (index == -1)
@@ -485,17 +481,17 @@ void ColoredPolygon::MouseDown(const FPoint &mouse) {
         _dotUnderCursor = _selectedDots;
     }
 
-	_mouseDown = true;
-	_mousePos = mouse;
+    _mouseDown = true;
+    _mousePos = mouse;
 }
 
 bool ColoredPolygon::MouseMove(const FPoint &mousePos) {
     if (!MainWindow::Instance()->CreateDotMode() && _mouseDown)
     {
         return true;
-	}
+    }
 
-	if (!_debugDraw || !_mouseDown) {
+    if (!_debugDraw || !_mouseDown) {
         int r = SearchNearest(mousePos.x, mousePos.y);
         if (r == -1)
         {
@@ -505,37 +501,37 @@ bool ColoredPolygon::MouseMove(const FPoint &mousePos) {
         {
             _dotUnderCursor = QVector<int>(1, r);
         }
-		_mousePos = mousePos;
+        _mousePos = mousePos;
         return false;
-	}
+    }
 
     FPoint start(_mousePos);
-	FPoint end(mousePos);
+    FPoint end(mousePos);
 
     if (_dotUnderCursor.size() == 0) {
-//		_pos.x += (end.x - start.x);
-//		_pos.y += (end.y - start.y);
-	} else {
+//        _pos.x += (end.x - start.x);
+//        _pos.y += (end.y - start.y);
+    } else {
         for (unsigned int i = 0; i < _dotUnderCursor.size(); ++i)
         {
             _dots[_dotUnderCursor[i]].pos.x += (end.x - start.x);
             _dots[_dotUnderCursor[i]].pos.y += (end.y - start.y);
         }
-		CalcWidthAndHeight();
+        CalcWidthAndHeight();
         GenerateTriangles();
     }
-	_mousePos = mousePos;
+    _mousePos = mousePos;
     return true;
 }
 
 void ColoredPolygon::MouseUp(const FPoint &mouse) {
-	_mouseDown = false;
+    _mouseDown = false;
     _dotUnderCursor.clear();
-	GenerateTriangles();
+    GenerateTriangles();
 }
 
 const char *ColoredPolygon::GetIconTexture() {
-	return NULL;
+    return NULL;
 }
 
 bool ColoredPolygon::CanCut(const std::string &message, const std::string &substr, std::string &result)
@@ -564,7 +560,7 @@ bool ColoredPolygon::RemoveDots()
 
 bool ColoredPolygon::GeometryCheck(const FPoint &point) {
     FPoint p(point);
-	return Math::Inside(p, _dots); 
+    return Math::Inside(p, _dots); 
 }
 
 bool ColoredPolygon::Selection(const Rect& rect, bool full)
@@ -598,7 +594,7 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
         FPoint &b = _dots[i].pos;
         FPoint &c = _dots[(i + 1) % _dots.size()].pos;
 
-        std::vector<std::pair<BoneAnimated *, float> > boneDistance;
+        std::vector<BoneDistance> boneDistance;
         for (uint j = 0; j < bones.size(); ++j)
         {
             BoneAnimated *d = bones[j];
@@ -614,22 +610,19 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
                 if ((d->GetParent() == NULL && (s - b).Length() < d->GetLength() / 2)
                         || (!d->HasChild() && (e - b).Length() < d->GetLength() / 2))
                 {
-                    boneDistance.push_back(
-                                std::make_pair<BoneAnimated *, float>
-                                (d, 0.f)
-                                );
+                    boneDistance.push_back({ d, 0.f });
                 }
                 else
                 {
-                    boneDistance.push_back(std::make_pair<BoneAnimated *, float>(d, Math::Distance(s, e, b) ) );
+                    boneDistance.push_back({ d, Math::Distance(s, e, b) });
                 }
             }
         }
 
         if (boneDistance.size() == 1)
         {
-            _dots[i].p[0].boneName = boneDistance.back().first->GetName();
-            _dots[i].p[0].bone = boneDistance.back().first;
+            _dots[i].p[0].boneName = boneDistance.back().bone->GetName();
+            _dots[i].p[0].bone = boneDistance.back().bone;
             _dots[i].p[0].mass = 1.f;
 
             _dots[i].p[1].boneName = "";
@@ -639,15 +632,15 @@ void ColoredPolygon::BindToBone(BoneAnimated *bone)
         else if (boneDistance.size() >= 2)
         {
             std::sort(boneDistance.begin(), boneDistance.end(), CmpBoneDistance);
-            float m = boneDistance[0].second + boneDistance[1].second;
+            float m = boneDistance[0].distance + boneDistance[1].distance;
 
-            _dots[i].p[0].boneName = boneDistance[0].first->GetName();
-            _dots[i].p[0].bone = boneDistance[0].first;
-            _dots[i].p[0].mass = boneDistance[1].second / m;
+            _dots[i].p[0].boneName = boneDistance[0].bone->GetName();
+            _dots[i].p[0].bone = boneDistance[0].bone;
+            _dots[i].p[0].mass = boneDistance[1].distance / m;
 
-            _dots[i].p[1].boneName = boneDistance[1].first->GetName();
-            _dots[i].p[1].bone = boneDistance[1].first;
-            _dots[i].p[1].mass = boneDistance[0].second / m;
+            _dots[i].p[1].boneName = boneDistance[1].bone->GetName();
+            _dots[i].p[1].bone = boneDistance[1].bone;
+            _dots[i].p[1].mass = boneDistance[0].distance / m;
         }
         else
         {

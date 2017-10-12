@@ -56,7 +56,7 @@ FPoint *FPoint::Rotate(float a)
     return this;
 }
 
-void FPoint::Set(float _x, float _y)	{
+void FPoint::Set(float _x, float _y)    {
     x=_x; y=_y;
     //printf("%f, %f\n", x, y);
 }
