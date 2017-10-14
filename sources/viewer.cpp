@@ -389,7 +389,7 @@ void Viewer::OnMouseMove(const FPoint &mousePos)
     char buff[100];
     sprintf(buff, "x: %0.2f, y: %0.2f; %s", _mouseWorld.x, _mouseWorld.y, _cursorText.c_str());
 
-    Render::TextToTexture(_cursorText.c_str(), text_texture, text_width, text_height);
+    //Render::TextToTexture(_cursorText.c_str(), text_texture, text_width, text_height);
 
     mainWindow->statusBar()->showMessage(tr(buff));
 }
