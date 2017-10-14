@@ -28,17 +28,17 @@ QConsoleWidget::QConsoleWidget(QWidget *parent) : QTextEdit(parent)
 
     {
         std::string stdOutErr =
-            "import sys\n\
-            class CatchOutErr:\n\
-                def __init__(self):\n\
-                self.value = ''\n\
-                def reset(self):\n\
-                self.value = ''\n\
-                def write(self, txt):\n\
-                self.value += txt\n\
-            catchOutErr = CatchOutErr()\n\
-            sys.stdout = catchOutErr\n\
-            sys.stderr = catchOutErr\n\
+"import sys\n\
+class CatchOutErr:\n\
+    def __init__(self):\n\
+        self.value = ''\n\
+    def reset(self):\n\
+        self.value = ''\n\
+    def write(self, txt):\n\
+        self.value += txt\n\
+catchOutErr = CatchOutErr()\n\
+sys.stdout = catchOutErr\n\
+sys.stderr = catchOutErr\n\
             "; //this is python code to redirect stdouts/stderr
 
         /* Initialize the Python interpreter.  Required. */

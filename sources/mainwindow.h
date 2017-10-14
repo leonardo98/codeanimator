@@ -8,7 +8,19 @@
 
 #include <QSettings>
 #include <QMainWindow>
-#include <QSplitter>
+#include <QDockWidget>
+
+class CustomDock : public QDockWidget
+{
+    Q_OBJECT
+        signals :
+    void onClose();
+public:
+    virtual void closeEvent(QCloseEvent *)
+    {
+        emit onClose();
+    }
+};
 
 class MainWindow : public QMainWindow
 {
@@ -32,12 +44,14 @@ public:
 private:
     QString _storeFileName;
     void createMenus();
-    QSplitter *_centralSplitter;
-    QSplitter *_codeConsoleSplitter;
-    QSplitter *_viewerSplineSplitter;
     CodeEditor *_codeEditor;
     Viewer *_viewer;
     SplineEditor *_splineEditor;
+
+    CustomDock *_viewerDock;
+    CustomDock *_codeEditorDock;
+    CustomDock *_consoleDock;
+    CustomDock *_splineEditorDock;
 
     QAction *_editPoints;
 
